@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TTT</title>
+</head>
+<style>
+    body {
+        background-color: black
+    }
+</style>
+<body>
+    <script src="/app.js"></script>
+    <script>
+        const app = Elm.Main.init({flags: "abc"});
+
+        let socket = null;
+
+        function connect(url) {
+            console.log("Begin connect");
+
+            socket = new WebSocket("ws://" + window.location.host + url);
+            // We set a handler that will be executed if the socket has any kind of unexpected error.
+            // Since this is a just sample, we only report it at the console instead of making more complex things.
+            socket.onerror = function() {
+                console.log("socket error");
+            };
+
+            // We set a handler upon connection.
+            // What this does is to put a text in the messages container notifying about this event.
+            socket.onopen = function() {
+                console.log("Connected");
+            };
+
+            // If the connection was closed gracefully (either normally or with a reason from the server),
+            // we have this handler to notify to the user via the messages container.
+            // Also we will retry a connection after 5 seconds.
+            socket.onclose = function(evt) {
+                // Try to gather an explanation about why this was closed.
+                let explanation;
+                if (evt.reason && evt.reason.length > 0) {
+                    explanation = "reason: " + evt.reason;
+                } else {
+                    explanation = "without a reason specified";
+                }
+
+                // Notify the user using the messages container.
+                console.log("Disconnected with close code " + evt.code + " and " + explanation);
+                setTimeout(function() { connect(url) }, 5000)
+            };
+
+            // If we receive a message from the server, we want to handle it.
+            socket.onmessage = function(event) {
+                console.log(event.data);
+                app.ports.receive.send(event.data);
+            };
+        }
+
+        app.ports.connect_.subscribe(function(param) {
+            if (socket) socket.close();
+            connect(param.url)
+        });
+
+        app.ports.send.subscribe(function(msg) {
+            console.log(msg);
+            if (socket) {
+                try {
+                    socket.send(msg);
+                } catch (error) {
+                    console.error("Failed to send " + msg + "with error " + error)
+                }
+            }
+        });
+
+        app.ports.copyToClipBoard.subscribe(function (text) {
+           copyTextToClipboard(window.location.host + text);
+        });
+
+        function copyTextToClipboard(text) {
+            const textArea = document.createElement("textarea");
+
+            textArea.setAttribute('readonly', '');
+            textArea.style.position = 'absolute';
+            textArea.style.left = '-9999px';
+
+            // Avoid flash of white box if rendered for any reason.
+            textArea.style.background = 'transparent';
+            textArea.value = text;
+
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                const msg = (successful) ? 'successful' : 'unsuccessful';
+                console.log('Copying text command was ' + msg);
+            } catch (err) {
+                console.log('Oops, unable to copy');
+            }
+
+            document.body.removeChild(textArea);
+        }
+    </script>
+</body>
+</html>
