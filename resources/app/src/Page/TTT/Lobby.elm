@@ -1,12 +1,14 @@
-module Page.TTT.Lobby exposing (Model, init, toSession, Msg, update, view)
+module Page.TTT.Lobby exposing (Model, init, toSession, Msg, update, view, updateFromWebsocket)
 
 import Browser.Navigation as Nav
 import ClipBoard
 import Game.Lobby as Lobby exposing (Lobby)
+import Game.LobbyPlayer exposing (Player)
 import Http
 import Monocle.Lens as Lens exposing (Lens)
-import ServerRequest.InLobby as InLobby
+import ServerRequest.InLobby as InLobbyRequest
 import ServerResponse.EnterLobby as EnterLobby
+import ServerResponse.InLobby as InLobbyResponse
 import Session exposing (Session)
 import UIHelper exposing (..)
 
@@ -17,7 +19,7 @@ import Element.Border as Border
 
 import MaterialUI.Button as Button
 import MaterialUI.TextField as TextField
-import MaterialUI.Theme as Theme
+import MaterialUI.Theme as Theme exposing (Theme)
 
 import Html
 import Url.Builder
@@ -67,13 +69,13 @@ update msg model =
             let
                 newLobby = Lobby.playerNameOfLobby.set name lobby
             in
-            ( { model | lobby = newLobby }, InLobby.nameChangedMsg newLobby.gameId newLobby.playerMe |> Websocket.send )
+            ( { model | lobby = newLobby }, InLobbyRequest.nameChangedMsg newLobby.gameId newLobby.playerMe |> Websocket.send )
 
         Ready ->
             let
                 newLobby = Lens.modify Lobby.playerReadyOfLobby not lobby
             in
-            ( { model | lobby = newLobby }, InLobby.readyChangedMsg newLobby.gameId newLobby.playerMe |> Websocket.send )
+            ( { model | lobby = newLobby }, InLobbyRequest.readyChangedMsg newLobby.gameId newLobby.playerMe |> Websocket.send )
 
         CopyGameId ->
             let
@@ -81,6 +83,15 @@ update msg model =
             in
             ( model, ClipBoard.copyToClipBoard <| Url.Builder.absolute [ "game", model.lobby.gameId ] [] )
 
+
+updateFromWebsocket : InLobbyResponse.Response -> Model -> ( Model, Cmd Msg )
+updateFromWebsocket response model =
+    case response of
+        InLobbyResponse.LobbyState lobby ->
+            let
+                newLobby = { lobby | playerMe = model.lobby.playerMe }
+            in
+            ( { model | lobby = newLobby}, Cmd.none )
 
 
 -- VIEW
@@ -184,5 +195,36 @@ view model =
                         }
                         theme
                     ]
-                ]
+                ] ++ (Lobby.allPlayers model.lobby |> List.map (playerRow theme))
     }
+
+
+playerRow : Theme a  -> Player -> Element Msg
+playerRow theme player =
+    row
+        [ width fill
+        , paddingEach { top = 4, bottom = 4, left = 0, right = 0 }
+        , Border.color <| Theme.setAlpha 0.3 theme.color.onBackground
+        , Border.width 2
+        , Border.rounded 6
+        ]
+        [ materialText
+            [ Font.alignLeft
+            , Font.color theme.color.onBackground
+            , alignLeft
+            , padding 10
+            ]
+            player.name
+            Theme.Body1
+            theme
+        , materialText
+            [ Font.alignRight
+            , Font.color theme.color.onBackground
+            , Font.italic
+            , alignRight
+            , padding 10
+            ]
+            (if player.isReady then "Ready" else "Not Ready")
+            Theme.Body1
+            theme
+        ]

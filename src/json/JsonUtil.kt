@@ -29,7 +29,7 @@ fun <F> JsonObject.getObject(key: String, ME: MonadError<F, JsonError>): Kind<F,
 
 fun <T, F> JsonParser<F>.parsRequest(
     json: JsonString,
-    deserializers: ListK<JsonTypeDeserializer<T, *>>
+    deserializers: ListK<JsonTypeDeserializer<out T, *>>
 ): Kind<F, T> = fx.monad {
     val (jObj) = parsJsonObj(json)
     val (type) = jObj.getStringK("type")

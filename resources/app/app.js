@@ -5344,7 +5344,7 @@ var author$project$ServerResponse$EnterLobby$responseDecoder = function (type_) 
 		case 'noSuchGame':
 			return author$project$ServerResponse$JsonHelper$contentDecoder(author$project$ServerResponse$EnterLobby$noSuchGameDecoder);
 		default:
-			return elm$json$Json$Decode$fail('Unknown type ' + (type_ + 'to EnterLobbyResponse'));
+			return elm$json$Json$Decode$fail('Unknown type \'' + (type_ + '\' to EnterLobbyResponse'));
 	}
 };
 var author$project$ServerResponse$JsonHelper$typeDecoder = A2(elm$json$Json$Decode$field, 'type', elm$json$Json$Decode$string);
@@ -6799,8 +6799,7 @@ var author$project$Page$Home$subscriptions = function (model) {
 var author$project$Page$TTT$Game$WebSocketIn = function (a) {
 	return {$: 'WebSocketIn', a: a};
 };
-var elm$json$Json$Decode$value = _Json_decodeValue;
-var author$project$Websocket$receive = _Platform_incomingPort('receive', elm$json$Json$Decode$value);
+var author$project$Websocket$receive = _Platform_incomingPort('receive', elm$json$Json$Decode$string);
 var author$project$Page$TTT$Game$subscriptions = function (model) {
 	switch (model.$) {
 		case 'Lobby':
@@ -7264,7 +7263,7 @@ var author$project$ServerRequest$InLobby$nameChangedMsg = F2(
 	function (gameId, changedPlayer) {
 		return A2(
 			author$project$ServerRequest$JsonHelper$remoteMsg,
-			'nameChanged',
+			'lobbyName',
 			elm$json$Json$Encode$object(
 				_Utils_ap(
 					A2(author$project$ServerRequest$InLobby$header, gameId, changedPlayer),
@@ -7280,14 +7279,14 @@ var author$project$ServerRequest$InLobby$readyChangedMsg = F2(
 	function (gameId, changedPlayer) {
 		return A2(
 			author$project$ServerRequest$JsonHelper$remoteMsg,
-			'readyChanged',
+			'lobbyReady',
 			elm$json$Json$Encode$object(
 				_Utils_ap(
 					A2(author$project$ServerRequest$InLobby$header, gameId, changedPlayer),
 					_List_fromArray(
 						[
 							_Utils_Tuple2(
-							'ready',
+							'isReady',
 							elm$json$Json$Encode$bool(changedPlayer.isReady))
 						]))));
 	});
@@ -7326,15 +7325,43 @@ var author$project$Page$TTT$Lobby$update = F2(
 							_List_Nil)));
 		}
 	});
+var author$project$Page$TTT$Lobby$updateFromWebsocket = F2(
+	function (response, model) {
+		var lobby = response.a;
+		var newLobby = _Utils_update(
+			lobby,
+			{playerMe: model.lobby.playerMe});
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{lobby: newLobby}),
+			elm$core$Platform$Cmd$none);
+	});
+var author$project$ServerResponse$InLobby$LobbyState = function (a) {
+	return {$: 'LobbyState', a: a};
+};
+var author$project$ServerResponse$InLobby$lobbyStateDecoder = A2(elm$json$Json$Decode$map, author$project$ServerResponse$InLobby$LobbyState, author$project$Game$Lobby$decoder);
+var author$project$ServerResponse$InLobby$responseDecoder = function (type_) {
+	if (type_ === 'lobbyState') {
+		return author$project$ServerResponse$JsonHelper$contentDecoder(author$project$ServerResponse$InLobby$lobbyStateDecoder);
+	} else {
+		return elm$json$Json$Decode$fail('Unknown type \'' + (type_ + '\' to InLobbyResponse'));
+	}
+};
+var author$project$ServerResponse$InLobby$decoder = A2(elm$json$Json$Decode$andThen, author$project$ServerResponse$InLobby$responseDecoder, author$project$ServerResponse$JsonHelper$typeDecoder);
+var author$project$Util$dummy = F2(
+	function (b, a) {
+		return a;
+	});
 var elm$core$Debug$todo = _Debug_todo;
 var author$project$Page$TTT$Game$update = F2(
 	function (msg, model) {
 		var _n0 = _Utils_Tuple2(msg, model);
-		_n0$3:
+		_n0$4:
 		while (true) {
-			switch (_n0.b.$) {
-				case 'Lobby':
-					if (_n0.a.$ === 'GotLobbyMsg') {
+			switch (_n0.a.$) {
+				case 'GotLobbyMsg':
+					if (_n0.b.$ === 'Lobby') {
 						var subMsg = _n0.a.a;
 						var lobby = _n0.b.a;
 						return A3(
@@ -7343,17 +7370,17 @@ var author$project$Page$TTT$Game$update = F2(
 							author$project$Page$TTT$Game$GotLobbyMsg,
 							A2(author$project$Page$TTT$Lobby$update, subMsg, lobby));
 					} else {
-						break _n0$3;
+						break _n0$4;
 					}
-				case 'InGame':
-					if (_n0.a.$ === 'GotInGameMsg') {
+				case 'GotInGameMsg':
+					if (_n0.b.$ === 'InGame') {
 						var _n1 = _n0.a;
 						return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
 					} else {
-						break _n0$3;
+						break _n0$4;
 					}
-				default:
-					if (_n0.a.$ === 'JoinResponse') {
+				case 'JoinResponse':
+					if (_n0.b.$ === 'Loading') {
 						var result = _n0.a.a;
 						var session = _n0.b.a;
 						if (result.$ === 'Ok') {
@@ -7371,24 +7398,24 @@ var author$project$Page$TTT$Game$update = F2(
 									return _Debug_todo(
 										'Page.TTT.Game',
 										{
-											start: {line: 83, column: 29},
-											end: {line: 83, column: 39}
+											start: {line: 84, column: 29},
+											end: {line: 84, column: 39}
 										})('handle error');
 								case 'GameAlreadyStarted':
 									var gameId = response.a;
 									return _Debug_todo(
 										'Page.TTT.Game',
 										{
-											start: {line: 86, column: 29},
-											end: {line: 86, column: 39}
+											start: {line: 87, column: 29},
+											end: {line: 87, column: 39}
 										})('handle error');
 								default:
 									var gameId = response.a;
 									return _Debug_todo(
 										'Page.TTT.Game',
 										{
-											start: {line: 89, column: 29},
-											end: {line: 89, column: 39}
+											start: {line: 90, column: 29},
+											end: {line: 90, column: 39}
 										})('handle error');
 							}
 						} else {
@@ -7396,12 +7423,41 @@ var author$project$Page$TTT$Game$update = F2(
 							return _Debug_todo(
 								'Page.TTT.Game',
 								{
-									start: {line: 92, column: 21},
-									end: {line: 92, column: 31}
+									start: {line: 93, column: 21},
+									end: {line: 93, column: 31}
 								})('handle error');
 						}
 					} else {
-						break _n0$3;
+						break _n0$4;
+					}
+				default:
+					var message = _n0.a.a;
+					switch (model.$) {
+						case 'Lobby':
+							var lobby = model.a;
+							var _n5 = A2(elm$json$Json$Decode$decodeString, author$project$ServerResponse$InLobby$decoder, message);
+							if (_n5.$ === 'Ok') {
+								var response = _n5.a;
+								return A3(
+									author$project$Util$updateWith,
+									author$project$Page$TTT$Game$Lobby,
+									author$project$Page$TTT$Game$GotLobbyMsg,
+									A2(author$project$Page$TTT$Lobby$updateFromWebsocket, response, lobby));
+							} else {
+								var error = _n5.a;
+								return _Utils_Tuple2(
+									A2(
+										author$project$Util$dummy,
+										A2(elm$core$Debug$log, 'json error', error),
+										model),
+									elm$core$Platform$Cmd$none);
+							}
+						case 'InGame':
+							var session = model.a;
+							return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+						default:
+							var session = model.a;
+							return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
 					}
 			}
 		}
@@ -15619,6 +15675,12 @@ var author$project$Page$TTT$Game$viewFragment = F2(
 			title: title
 		};
 	});
+var author$project$Game$Lobby$allPlayers = function (lobby) {
+	return A2(
+		elm$core$List$cons,
+		A2(author$project$Game$LobbyPlayer$Player, lobby.playerMe.name, lobby.playerMe.isReady),
+		lobby.players);
+};
 var author$project$MaterialUI$Theme$Subtitle2 = {$: 'Subtitle2'};
 var author$project$Page$TTT$Lobby$CopyGameId = {$: 'CopyGameId'};
 var author$project$Page$TTT$Lobby$Name = function (a) {
@@ -15627,6 +15689,51 @@ var author$project$Page$TTT$Lobby$Name = function (a) {
 var author$project$Page$TTT$Lobby$Ready = {$: 'Ready'};
 var mdgriffith$elm_ui$Internal$Model$Right = {$: 'Right'};
 var mdgriffith$elm_ui$Element$alignRight = mdgriffith$elm_ui$Internal$Model$AlignX(mdgriffith$elm_ui$Internal$Model$Right);
+var mdgriffith$elm_ui$Element$Font$alignLeft = A2(mdgriffith$elm_ui$Internal$Model$Class, mdgriffith$elm_ui$Internal$Flag$fontAlignment, mdgriffith$elm_ui$Internal$Style$classes.textLeft);
+var mdgriffith$elm_ui$Element$Font$italic = mdgriffith$elm_ui$Internal$Model$htmlClass(mdgriffith$elm_ui$Internal$Style$classes.italic);
+var author$project$Page$TTT$Lobby$playerRow = F2(
+	function (theme, player) {
+		return A2(
+			mdgriffith$elm_ui$Element$row,
+			_List_fromArray(
+				[
+					mdgriffith$elm_ui$Element$width(mdgriffith$elm_ui$Element$fill),
+					mdgriffith$elm_ui$Element$paddingEach(
+					{bottom: 4, left: 0, right: 0, top: 4}),
+					mdgriffith$elm_ui$Element$Border$color(
+					A2(author$project$MaterialUI$Theme$setAlpha, 0.3, theme.color.onBackground)),
+					mdgriffith$elm_ui$Element$Border$width(2),
+					mdgriffith$elm_ui$Element$Border$rounded(6)
+				]),
+			_List_fromArray(
+				[
+					A4(
+					author$project$UIHelper$materialText,
+					_List_fromArray(
+						[
+							mdgriffith$elm_ui$Element$Font$alignLeft,
+							mdgriffith$elm_ui$Element$Font$color(theme.color.onBackground),
+							mdgriffith$elm_ui$Element$alignLeft,
+							mdgriffith$elm_ui$Element$padding(10)
+						]),
+					player.name,
+					author$project$MaterialUI$Theme$Body1,
+					theme),
+					A4(
+					author$project$UIHelper$materialText,
+					_List_fromArray(
+						[
+							mdgriffith$elm_ui$Element$Font$alignRight,
+							mdgriffith$elm_ui$Element$Font$color(theme.color.onBackground),
+							mdgriffith$elm_ui$Element$Font$italic,
+							mdgriffith$elm_ui$Element$alignRight,
+							mdgriffith$elm_ui$Element$padding(10)
+						]),
+					player.isReady ? 'Ready' : 'Not Ready',
+					author$project$MaterialUI$Theme$Body1,
+					theme)
+				]));
+	});
 var author$project$Page$TTT$Lobby$view = function (model) {
 	var theme = author$project$Session$theme(
 		author$project$Page$TTT$Lobby$toSession(model));
@@ -15648,110 +15755,77 @@ var author$project$Page$TTT$Lobby$view = function (model) {
 						mdgriffith$elm_ui$Element$padding(16),
 						mdgriffith$elm_ui$Element$spacing(16)
 					]),
-				_List_fromArray(
-					[
-						A2(
-						mdgriffith$elm_ui$Element$row,
-						_List_fromArray(
-							[
-								mdgriffith$elm_ui$Element$width(mdgriffith$elm_ui$Element$fill),
-								mdgriffith$elm_ui$Element$spacing(10)
-							]),
-						_List_fromArray(
-							[
-								A2(
-								mdgriffith$elm_ui$Element$column,
-								_List_fromArray(
-									[
-										mdgriffith$elm_ui$Element$width(
-										mdgriffith$elm_ui$Element$fillPortion(2)),
-										mdgriffith$elm_ui$Element$padding(16),
-										mdgriffith$elm_ui$Element$spacing(8)
-									]),
-								_List_fromArray(
-									[
-										A4(
-										author$project$UIHelper$materialText,
-										_List_fromArray(
-											[mdgriffith$elm_ui$Element$Font$alignRight, mdgriffith$elm_ui$Element$alignRight]),
-										'Lobby',
-										author$project$MaterialUI$Theme$H5,
-										theme),
-										A4(
-										author$project$UIHelper$materialText,
-										_List_fromArray(
-											[mdgriffith$elm_ui$Element$Font$alignRight, mdgriffith$elm_ui$Element$alignRight]),
-										model.lobby.gameId,
-										author$project$MaterialUI$Theme$Subtitle2,
-										theme)
-									])),
-								author$project$UIHelper$nonEl(
-								_List_fromArray(
-									[
-										mdgriffith$elm_ui$Element$width(
-										mdgriffith$elm_ui$Element$fillPortion(1)),
-										mdgriffith$elm_ui$Element$padding(16)
-									]))
-							])),
-						A2(
-						mdgriffith$elm_ui$Element$row,
-						_List_fromArray(
-							[
-								mdgriffith$elm_ui$Element$width(mdgriffith$elm_ui$Element$fill),
-								mdgriffith$elm_ui$Element$spacing(10)
-							]),
-						_List_fromArray(
-							[
-								A2(
-								mdgriffith$elm_ui$Element$el,
-								_List_fromArray(
-									[
-										mdgriffith$elm_ui$Element$width(
-										mdgriffith$elm_ui$Element$fillPortion(2))
-									]),
-								A3(
-									author$project$MaterialUI$TextField$text,
+				_Utils_ap(
+					_List_fromArray(
+						[
+							A2(
+							mdgriffith$elm_ui$Element$row,
+							_List_fromArray(
+								[
+									mdgriffith$elm_ui$Element$width(mdgriffith$elm_ui$Element$fill),
+									mdgriffith$elm_ui$Element$spacing(10)
+								]),
+							_List_fromArray(
+								[
+									A2(
+									mdgriffith$elm_ui$Element$column,
 									_List_fromArray(
 										[
-											mdgriffith$elm_ui$Element$width(mdgriffith$elm_ui$Element$fill)
+											mdgriffith$elm_ui$Element$width(
+											mdgriffith$elm_ui$Element$fillPortion(2)),
+											mdgriffith$elm_ui$Element$padding(16),
+											mdgriffith$elm_ui$Element$spacing(8)
 										]),
-									{color: author$project$MaterialUI$Theme$Primary, errorText: elm$core$Maybe$Nothing, helperText: elm$core$Maybe$Nothing, hideLabel: false, label: 'Name', onChange: author$project$Page$TTT$Lobby$Name, state: author$project$MaterialUI$TextField$Idle, text: model.lobby.playerMe.name, type_: author$project$MaterialUI$TextField$Outlined},
-									theme)),
-								A3(
-								author$project$MaterialUI$Button$outlined,
-								_List_fromArray(
-									[
-										mdgriffith$elm_ui$Element$alignLeft,
-										mdgriffith$elm_ui$Element$width(
-										mdgriffith$elm_ui$Element$fillPortion(1))
-									]),
-								{
-									color: author$project$MaterialUI$Theme$Primary,
-									disabled: false,
-									icon: elm$core$Maybe$Nothing,
-									onPress: elm$core$Maybe$Just(author$project$Page$TTT$Lobby$CopyGameId),
-									text: 'Invite Link'
-								},
-								theme)
-							])),
-						A2(
-						mdgriffith$elm_ui$Element$row,
-						_List_fromArray(
-							[
-								mdgriffith$elm_ui$Element$width(mdgriffith$elm_ui$Element$fill),
-								mdgriffith$elm_ui$Element$spacing(10)
-							]),
-						_List_fromArray(
-							[
-								author$project$UIHelper$nonEl(
-								_List_fromArray(
-									[
-										mdgriffith$elm_ui$Element$width(
-										mdgriffith$elm_ui$Element$fillPortion(2))
-									])),
-								function () {
-								var bText = model.lobby.playerMe.isReady ? 'Ready' : 'Not Ready';
-								return A3(
+									_List_fromArray(
+										[
+											A4(
+											author$project$UIHelper$materialText,
+											_List_fromArray(
+												[mdgriffith$elm_ui$Element$Font$alignRight, mdgriffith$elm_ui$Element$alignRight]),
+											'Lobby',
+											author$project$MaterialUI$Theme$H5,
+											theme),
+											A4(
+											author$project$UIHelper$materialText,
+											_List_fromArray(
+												[mdgriffith$elm_ui$Element$Font$alignRight, mdgriffith$elm_ui$Element$alignRight]),
+											model.lobby.gameId,
+											author$project$MaterialUI$Theme$Subtitle2,
+											theme)
+										])),
+									author$project$UIHelper$nonEl(
+									_List_fromArray(
+										[
+											mdgriffith$elm_ui$Element$width(
+											mdgriffith$elm_ui$Element$fillPortion(1)),
+											mdgriffith$elm_ui$Element$padding(16)
+										]))
+								])),
+							A2(
+							mdgriffith$elm_ui$Element$row,
+							_List_fromArray(
+								[
+									mdgriffith$elm_ui$Element$width(mdgriffith$elm_ui$Element$fill),
+									mdgriffith$elm_ui$Element$spacing(10)
+								]),
+							_List_fromArray(
+								[
+									A2(
+									mdgriffith$elm_ui$Element$el,
+									_List_fromArray(
+										[
+											mdgriffith$elm_ui$Element$width(
+											mdgriffith$elm_ui$Element$fillPortion(2))
+										]),
+									A3(
+										author$project$MaterialUI$TextField$text,
+										_List_fromArray(
+											[
+												mdgriffith$elm_ui$Element$width(mdgriffith$elm_ui$Element$fill)
+											]),
+										{color: author$project$MaterialUI$Theme$Primary, errorText: elm$core$Maybe$Nothing, helperText: elm$core$Maybe$Nothing, hideLabel: false, label: 'Name', onChange: author$project$Page$TTT$Lobby$Name, state: author$project$MaterialUI$TextField$Idle, text: model.lobby.playerMe.name, type_: author$project$MaterialUI$TextField$Outlined},
+										theme)),
+									A3(
 									author$project$MaterialUI$Button$outlined,
 									_List_fromArray(
 										[
@@ -15763,13 +15837,51 @@ var author$project$Page$TTT$Lobby$view = function (model) {
 										color: author$project$MaterialUI$Theme$Primary,
 										disabled: false,
 										icon: elm$core$Maybe$Nothing,
-										onPress: elm$core$Maybe$Just(author$project$Page$TTT$Lobby$Ready),
-										text: bText
+										onPress: elm$core$Maybe$Just(author$project$Page$TTT$Lobby$CopyGameId),
+										text: 'Invite Link'
 									},
-									theme);
-							}()
-							]))
-					]))),
+									theme)
+								])),
+							A2(
+							mdgriffith$elm_ui$Element$row,
+							_List_fromArray(
+								[
+									mdgriffith$elm_ui$Element$width(mdgriffith$elm_ui$Element$fill),
+									mdgriffith$elm_ui$Element$spacing(10)
+								]),
+							_List_fromArray(
+								[
+									author$project$UIHelper$nonEl(
+									_List_fromArray(
+										[
+											mdgriffith$elm_ui$Element$width(
+											mdgriffith$elm_ui$Element$fillPortion(2))
+										])),
+									function () {
+									var bText = model.lobby.playerMe.isReady ? 'Ready' : 'Not Ready';
+									return A3(
+										author$project$MaterialUI$Button$outlined,
+										_List_fromArray(
+											[
+												mdgriffith$elm_ui$Element$alignLeft,
+												mdgriffith$elm_ui$Element$width(
+												mdgriffith$elm_ui$Element$fillPortion(1))
+											]),
+										{
+											color: author$project$MaterialUI$Theme$Primary,
+											disabled: false,
+											icon: elm$core$Maybe$Nothing,
+											onPress: elm$core$Maybe$Just(author$project$Page$TTT$Lobby$Ready),
+											text: bText
+										},
+										theme);
+								}()
+								]))
+						]),
+					A2(
+						elm$core$List$map,
+						author$project$Page$TTT$Lobby$playerRow(theme),
+						author$project$Game$Lobby$allPlayers(model.lobby))))),
 		title: 'Home'
 	};
 };
@@ -15786,8 +15898,8 @@ var author$project$Page$TTT$Game$view = function (model) {
 			return _Debug_todo(
 				'Page.TTT.Game',
 				{
-					start: {line: 108, column: 13},
-					end: {line: 108, column: 23}
+					start: {line: 126, column: 13},
+					end: {line: 126, column: 23}
 				})('Implement InGame view');
 		default:
 			var session = model.a;

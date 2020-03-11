@@ -25,7 +25,7 @@ responseDecoder type_ =
         "lobbyFull" -> contentDecoder lobbyFullDecoder
         "gameAlreadyStarted" -> contentDecoder gameAlreadyStartedDecoder
         "noSuchGame" -> contentDecoder noSuchGameDecoder
-        _ -> Decode.fail <| "Unknown type " ++ type_ ++ "to EnterLobbyResponse"
+        _ -> Decode.fail <| "Unknown type '" ++ type_ ++ "' to EnterLobbyResponse"
 
 
 lobbyStateDecoder : Decoder Response

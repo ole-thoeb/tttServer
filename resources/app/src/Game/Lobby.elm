@@ -1,4 +1,4 @@
-module Game.Lobby exposing (Lobby, decoder, playerNameOfLobby, playerReadyOfLobby)
+module Game.Lobby exposing (Lobby, decoder, playerNameOfLobby, playerReadyOfLobby, allPlayers)
 
 
 import Game.LobbyPlayer as LobbyPlayer
@@ -19,6 +19,11 @@ decoder =
         (Decode.field "gameId" Decode.string)
         (Decode.field "players" <| Decode.list LobbyPlayer.decoder)
         (Decode.field "playerMe" LobbyPlayer.meDecoder)
+
+
+allPlayers : Lobby -> List LobbyPlayer.Player
+allPlayers lobby =
+    (LobbyPlayer.Player lobby.playerMe.name lobby.playerMe.isReady) :: lobby.players
 
 
 -- LENS

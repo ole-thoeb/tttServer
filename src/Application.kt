@@ -1,11 +1,7 @@
 import io.ktor.application.*
-import io.ktor.response.*
-import io.ktor.request.*
-import io.ktor.features.*
-import org.slf4j.event.*
-import io.ktor.routing.*
-import io.ktor.http.*
-import io.ktor.websocket.*
+import io.ktor.features.CallLogging
+import io.ktor.features.DefaultHeaders
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.cio.websocket.*
 import io.ktor.http.content.defaultResource
 import io.ktor.http.content.resource
@@ -13,16 +9,22 @@ import io.ktor.http.content.static
 import io.ktor.locations.Location
 import io.ktor.locations.Locations
 import io.ktor.locations.get
+import io.ktor.request.path
+import io.ktor.response.respond
+import io.ktor.routing.*
 import io.ktor.sessions.*
+import io.ktor.websocket.WebSockets
+import io.ktor.websocket.webSocket
 import messages.responses.TTTResponse
-import java.time.*
+import org.slf4j.event.Level
+import java.time.Duration
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
 @Suppress("unused") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
-fun Application.module(testing: Boolean = false) {
-    val tttGameServer = TTTGameServer()
+fun Application.module(testing: Boolean = true) {
+    val tttGameServer = TTTGameServer(this, testing)
     install(CallLogging) {
         level = Level.INFO
         filter { call -> call.request.path().startsWith("/") }
@@ -71,12 +73,12 @@ fun Application.module(testing: Boolean = false) {
                         is Frame.Text -> {
                             val text = frame.readText()
                             log.info("message from ${session}: $text")
-                            //server.handleJsonRequest(session, text)
+                            sendViaWebsocket(tttGameServer.handleJsonRequest(session, text))
                         }
                     }
                 }
             } finally {
-                tttGameServer.clientLeft(session, this)
+                tttGameServer.clientLeft(session, GameId(gameId), this)
             }
         }
         get("/newGame") {
@@ -90,6 +92,9 @@ fun Application.module(testing: Boolean = false) {
             val respondMsg = msgs.entries.firstOrNull { it.key.sessionId == sessionId }
             if (respondMsg != null) {
                 call.respondJson(respondMsg.value)
+            } else {
+                log.error("no response message for new game generated")
+                call.respond(HttpStatusCode.InternalServerError, "welp...")
             }
             sendViaWebsocket(msgs)
         }

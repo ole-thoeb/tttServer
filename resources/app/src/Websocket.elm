@@ -8,7 +8,7 @@ import Url.Builder
 port send : Encode.Value -> Cmd msg
 
 
-port receive : (Decode.Value -> msg) -> Sub msg
+port receive : (String -> msg) -> Sub msg
 
 
 port connect_ : Encode.Value -> Cmd msg

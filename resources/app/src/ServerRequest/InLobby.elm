@@ -11,15 +11,15 @@ nameChangedMsg gameId changedPlayer =
     Encode.object
         ( (header gameId changedPlayer) ++
         [ ( "name", Encode.string changedPlayer.name ) ] )
-        |> remoteMsg "nameChanged"
+        |> remoteMsg "lobbyName"
 
 
 readyChangedMsg : String -> PlayerMe -> Encode.Value
 readyChangedMsg gameId changedPlayer =
     Encode.object
         ( (header gameId changedPlayer) ++
-        [ ( "ready", Encode.bool changedPlayer.isReady ) ] )
-        |> remoteMsg "readyChanged"
+        [ ( "isReady", Encode.bool changedPlayer.isReady ) ] )
+        |> remoteMsg "lobbyReady"
 
 
 header : String -> PlayerMe -> List ( String, Encode.Value )

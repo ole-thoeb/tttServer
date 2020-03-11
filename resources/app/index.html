@@ -52,7 +52,7 @@
 
             // If we receive a message from the server, we want to handle it.
             socket.onmessage = function(event) {
-                console.log(event.data);
+                console.log("received: " + event.data);
                 app.ports.receive.send(event.data);
             };
         }
@@ -63,10 +63,10 @@
         });
 
         app.ports.send.subscribe(function(msg) {
-            console.log(msg);
             if (socket) {
                 try {
-                    socket.send(msg);
+                    socket.send(JSON.stringify(msg));
+                    console.log("send: " + msg);
                 } catch (error) {
                     console.error("Failed to send " + msg + "with error " + error)
                 }

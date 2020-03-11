@@ -3,7 +3,6 @@ module Util exposing (..)
 
 import Browser
 import Html exposing (Html)
-import Monocle.Lens exposing (Lens)
 
 
 updateWith : (subModel -> model) -> (subMsg -> msg) -> ( subModel, Cmd subMsg ) -> ( model, Cmd msg )
@@ -20,3 +19,8 @@ viewPage toMsg { title, body } =
         [ Html.map toMsg body
         ]
     }
+
+
+dummy : b -> a -> a
+dummy b a =
+    a

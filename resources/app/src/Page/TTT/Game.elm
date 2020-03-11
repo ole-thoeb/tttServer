@@ -7,10 +7,11 @@ import Json.Decode as Decode
 import Page.Blank
 import Page.TTT.Lobby as Lobby
 import ServerResponse.EnterLobby as EnterLobby
+import ServerResponse.InLobby as InLobbyResponse
 import Session exposing (Session)
 import Url.Builder
 
-import Util exposing (updateWith)
+import Util exposing (dummy, updateWith)
 import Websocket
 
 -- MODEL
@@ -58,7 +59,7 @@ type Msg
     = GotLobbyMsg Lobby.Msg
     | GotInGameMsg
     | JoinResponse (Result Http.Error EnterLobby.Response)
-    | WebSocketIn Decode.Value
+    | WebSocketIn String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -90,6 +91,23 @@ update msg model =
 
                 Err error ->
                     Debug.todo "handle error"
+
+        ( WebSocketIn message, _ ) ->
+            case model of
+                Lobby lobby ->
+                    case Decode.decodeString InLobbyResponse.decoder message of
+                        Ok response ->
+                            Lobby.updateFromWebsocket response lobby
+                                |> updateWith Lobby GotLobbyMsg
+
+                        Err error ->
+                            ( dummy (Debug.log "json error" error) model, Cmd.none )
+
+                InGame session ->
+                    ( model, Cmd.none )
+
+                Loading session ->
+                    ( model, Cmd.none )
 
         ( _, _ ) ->
             ( model, Cmd.none )

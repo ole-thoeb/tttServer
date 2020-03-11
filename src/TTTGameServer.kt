@@ -1,19 +1,35 @@
+import arrow.core.Either
 import arrow.core.Tuple2
-import json.JsonSerializable
+import arrow.core.extensions.either.foldable.fold
+import arrow.core.extensions.either.monadError.monadError
+import arrow.core.fix
+import arrow.core.toT
+import io.ktor.application.Application
+import io.ktor.application.log
 import io.ktor.http.cio.websocket.WebSocketSession
+import json.JsonParser
+import json.JsonSerializable
+import json.JsonString
+import json.parsRequest
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.util.concurrent.ConcurrentHashMap
-import arrow.core.toT
+import messages.requests.LobbyRequest
 import messages.responses.TTTResponse
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 
-class TTTGameServer {
+class TTTGameServer(private val application: Application, val testing: Boolean){
     
     private val games: ConcurrentHashMap<GameId, TTTGame> = ConcurrentHashMap()
     private val locks: ConcurrentHashMap<GameId, Mutex> = ConcurrentHashMap()
-    
+
+    private val jsonParser = JsonParser(Either.monadError())
+    private val log get() = application.log
+
+    private var testGameId = AtomicInteger(0)
+
     fun newGame(): TTTGame {
-        val gameId = GameId.create()
+        val gameId = if (testing) GameId(testGameId.incrementAndGet().toString()) else GameId.create()
         val game = TTTGame.Lobby(gameId)
         locks[gameId] = Mutex()
         games[gameId] = game
@@ -51,27 +67,36 @@ class TTTGameServer {
         }.entries.first().value
     }
     
-    suspend fun clientLeft(sessionId: SessionId, websocket: WebSocketSession) {
-        val game = sessionId.game
-        if (game != null) {
-            updateGame<JsonSerializable>(game.id) { lockedGame ->
-                val updatedGame = when (lockedGame) {
-                    is TTTGame.Lobby -> {
-                        TTTGame.Lobby.technical { it.technical.sessionId == sessionId }
-                                .modify(lockedGame) { it.removeSocket(websocket) }
-                    }
-                    is TTTGame.InGame -> {
-                        TODO()
-                    }
+    suspend fun clientLeft(sessionId: SessionId, gameId: GameId, websocket: WebSocketSession) {
+        updateGame<JsonSerializable>(gameId) { lockedGame ->
+            val updatedGame = when (lockedGame) {
+                is TTTGame.Lobby -> {
+                    TTTGame.Lobby.technical { it.technical.sessionId == sessionId }
+                            .modify(lockedGame) { it.removeSocket(websocket) }
                 }
-                return@updateGame updatedGame toT emptyMap()
+                is TTTGame.InGame -> {
+                    TODO()
+                }
             }
+            return@updateGame updatedGame toT emptyMap()
         }
     }
 
-    fun noSuchGame(unknownGameId: GameId): Messages =
+    private fun noSuchGame(unknownGameId: GameId): Messages =
         mapOf(TechnicalPlayer.DUMMY to TTTResponse.NoSuchGame(unknownGameId.asString()))
-    
+
+    suspend fun handleJsonRequest(session: SessionId, request: JsonString): Messages {
+        return jsonParser.parsRequest(request, LobbyRequest.deserializers).fix().fold(
+            { error ->
+                log.info("failed to parse JSON request! session=$session, error=$error")
+                emptyMap()
+            },
+            { parsedRequest -> when (parsedRequest) {
+                is LobbyRequest -> handleLobbyRequest(parsedRequest)
+            }}
+        )
+    }
+
     private val SessionId.game: TTTGame? get() {
         return games.entries.firstOrNull { (_, game) ->
             game.technicalPlayers.any { it.sessionId == this }
