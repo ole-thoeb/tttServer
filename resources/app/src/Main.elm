@@ -59,8 +59,8 @@ changeRouteTo route model =
         session = toSession model
     in
     case route of
-        Route.Home ->
-            Home.init session
+        Route.Home maybeError ->
+            Home.init session maybeError
                 |> updateWith Home GotHomeMsg
 
         Route.Game gameId ->

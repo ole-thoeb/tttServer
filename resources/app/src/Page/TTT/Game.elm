@@ -1,5 +1,6 @@
 module Page.TTT.Game exposing (Model, toSession, fromLobby, Msg, update, view, subscriptions)
 
+import Browser.Navigation as Nav
 import Game.Lobby as Lobby
 import Html
 import Http
@@ -64,15 +65,18 @@ type Msg
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
+    let
+        session = model |> toSession
+    in
     case ( msg, model ) of
         ( GotLobbyMsg subMsg, Lobby lobby ) ->
             Lobby.update subMsg lobby
                 |> updateWith Lobby GotLobbyMsg
 
-        ( GotInGameMsg, InGame _) ->
+        ( GotInGameMsg, InGame _ ) ->
             ( model, Cmd.none )
 
-        ( JoinResponse result, Loading session) ->
+        ( JoinResponse result, Loading _ ) ->
             case result of
                 Ok response ->
                     case response of
@@ -80,14 +84,9 @@ update msg model =
                             Lobby.init session lobby
                                 |> updateWith Lobby GotLobbyMsg
 
-                        EnterLobby.LobbyFull max ->
-                            Debug.todo "handle error"
-
-                        EnterLobby.GameAlreadyStarted gameId ->
-                            Debug.todo "handle error"
-
-                        EnterLobby.NoSuchGame gameId ->
-                            Debug.todo "handle error"
+                        EnterLobby.Error error ->
+                            ( model
+                            , Nav.pushUrl (Session.navKey session) (Url.Builder.absolute [] (EnterLobby.errorToQueryParam error)) )
 
                 Err error ->
                     Debug.todo "handle error"
@@ -103,10 +102,10 @@ update msg model =
                         Err error ->
                             ( dummy (Debug.log "json error" error) model, Cmd.none )
 
-                InGame session ->
+                InGame _ ->
                     ( model, Cmd.none )
 
-                Loading session ->
+                Loading _ ->
                     ( model, Cmd.none )
 
         ( _, _ ) ->

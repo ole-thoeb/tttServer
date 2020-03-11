@@ -1,4 +1,5 @@
 import arrow.core.ListK
+import arrow.core.firstOrNone
 import arrow.core.toT
 import json.JsonSerializable
 import messages.requests.LobbyRequest
@@ -8,13 +9,16 @@ suspend fun TTTGameServer.addNewPlayer(sessionId: SessionId, gameId: GameId): Me
     val newPlayer = TechnicalPlayer(PlayerId.create(), sessionId, ListK.empty())
     when (game) {
         is TTTGame.Lobby -> {
-            game.addPlayer(newPlayer).fold(
+            game.players.firstOrNone { it.technical.sessionId == sessionId }.fold(
+                { game.addPlayer(newPlayer).fold(
                     { lobbyError ->
                         game toT mapOf(newPlayer to LobbyResponse.Full.fromError(lobbyError))
                     },
                     { updatedLobby ->
                         updatedLobby toT lobbyStateMsgs(updatedLobby)
                     }
+                ) },
+                {  game toT lobbyStateMsgs(game) }
             )
         }
         is TTTGame.InGame -> {

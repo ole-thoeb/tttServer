@@ -29,16 +29,21 @@ import Url.Builder
 type alias Model =
     { session: Session
     , gameId: String
-    , error: Maybe String
+    , error: Maybe JoinError
     , lobby: Maybe Lobby
     }
 
 
-init : Session -> ( Model, Cmd Msg )
-init session =
+type JoinError
+    = LobbyError EnterLobby.Error
+    | ConnectionError Http.Error
+
+
+init : Session -> Maybe EnterLobby.Error -> ( Model, Cmd Msg )
+init session maybeError =
     ( { session = session
     , gameId = ""
-    , error = Nothing
+    , error = Maybe.map LobbyError maybeError
     , lobby = Nothing
     }
     , Cmd.none
@@ -98,30 +103,14 @@ update msg model =
                                     ] []
                             )
 
-                        EnterLobby.LobbyFull maxPlayers ->
-                            ( { model | error = Just <| "The Game is full. There are a maximum of " ++
-                                String.fromInt maxPlayers ++ " players allowed." }
-                            , Cmd.none
-                            )
-
-                        EnterLobby.NoSuchGame gameId ->
-                            ( { model | error = Just <| "The Game " ++ gameId ++ " does not exist." }
-                            , Cmd.none
-                            )
-
-                        EnterLobby.GameAlreadyStarted gameId ->
-                            ( { model | error = Just <| "The Game " ++ gameId ++ " has already started." }
-                            , Cmd.none
-                            )
-
+                        EnterLobby.Error error ->
+                            ( { model | error = Just (LobbyError error) }, Cmd.none )
 
                 Err httpError ->
                     let
                         a = Debug.log "http error" httpError
                     in
-                    ( { model | error = Just <| "Failed to reach the server." }
-                    , Cmd.none
-                    )
+                    ( { model | error = Just (ConnectionError httpError) }, Cmd.none )
 
 
 -- VIEW
@@ -211,13 +200,31 @@ view model =
                         theme
                     ]
                 ] ++ case model.error of
-                    Just errorMsg ->
-                        [ errorCard errorMsg theme ]
+                    Just error ->
+                        [ errorCard (error |> toErrorMsg) theme ]
 
                     Nothing ->
                         []
 
     }
+
+
+toErrorMsg : JoinError -> String
+toErrorMsg joinError =
+    case joinError of
+        LobbyError lobbyError ->
+            case lobbyError of
+                EnterLobby.LobbyFull maxPlayers ->
+                    "The Game is full. There are a maximum of " ++ String.fromInt maxPlayers ++ " players allowed."
+
+                EnterLobby.GameAlreadyStarted id ->
+                    "The Game " ++ id ++ " has already started."
+
+                EnterLobby.NoSuchGame id ->
+                    "The Game " ++ id ++ " does not exist."
+
+        ConnectionError error ->
+            "Failed to reach the server."
 
 
 errorCard : String -> Theme.Theme a -> Element Msg
