@@ -15,6 +15,7 @@ import io.ktor.routing.*
 import io.ktor.sessions.*
 import io.ktor.websocket.WebSockets
 import io.ktor.websocket.webSocket
+import kotlinx.coroutines.launch
 import messages.responses.TTTResponse
 import org.slf4j.event.Level
 import java.time.Duration
@@ -49,9 +50,15 @@ fun Application.module(testing: Boolean = true) {
             call.sessions.set(SessionId.create())
         }
     }
-
+    
+    launch {
+        for (messages in tttGameServer.asyncMessages) {
+            sendViaWebsocket(messages)
+        }
+    }
+    
     routing {
-        trace { application.log.trace(it.buildText()) }
+        //trace { application.log.trace(it.buildText()) }
         webSocket("/ttt/{gameId}/ws") {
             val gameId = call.parameters["gameId"] ?: kotlin.run {
                 close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "No gameId"))

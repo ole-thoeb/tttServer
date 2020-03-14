@@ -1,9 +1,6 @@
 import arrow.Kind
-import arrow.core.ListK
 import arrow.core.Option
 import arrow.core.Predicate
-import arrow.core.k
-import arrow.optics.Lens
 import arrow.typeclasses.ApplicativeError
 import arrow.typeclasses.MonadError
 import json.JsonSerializable

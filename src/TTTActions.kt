@@ -1,12 +1,14 @@
 import arrow.core.ListK
 import arrow.core.firstOrNone
+import arrow.core.k
 import arrow.core.toT
 import json.JsonSerializable
+import kotlinx.coroutines.Job
 import messages.requests.LobbyRequest
 import messages.responses.LobbyResponse
 
 suspend fun TTTGameServer.addNewPlayer(sessionId: SessionId, gameId: GameId): Messages = updateGame(gameId) { game ->
-    val newPlayer = TechnicalPlayer(PlayerId.create(), sessionId, ListK.empty())
+    val newPlayer = TechnicalPlayer(PlayerId.create(), sessionId, ListK.empty(), emptyMap<String, Job>().k())
     when (game) {
         is TTTGame.Lobby -> {
             game.players.firstOrNone { it.technical.sessionId == sessionId }.fold(
@@ -43,6 +45,6 @@ suspend fun TTTGameServer.handleLobbyRequest(lobbyRequest: LobbyRequest): Messag
     updatedGame toT lobbyStateMsgs(updatedGame)
 }
 
-private fun lobbyStateMsgs(lobby: TTTGame.Lobby): MessagesOf<LobbyResponse.State> = lobby.players.associate {
+fun lobbyStateMsgs(lobby: TTTGame.Lobby): MessagesOf<LobbyResponse.State> = lobby.players.associate {
     it.technical to LobbyResponse.State.forPlayer(lobby, it)
 }

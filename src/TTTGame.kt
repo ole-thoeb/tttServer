@@ -1,16 +1,8 @@
-import arrow.Kind
 import arrow.core.*
-import arrow.core.extensions.listk.traverse.traverse
 import arrow.optics.Lens
-import arrow.optics.PLens
 import arrow.optics.Setter
-import arrow.optics.Traversal
-import arrow.optics.extensions.listk.filterIndex.filterIndex
-import arrow.optics.extensions.mapk.at.at
-import arrow.optics.extensions.traversal
-import arrow.optics.typeclasses.FilterIndex
-import arrow.typeclasses.Applicative
 import io.ktor.http.cio.websocket.WebSocketSession
+import kotlinx.coroutines.Job
 
 sealed class TTTGame {
     abstract val id: GameId
@@ -45,6 +37,11 @@ sealed class TTTGame {
         }
 
         companion object {
+            fun players(): Lens<Lobby, ListK<Player>> = Lens(
+                    get = { it.players },
+                    set = { lobby, players -> lobby.copy(players =  players) }
+            )
+            
             fun player(predicate: Predicate<Player>): Setter<Lobby, Player> = Setter { lobby, playerUpdate ->
                 lobby.copy(players = lobby.players.update(predicate, playerUpdate).k())
             }
@@ -63,12 +60,17 @@ fun TTTGame.Lobby.addPlayer(technicalPlayer: TechnicalPlayer): Either<LobbyError
     return addPlayer(TTTGame.Lobby.Player("Player ${players.size + 1}", false, technicalPlayer))
 }
 
-data class TechnicalPlayer(val playerId: PlayerId, val sessionId: SessionId, val sockets: ListK<WebSocketSession>) {
+data class TechnicalPlayer(
+        val playerId: PlayerId,
+        val sessionId: SessionId,
+        val sockets: ListK<WebSocketSession>,
+        val jobs: MapK<String, Job>
+) {
 
     fun addSocket(webSocket: WebSocketSession): TechnicalPlayer = copy(sockets = (sockets + webSocket).k())
     fun removeSocket(webSocket: WebSocketSession): TechnicalPlayer = copy(sockets = (sockets - webSocket).k())
 
     companion object {
-        val DUMMY = TechnicalPlayer(PlayerId("DUMMY_PLAYER"), SessionId("DUMMY_SESSION"), ListK.empty())
+        val DUMMY = TechnicalPlayer(PlayerId("DUMMY_PLAYER"), SessionId("DUMMY_SESSION"), ListK.empty(), emptyMap<String, Job>().k())
     }
 }
