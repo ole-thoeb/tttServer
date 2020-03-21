@@ -6,8 +6,10 @@ import Html
 import Http
 import Json.Decode as Decode
 import Page.Blank
+import Page.TTT.InGame as InGame
 import Page.TTT.Lobby as Lobby
 import ServerResponse.EnterLobby as EnterLobby
+import ServerResponse.InGame as InGameResponse
 import ServerResponse.InLobby as InLobbyResponse
 import Session exposing (Session)
 import Url.Builder
@@ -20,7 +22,7 @@ import Websocket
 
 type Model
     = Lobby Lobby.Model
-    | InGame Session
+    | InGame InGame.Model
     | Loading Session
 
 
@@ -30,8 +32,8 @@ toSession model =
         Lobby lobby ->
             Lobby.toSession lobby
 
-        InGame session ->
-            session
+        InGame inGame ->
+            InGame.toSession inGame
 
         Loading session ->
             session
@@ -58,7 +60,7 @@ fromLobby session gameId maybeLobby =
 
 type Msg
     = GotLobbyMsg Lobby.Msg
-    | GotInGameMsg
+    | GotInGameMsg InGame.Msg
     | JoinResponse (Result Http.Error EnterLobby.Response)
     | WebSocketIn String
 
@@ -73,8 +75,9 @@ update msg model =
             Lobby.update subMsg lobby
                 |> updateWith Lobby GotLobbyMsg
 
-        ( GotInGameMsg, InGame _ ) ->
-            ( model, Cmd.none )
+        ( GotInGameMsg subMsg, InGame inGame ) ->
+            InGame.update subMsg inGame
+                |> updateWith InGame GotInGameMsg
 
         ( JoinResponse result, Loading _ ) ->
             case result of
@@ -99,11 +102,26 @@ update msg model =
                             Lobby.updateFromWebsocket response lobby
                                 |> updateWith Lobby GotLobbyMsg
 
-                        Err error ->
-                            ( dummy (Debug.log "json error" error) model, Cmd.none )
+                        Err _ ->
+                            case Decode.decodeString InGameResponse.decoder message of
+                                Ok (InGameResponse.GameState game) ->
+                                    InGame.init session game
+                                        |> updateWith InGame GotInGameMsg
 
-                InGame _ ->
-                    ( model, Cmd.none )
+                                Err error ->
+                                    ( Debug.log ("json error lobby" ++ (Decode.errorToString error)) model, Cmd.none )
+
+                                _ ->
+                                    ( model, Cmd.none)
+
+                InGame inGame ->
+                    case Decode.decodeString InGameResponse.decoder message of
+                        Ok response ->
+                            InGame.updateFromWebsocket response inGame
+                                |> updateWith InGame GotInGameMsg
+
+                        Err error ->
+                            ( dummy (Debug.log "json error inGame" error) model, Cmd.none )
 
                 Loading _ ->
                     ( model, Cmd.none )
@@ -121,8 +139,8 @@ view model =
         Lobby lobby ->
             viewFragment GotLobbyMsg (Lobby.view lobby)
 
-        InGame session ->
-            Debug.todo "Implement InGame view"
+        InGame inGame ->
+            viewFragment GotInGameMsg (InGame.view inGame)
 
         Loading session ->
             Page.Blank.view
@@ -144,7 +162,7 @@ subscriptions model =
             Websocket.receive WebSocketIn
 
         InGame session ->
-            Sub.none
+            Websocket.receive WebSocketIn
 
         Loading session ->
             Sub.none

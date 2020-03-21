@@ -6410,6 +6410,9 @@ var $author$project$Page$Home$toSession = function (model) {
 var $author$project$Page$NotFound$toSession = function (model) {
 	return model.session;
 };
+var $author$project$Page$TTT$InGame$toSession = function ($) {
+	return $.session;
+};
 var $author$project$Page$TTT$Lobby$toSession = function (model) {
 	return model.session;
 };
@@ -6419,8 +6422,8 @@ var $author$project$Page$TTT$Game$toSession = function (model) {
 			var lobby = model.a;
 			return $author$project$Page$TTT$Lobby$toSession(lobby);
 		case 'InGame':
-			var session = model.a;
-			return session;
+			var inGame = model.a;
+			return $author$project$Page$TTT$InGame$toSession(inGame);
 		default:
 			var session = model.a;
 			return session;
@@ -7134,7 +7137,7 @@ var $author$project$Page$TTT$Game$subscriptions = function (model) {
 			return $author$project$Websocket$receive($author$project$Page$TTT$Game$WebSocketIn);
 		case 'InGame':
 			var session = model.a;
-			return $elm$core$Platform$Sub$none;
+			return $author$project$Websocket$receive($author$project$Page$TTT$Game$WebSocketIn);
 		default:
 			var session = model.a;
 			return $elm$core$Platform$Sub$none;
@@ -7310,6 +7313,97 @@ var $author$project$Page$NotFound$update = F2(
 					$author$project$Page$NotFound$toSession(model)),
 				A2($elm$url$Url$Builder$absolute, _List_Nil, _List_Nil)));
 	});
+var $author$project$Page$TTT$Game$GotInGameMsg = function (a) {
+	return {$: 'GotInGameMsg', a: a};
+};
+var $author$project$Page$TTT$Game$InGame = function (a) {
+	return {$: 'InGame', a: a};
+};
+var $author$project$ServerResponse$InGame$GameState = function (a) {
+	return {$: 'GameState', a: a};
+};
+var $author$project$Game$TTTGame$TTTGame = F5(
+	function (gameId, playerMe, opponent, meTurn, board) {
+		return {board: board, gameId: gameId, meTurn: meTurn, opponent: opponent, playerMe: playerMe};
+	});
+var $elm$json$Json$Decode$array = _Json_decodeArray;
+var $author$project$Game$TTTGame$Empty = {$: 'Empty'};
+var $author$project$Game$TTTGame$O = {$: 'O'};
+var $author$project$Game$TTTGame$X = {$: 'X'};
+var $author$project$Game$TTTGame$cellDecoder = A2(
+	$elm$json$Json$Decode$andThen,
+	function (stateStr) {
+		switch (stateStr) {
+			case 'X':
+				return $elm$json$Json$Decode$succeed($author$project$Game$TTTGame$X);
+			case 'O':
+				return $elm$json$Json$Decode$succeed($author$project$Game$TTTGame$O);
+			case 'EMPTY':
+				return $elm$json$Json$Decode$succeed($author$project$Game$TTTGame$Empty);
+			default:
+				return $elm$json$Json$Decode$fail('Unknown cell state ' + stateStr);
+		}
+	},
+	$elm$json$Json$Decode$string);
+var $author$project$Game$TTTGame$boardDecoder = $elm$json$Json$Decode$array($author$project$Game$TTTGame$cellDecoder);
+var $author$project$Game$TTTGamePlayer$Player = F3(
+	function (name, color, symbol) {
+		return {color: color, name: name, symbol: symbol};
+	});
+var $author$project$Game$TTTGamePlayer$colorDecoder = A2($elm$json$Json$Decode$field, 'color', $elm$json$Json$Decode$string);
+var $author$project$Game$TTTGamePlayer$nameDecoder = A2($elm$json$Json$Decode$field, 'name', $elm$json$Json$Decode$string);
+var $author$project$Game$TTTGamePlayer$O = {$: 'O'};
+var $author$project$Game$TTTGamePlayer$X = {$: 'X'};
+var $author$project$Game$TTTGamePlayer$symbolDecoder = A2(
+	$elm$json$Json$Decode$andThen,
+	function (str) {
+		switch (str) {
+			case 'X':
+				return $elm$json$Json$Decode$succeed($author$project$Game$TTTGamePlayer$X);
+			case 'O':
+				return $elm$json$Json$Decode$succeed($author$project$Game$TTTGamePlayer$O);
+			default:
+				return $elm$json$Json$Decode$fail('unknown symbol ' + str);
+		}
+	},
+	A2($elm$json$Json$Decode$field, 'symbol', $elm$json$Json$Decode$string));
+var $author$project$Game$TTTGamePlayer$decoder = A4($elm$json$Json$Decode$map3, $author$project$Game$TTTGamePlayer$Player, $author$project$Game$TTTGamePlayer$nameDecoder, $author$project$Game$TTTGamePlayer$colorDecoder, $author$project$Game$TTTGamePlayer$symbolDecoder);
+var $elm$json$Json$Decode$map5 = _Json_map5;
+var $author$project$Game$TTTGamePlayer$PlayerMe = F4(
+	function (id, name, color, symbol) {
+		return {color: color, id: id, name: name, symbol: symbol};
+	});
+var $author$project$Game$TTTGamePlayer$idDecoder = A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$string);
+var $elm$json$Json$Decode$map4 = _Json_map4;
+var $author$project$Game$TTTGamePlayer$meDecoder = A5($elm$json$Json$Decode$map4, $author$project$Game$TTTGamePlayer$PlayerMe, $author$project$Game$TTTGamePlayer$idDecoder, $author$project$Game$TTTGamePlayer$nameDecoder, $author$project$Game$TTTGamePlayer$colorDecoder, $author$project$Game$TTTGamePlayer$symbolDecoder);
+var $author$project$Game$TTTGame$decoder = A6(
+	$elm$json$Json$Decode$map5,
+	$author$project$Game$TTTGame$TTTGame,
+	A2($elm$json$Json$Decode$field, 'gameId', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'playerMe', $author$project$Game$TTTGamePlayer$meDecoder),
+	A2($elm$json$Json$Decode$field, 'opponent', $author$project$Game$TTTGamePlayer$decoder),
+	A2($elm$json$Json$Decode$field, 'meTurn', $elm$json$Json$Decode$bool),
+	A2($elm$json$Json$Decode$field, 'board', $author$project$Game$TTTGame$boardDecoder));
+var $author$project$ServerResponse$InGame$gameStateDecoder = A2($elm$json$Json$Decode$map, $author$project$ServerResponse$InGame$GameState, $author$project$Game$TTTGame$decoder);
+var $author$project$ServerResponse$InGame$PlayerDisc = function (a) {
+	return {$: 'PlayerDisc', a: a};
+};
+var $author$project$ServerResponse$InGame$playerDiscDecoder = A2(
+	$elm$json$Json$Decode$map,
+	$author$project$ServerResponse$InGame$PlayerDisc,
+	A2($elm$json$Json$Decode$field, 'discPlayerName', $elm$json$Json$Decode$string));
+var $author$project$ServerResponse$InGame$responseDecoder = function (type_) {
+	var _v0 = A2($elm$core$Debug$log, 'decoded type', type_);
+	switch (_v0) {
+		case 'playerDisconnected':
+			return $author$project$ServerResponse$JsonHelper$contentDecoder($author$project$ServerResponse$InGame$playerDiscDecoder);
+		case 'inGameState':
+			return $author$project$ServerResponse$JsonHelper$contentDecoder($author$project$ServerResponse$InGame$gameStateDecoder);
+		default:
+			return $elm$json$Json$Decode$fail('Unknown type \'' + (type_ + '\' to InGameResponse'));
+	}
+};
+var $author$project$ServerResponse$InGame$decoder = A2($elm$json$Json$Decode$andThen, $author$project$ServerResponse$InGame$responseDecoder, $author$project$ServerResponse$JsonHelper$typeDecoder);
 var $author$project$ServerResponse$InLobby$LobbyState = function (a) {
 	return {$: 'LobbyState', a: a};
 };
@@ -7362,7 +7456,54 @@ var $author$project$ServerResponse$EnterLobby$errorToQueryParam = function (erro
 				]);
 	}
 };
+var $author$project$Page$TTT$InGame$init = F2(
+	function (session, game) {
+		return _Utils_Tuple2(
+			{game: game, session: session},
+			$author$project$Websocket$connect(game.gameId));
+	});
 var $elm$core$Debug$todo = _Debug_todo;
+var $author$project$Websocket$send = _Platform_outgoingPort('send', $elm$core$Basics$identity);
+var $elm$json$Json$Encode$int = _Json_wrap;
+var $author$project$ServerRequest$JsonHelper$remoteMsg = F2(
+	function (type_, content) {
+		return $elm$json$Json$Encode$object(
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					'type',
+					$elm$json$Json$Encode$string(type_)),
+					_Utils_Tuple2('content', content)
+				]));
+	});
+var $author$project$ServerRequest$InGame$setPiece = F3(
+	function (gameId, playerId, index) {
+		return A2(
+			$author$project$ServerRequest$JsonHelper$remoteMsg,
+			'tttSetPiece',
+			$elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'playerId',
+						$elm$json$Json$Encode$string(playerId)),
+						_Utils_Tuple2(
+						'gameId',
+						$elm$json$Json$Encode$string(gameId)),
+						_Utils_Tuple2(
+						'index',
+						$elm$json$Json$Encode$int(index))
+					])));
+	});
+var $author$project$Page$TTT$InGame$update = F2(
+	function (msg, model) {
+		var game = model.game;
+		var index = msg.a;
+		return _Utils_Tuple2(
+			model,
+			$author$project$Websocket$send(
+				A3($author$project$ServerRequest$InGame$setPiece, game.gameId, game.playerMe.id, index)));
+	});
 var $author$project$ClipBoard$copyToClipBoard = _Platform_outgoingPort('copyToClipBoard', $elm$json$Json$Encode$string);
 var $arturopala$elm_monocle$Monocle$Lens$modify = F2(
 	function (lens, f) {
@@ -7386,17 +7527,6 @@ var $author$project$ServerRequest$InLobby$header = F2(
 				'playerId',
 				$elm$json$Json$Encode$string(player.id))
 			]);
-	});
-var $author$project$ServerRequest$JsonHelper$remoteMsg = F2(
-	function (type_, content) {
-		return $elm$json$Json$Encode$object(
-			_List_fromArray(
-				[
-					_Utils_Tuple2(
-					'type',
-					$elm$json$Json$Encode$string(type_)),
-					_Utils_Tuple2('content', content)
-				]));
 	});
 var $author$project$ServerRequest$InLobby$nameChangedMsg = F2(
 	function (gameId, changedPlayer) {
@@ -7486,7 +7616,6 @@ var $author$project$ServerRequest$InLobby$readyChangedMsg = F2(
 							$elm$json$Json$Encode$bool(changedPlayer.isReady))
 						]))));
 	});
-var $author$project$Websocket$send = _Platform_outgoingPort('send', $elm$core$Basics$identity);
 var $author$project$Page$TTT$Lobby$update = F2(
 	function (msg, model) {
 		var lobby = model.lobby;
@@ -7518,6 +7647,20 @@ var $author$project$Page$TTT$Lobby$update = F2(
 							_List_fromArray(
 								['game', model.lobby.gameId]),
 							_List_Nil)));
+		}
+	});
+var $author$project$Page$TTT$InGame$updateFromWebsocket = F2(
+	function (response, model) {
+		if (response.$ === 'PlayerDisc') {
+			var discPlayerName = response.a;
+			return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+		} else {
+			var tttGame = response.a;
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{game: tttGame}),
+				$elm$core$Platform$Cmd$none);
 		}
 	});
 var $author$project$Page$TTT$Lobby$updateFromWebsocket = F2(
@@ -7553,8 +7696,13 @@ var $author$project$Page$TTT$Game$update = F2(
 					}
 				case 'GotInGameMsg':
 					if (_v0.b.$ === 'InGame') {
-						var _v1 = _v0.a;
-						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+						var subMsg = _v0.a.a;
+						var inGame = _v0.b.a;
+						return A3(
+							$author$project$Util$updateWith,
+							$author$project$Page$TTT$Game$InGame,
+							$author$project$Page$TTT$Game$GotInGameMsg,
+							A2($author$project$Page$TTT$InGame$update, subMsg, inGame));
 					} else {
 						break _v0$4;
 					}
@@ -7587,8 +7735,8 @@ var $author$project$Page$TTT$Game$update = F2(
 							return _Debug_todo(
 								'Page.TTT.Game',
 								{
-									start: {line: 92, column: 21},
-									end: {line: 92, column: 31}
+									start: {line: 95, column: 21},
+									end: {line: 95, column: 31}
 								})('handle error');
 						}
 					} else {
@@ -7599,25 +7747,56 @@ var $author$project$Page$TTT$Game$update = F2(
 					switch (model.$) {
 						case 'Lobby':
 							var lobby = model.a;
-							var _v5 = A2($elm$json$Json$Decode$decodeString, $author$project$ServerResponse$InLobby$decoder, message);
-							if (_v5.$ === 'Ok') {
-								var response = _v5.a;
+							var _v4 = A2($elm$json$Json$Decode$decodeString, $author$project$ServerResponse$InLobby$decoder, message);
+							if (_v4.$ === 'Ok') {
+								var response = _v4.a;
 								return A3(
 									$author$project$Util$updateWith,
 									$author$project$Page$TTT$Game$Lobby,
 									$author$project$Page$TTT$Game$GotLobbyMsg,
 									A2($author$project$Page$TTT$Lobby$updateFromWebsocket, response, lobby));
 							} else {
-								var error = _v5.a;
+								var _v5 = A2($elm$json$Json$Decode$decodeString, $author$project$ServerResponse$InGame$decoder, message);
+								if (_v5.$ === 'Ok') {
+									if (_v5.a.$ === 'GameState') {
+										var game = _v5.a.a;
+										return A3(
+											$author$project$Util$updateWith,
+											$author$project$Page$TTT$Game$InGame,
+											$author$project$Page$TTT$Game$GotInGameMsg,
+											A2($author$project$Page$TTT$InGame$init, session, game));
+									} else {
+										return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+									}
+								} else {
+									var error = _v5.a;
+									return _Utils_Tuple2(
+										A2(
+											$elm$core$Debug$log,
+											'json error lobby' + $elm$json$Json$Decode$errorToString(error),
+											model),
+										$elm$core$Platform$Cmd$none);
+								}
+							}
+						case 'InGame':
+							var inGame = model.a;
+							var _v6 = A2($elm$json$Json$Decode$decodeString, $author$project$ServerResponse$InGame$decoder, message);
+							if (_v6.$ === 'Ok') {
+								var response = _v6.a;
+								return A3(
+									$author$project$Util$updateWith,
+									$author$project$Page$TTT$Game$InGame,
+									$author$project$Page$TTT$Game$GotInGameMsg,
+									A2($author$project$Page$TTT$InGame$updateFromWebsocket, response, inGame));
+							} else {
+								var error = _v6.a;
 								return _Utils_Tuple2(
 									A2(
 										$author$project$Util$dummy,
-										A2($elm$core$Debug$log, 'json error', error),
+										A2($elm$core$Debug$log, 'json error inGame', error),
 										model),
 									$elm$core$Platform$Cmd$none);
 							}
-						case 'InGame':
-							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 						default:
 							return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 					}
@@ -15789,21 +15968,429 @@ var $author$project$Page$NotFound$view = function (model) {
 		title: 'Page Not Found'
 	};
 };
+var $author$project$Page$TTT$InGame$Left = {$: 'Left'};
+var $author$project$Page$TTT$InGame$Right = {$: 'Right'};
+var $author$project$Page$TTT$InGame$CellClicked = function (a) {
+	return {$: 'CellClicked', a: a};
+};
+var $elm$svg$Svg$circle = $elm$svg$Svg$trustedNode('circle');
+var $elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
+var $elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
+var $elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
+var $elm$svg$Svg$Attributes$preserveAspectRatio = _VirtualDom_attribute('preserveAspectRatio');
+var $elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
+var $elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
+var $elm$svg$Svg$Attributes$strokeWidth = _VirtualDom_attribute('stroke-width');
+var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
+var $elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
+var $author$project$Page$TTT$SvgSymbol$circle = function (color) {
+	return A2(
+		$elm$svg$Svg$svg,
+		_List_fromArray(
+			[
+				$elm$svg$Svg$Attributes$width('100%'),
+				$elm$svg$Svg$Attributes$preserveAspectRatio('xMinYMin'),
+				$elm$svg$Svg$Attributes$viewBox('0 0 120 120')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$svg$Svg$circle,
+				_List_fromArray(
+					[
+						$elm$svg$Svg$Attributes$cx('60'),
+						$elm$svg$Svg$Attributes$cy('60'),
+						$elm$svg$Svg$Attributes$r('50'),
+						$elm$svg$Svg$Attributes$stroke(color),
+						$elm$svg$Svg$Attributes$strokeWidth('2'),
+						$elm$svg$Svg$Attributes$fill('none')
+					]),
+				_List_Nil)
+			]));
+};
+var $elm$svg$Svg$line = $elm$svg$Svg$trustedNode('line');
+var $elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
+var $elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
+var $elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
+var $elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
+var $author$project$Page$TTT$SvgSymbol$cross = function (color) {
+	return A2(
+		$elm$svg$Svg$svg,
+		_List_fromArray(
+			[
+				$elm$svg$Svg$Attributes$width('100%'),
+				$elm$svg$Svg$Attributes$preserveAspectRatio('xMinYMin'),
+				$elm$svg$Svg$Attributes$viewBox('0 0 120 120')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$svg$Svg$line,
+				_List_fromArray(
+					[
+						$elm$svg$Svg$Attributes$stroke(color),
+						$elm$svg$Svg$Attributes$strokeWidth('2'),
+						$elm$svg$Svg$Attributes$x1('10'),
+						$elm$svg$Svg$Attributes$y1('10'),
+						$elm$svg$Svg$Attributes$x2('110'),
+						$elm$svg$Svg$Attributes$y2('110')
+					]),
+				_List_Nil),
+				A2(
+				$elm$svg$Svg$line,
+				_List_fromArray(
+					[
+						$elm$svg$Svg$Attributes$stroke(color),
+						$elm$svg$Svg$Attributes$strokeWidth('2'),
+						$elm$svg$Svg$Attributes$x1('110'),
+						$elm$svg$Svg$Attributes$y1('10'),
+						$elm$svg$Svg$Attributes$x2('10'),
+						$elm$svg$Svg$Attributes$y2('110')
+					]),
+				_List_Nil)
+			]));
+};
+var $author$project$Page$TTT$SvgSymbol$empty = A2(
+	$elm$svg$Svg$svg,
+	_List_fromArray(
+		[
+			$elm$svg$Svg$Attributes$width('100%'),
+			$elm$svg$Svg$Attributes$preserveAspectRatio('xMinYMin'),
+			$elm$svg$Svg$Attributes$viewBox('0 0 120 120')
+		]),
+	_List_Nil);
+var $elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
+var $elm$core$Array$bitMask = 4294967295 >>> (32 - $elm$core$Array$shiftStep);
+var $elm$core$Elm$JsArray$unsafeGet = _JsArray_unsafeGet;
+var $elm$core$Array$getHelp = F3(
+	function (shift, index, tree) {
+		getHelp:
+		while (true) {
+			var pos = $elm$core$Array$bitMask & (index >>> shift);
+			var _v0 = A2($elm$core$Elm$JsArray$unsafeGet, pos, tree);
+			if (_v0.$ === 'SubTree') {
+				var subTree = _v0.a;
+				var $temp$shift = shift - $elm$core$Array$shiftStep,
+					$temp$index = index,
+					$temp$tree = subTree;
+				shift = $temp$shift;
+				index = $temp$index;
+				tree = $temp$tree;
+				continue getHelp;
+			} else {
+				var values = _v0.a;
+				return A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, values);
+			}
+		}
+	});
+var $elm$core$Array$tailIndex = function (len) {
+	return (len >>> 5) << 5;
+};
+var $elm$core$Array$get = F2(
+	function (index, _v0) {
+		var len = _v0.a;
+		var startShift = _v0.b;
+		var tree = _v0.c;
+		var tail = _v0.d;
+		return ((index < 0) || (_Utils_cmp(index, len) > -1)) ? $elm$core$Maybe$Nothing : ((_Utils_cmp(
+			index,
+			$elm$core$Array$tailIndex(len)) > -1) ? $elm$core$Maybe$Just(
+			A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, tail)) : $elm$core$Maybe$Just(
+			A3($elm$core$Array$getHelp, startShift, index, tree)));
+	});
+var $author$project$Page$TTT$InGame$boardCell = F3(
+	function (theme, cellNumber, game) {
+		var board = game.board;
+		var svgIcon = function () {
+			var _v0 = A2($elm$core$Array$get, cellNumber, board);
+			_v0$2:
+			while (true) {
+				if (_v0.$ === 'Just') {
+					switch (_v0.a.$) {
+						case 'X':
+							var _v1 = _v0.a;
+							return $author$project$Page$TTT$SvgSymbol$cross('red');
+						case 'O':
+							var _v2 = _v0.a;
+							return $author$project$Page$TTT$SvgSymbol$circle('blue');
+						default:
+							break _v0$2;
+					}
+				} else {
+					break _v0$2;
+				}
+			}
+			return $author$project$Page$TTT$SvgSymbol$empty;
+		}();
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$Events$onClick(
+					$author$project$Page$TTT$InGame$CellClicked(cellNumber))
+				]),
+			$mdgriffith$elm_ui$Element$html(svgIcon));
+	});
+var $author$project$Page$TTT$InGame$hLine = function (theme) {
+	return A2(
+		$mdgriffith$elm_ui$Element$el,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$width(
+				$mdgriffith$elm_ui$Element$px(2)),
+				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+				$mdgriffith$elm_ui$Element$Background$color(
+				A2($author$project$MaterialUI$Theme$setAlpha, 0.3, theme.color.onBackground))
+			]),
+		$mdgriffith$elm_ui$Element$none);
+};
+var $author$project$MaterialUI$Theme$SecondaryVariant = {$: 'SecondaryVariant'};
+var $mdgriffith$elm_ui$Element$Font$alignLeft = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontAlignment, $mdgriffith$elm_ui$Internal$Style$classes.textLeft);
+var $mdgriffith$elm_ui$Internal$Model$Right = {$: 'Right'};
+var $mdgriffith$elm_ui$Element$alignRight = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Right);
+var $elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
+var $elm$svg$Svg$g = $elm$svg$Svg$trustedNode('g');
+var $elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
+var $danmarcab$material_icons$Material$Icons$Internal$toRgbaString = function (color) {
+	var _v0 = $avh4$elm_color$Color$toRgba(color);
+	var red = _v0.red;
+	var green = _v0.green;
+	var blue = _v0.blue;
+	var alpha = _v0.alpha;
+	return 'rgba(' + ($elm$core$String$fromInt(
+		$elm$core$Basics$round(255 * red)) + (',' + ($elm$core$String$fromInt(
+		$elm$core$Basics$round(255 * green)) + (',' + ($elm$core$String$fromInt(
+		$elm$core$Basics$round(255 * blue)) + (',' + ($elm$core$String$fromFloat(alpha) + ')')))))));
+};
+var $danmarcab$material_icons$Material$Icons$Internal$icon = F4(
+	function (viewBox, children, color, size) {
+		var stringSize = $elm$core$String$fromInt(size);
+		var stringColor = $danmarcab$material_icons$Material$Icons$Internal$toRgbaString(color);
+		return A2(
+			$elm$svg$Svg$svg,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$width(stringSize),
+					$elm$svg$Svg$Attributes$height(stringSize),
+					$elm$svg$Svg$Attributes$viewBox(viewBox)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$svg$Svg$g,
+					_List_fromArray(
+						[
+							$elm$svg$Svg$Attributes$fill(stringColor)
+						]),
+					children)
+				]));
+	});
+var $elm$svg$Svg$path = $elm$svg$Svg$trustedNode('path');
+var $danmarcab$material_icons$Material$Icons$Navigation$close = A2(
+	$danmarcab$material_icons$Material$Icons$Internal$icon,
+	'0 0 48 48',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$path,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$d('M38 12.83L35.17 10 24 21.17 12.83 10 10 12.83 21.17 24 10 35.17 12.83 38 24 26.83 35.17 38 38 35.17 26.83 24z')
+				]),
+			_List_Nil)
+		]));
+var $author$project$MaterialUI$Icon$Icon = function (a) {
+	return {$: 'Icon', a: a};
+};
+var $author$project$MaterialUI$Icon$makeIcon = $author$project$MaterialUI$Icon$Icon;
+var $author$project$MaterialUI$Icons$Navigation$close = $author$project$MaterialUI$Icon$makeIcon($danmarcab$material_icons$Material$Icons$Navigation$close);
+var $danmarcab$material_icons$Material$Icons$Toggle$radio_button_unchecked = A2(
+	$danmarcab$material_icons$Material$Icons$Internal$icon,
+	'0 0 48 48',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$path,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$d('M24 4C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm0 36c-8.84 0-16-7.16-16-16S15.16 8 24 8s16 7.16 16 16-7.16 16-16 16z')
+				]),
+			_List_Nil)
+		]));
+var $author$project$MaterialUI$Icons$Toggle$radio_button_unchecked = $author$project$MaterialUI$Icon$makeIcon($danmarcab$material_icons$Material$Icons$Toggle$radio_button_unchecked);
+var $author$project$Page$TTT$InGame$playerHeader = F4(
+	function (theme, player, highlight, alignment) {
+		var symbolIcon = function () {
+			var _v2 = player.symbol;
+			if (_v2.$ === 'X') {
+				return $author$project$MaterialUI$Icons$Navigation$close;
+			} else {
+				return $author$project$MaterialUI$Icons$Toggle$radio_button_unchecked;
+			}
+		}();
+		var borderColor = highlight ? theme.color.secondary : theme.color.onBackground;
+		var _v0 = function () {
+			if (alignment.$ === 'Left') {
+				return _Utils_Tuple2($mdgriffith$elm_ui$Element$Font$alignLeft, $mdgriffith$elm_ui$Element$alignLeft);
+			} else {
+				return _Utils_Tuple2($mdgriffith$elm_ui$Element$Font$alignRight, $mdgriffith$elm_ui$Element$alignRight);
+			}
+		}();
+		var fontAlign = _v0.a;
+		var align = _v0.b;
+		return A2(
+			$mdgriffith$elm_ui$Element$row,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+					$mdgriffith$elm_ui$Element$Border$color(
+					A2($author$project$MaterialUI$Theme$setAlpha, 0.3, borderColor)),
+					$mdgriffith$elm_ui$Element$Border$width(2),
+					$mdgriffith$elm_ui$Element$Border$rounded(6),
+					$mdgriffith$elm_ui$Element$spacing(8),
+					$mdgriffith$elm_ui$Element$padding(8)
+				]),
+			_List_fromArray(
+				[
+					A4(
+					$author$project$UIHelper$materialText,
+					_List_fromArray(
+						[
+							fontAlign,
+							$mdgriffith$elm_ui$Element$Font$color(theme.color.onBackground),
+							align
+						]),
+					player.name,
+					$author$project$MaterialUI$Theme$Body1,
+					theme),
+					A4($author$project$MaterialUI$Icon$view, theme, $author$project$MaterialUI$Theme$SecondaryVariant, 20, symbolIcon)
+				]));
+	});
+var $mdgriffith$elm_ui$Element$spaceEvenly = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$spacing, $mdgriffith$elm_ui$Internal$Style$classes.spaceEvenly);
+var $author$project$Page$TTT$InGame$vLine = function (theme) {
+	return A2(
+		$mdgriffith$elm_ui$Element$el,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+				$mdgriffith$elm_ui$Element$height(
+				$mdgriffith$elm_ui$Element$px(2)),
+				$mdgriffith$elm_ui$Element$Background$color(
+				A2($author$project$MaterialUI$Theme$setAlpha, 0.3, theme.color.onBackground))
+			]),
+		$mdgriffith$elm_ui$Element$none);
+};
+var $author$project$Page$TTT$InGame$view = function (model) {
+	var theme = $author$project$Session$theme(
+		$author$project$Page$TTT$InGame$toSession(model));
+	var game = model.game;
+	return {
+		body: A2(
+			$mdgriffith$elm_ui$Element$layout,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$Background$color(theme.color.background),
+					$mdgriffith$elm_ui$Element$Font$color(theme.color.onBackground)
+				]),
+			A2(
+				$mdgriffith$elm_ui$Element$column,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$centerX,
+						$mdgriffith$elm_ui$Element$width(
+						A2($mdgriffith$elm_ui$Element$maximum, 900, $mdgriffith$elm_ui$Element$fill)),
+						$mdgriffith$elm_ui$Element$padding(16),
+						$mdgriffith$elm_ui$Element$spacing(16)
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Element$row,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$spaceEvenly,
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+							]),
+						_List_fromArray(
+							[
+								A4($author$project$Page$TTT$InGame$playerHeader, theme, game.playerMe, game.meTurn, $author$project$Page$TTT$InGame$Left),
+								A4($author$project$Page$TTT$InGame$playerHeader, theme, game.opponent, !game.meTurn, $author$project$Page$TTT$InGame$Right)
+							])),
+						A2(
+						$mdgriffith$elm_ui$Element$column,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$centerX,
+								$mdgriffith$elm_ui$Element$width(
+								A2($mdgriffith$elm_ui$Element$maximum, 500, $mdgriffith$elm_ui$Element$fill))
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$mdgriffith$elm_ui$Element$row,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$spaceEvenly,
+										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+									]),
+								_List_fromArray(
+									[
+										A3($author$project$Page$TTT$InGame$boardCell, theme, 0, game),
+										$author$project$Page$TTT$InGame$hLine(theme),
+										A3($author$project$Page$TTT$InGame$boardCell, theme, 1, game),
+										$author$project$Page$TTT$InGame$hLine(theme),
+										A3($author$project$Page$TTT$InGame$boardCell, theme, 2, game)
+									])),
+								$author$project$Page$TTT$InGame$vLine(theme),
+								A2(
+								$mdgriffith$elm_ui$Element$row,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$spaceEvenly,
+										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+									]),
+								_List_fromArray(
+									[
+										A3($author$project$Page$TTT$InGame$boardCell, theme, 3, game),
+										$author$project$Page$TTT$InGame$hLine(theme),
+										A3($author$project$Page$TTT$InGame$boardCell, theme, 4, game),
+										$author$project$Page$TTT$InGame$hLine(theme),
+										A3($author$project$Page$TTT$InGame$boardCell, theme, 5, game)
+									])),
+								$author$project$Page$TTT$InGame$vLine(theme),
+								A2(
+								$mdgriffith$elm_ui$Element$row,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$spaceEvenly,
+										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+									]),
+								_List_fromArray(
+									[
+										A3($author$project$Page$TTT$InGame$boardCell, theme, 6, game),
+										$author$project$Page$TTT$InGame$hLine(theme),
+										A3($author$project$Page$TTT$InGame$boardCell, theme, 7, game),
+										$author$project$Page$TTT$InGame$hLine(theme),
+										A3($author$project$Page$TTT$InGame$boardCell, theme, 8, game)
+									]))
+							]))
+					]))),
+		title: 'TTTGame'
+	};
+};
 var $author$project$Page$TTT$Lobby$CopyGameId = {$: 'CopyGameId'};
 var $author$project$Page$TTT$Lobby$Name = function (a) {
 	return {$: 'Name', a: a};
 };
 var $author$project$Page$TTT$Lobby$Ready = {$: 'Ready'};
 var $author$project$MaterialUI$Theme$Subtitle2 = {$: 'Subtitle2'};
-var $mdgriffith$elm_ui$Internal$Model$Right = {$: 'Right'};
-var $mdgriffith$elm_ui$Element$alignRight = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Right);
 var $author$project$Game$Lobby$allPlayers = function (lobby) {
 	return A2(
 		$elm$core$List$cons,
 		A2($author$project$Game$LobbyPlayer$Player, lobby.playerMe.name, lobby.playerMe.isReady),
 		lobby.players);
 };
-var $mdgriffith$elm_ui$Element$Font$alignLeft = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontAlignment, $mdgriffith$elm_ui$Internal$Style$classes.textLeft);
 var $mdgriffith$elm_ui$Element$Font$italic = $mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.italic);
 var $author$project$Page$TTT$Lobby$playerRow = F2(
 	function (theme, player) {
@@ -16018,13 +16605,11 @@ var $author$project$Page$TTT$Game$view = function (model) {
 				$author$project$Page$TTT$Game$GotLobbyMsg,
 				$author$project$Page$TTT$Lobby$view(lobby));
 		case 'InGame':
-			var session = model.a;
-			return _Debug_todo(
-				'Page.TTT.Game',
-				{
-					start: {line: 125, column: 13},
-					end: {line: 125, column: 23}
-				})('Implement InGame view');
+			var inGame = model.a;
+			return A2(
+				$author$project$Page$TTT$Game$viewFragment,
+				$author$project$Page$TTT$Game$GotInGameMsg,
+				$author$project$Page$TTT$InGame$view(inGame));
 		default:
 			var session = model.a;
 			return $author$project$Page$Blank$view;
