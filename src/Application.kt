@@ -38,7 +38,7 @@ fun Application.module(testing: Boolean = true) {
     install(Locations)
 
     install(WebSockets) {
-        pingPeriod = Duration.ofMinutes(1)
+        pingPeriod = if (testing) Duration.ofMinutes(1) else Duration.ofSeconds(5)
     }
 
     install(Sessions) {

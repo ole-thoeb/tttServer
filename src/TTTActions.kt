@@ -1,10 +1,11 @@
 import arrow.core.ListK
+import arrow.core.extensions.list.functor.mapConst
 import arrow.core.firstOrNone
 import arrow.core.k
 import arrow.core.toT
-import json.JsonSerializable
 import kotlinx.coroutines.Job
 import messages.requests.LobbyRequest
+import messages.responses.InGameResponse
 import messages.responses.LobbyResponse
 
 suspend fun TTTGameServer.addNewPlayer(sessionId: SessionId, gameId: GameId): Messages = updateGame(gameId) { game ->
@@ -12,15 +13,17 @@ suspend fun TTTGameServer.addNewPlayer(sessionId: SessionId, gameId: GameId): Me
     when (game) {
         is TTTGame.Lobby -> {
             game.players.firstOrNone { it.technical.sessionId == sessionId }.fold(
-                { game.addPlayer(newPlayer).fold(
-                    { lobbyError ->
-                        game toT mapOf(newPlayer to LobbyResponse.Full.fromError(lobbyError))
+                    {
+                        game.addPlayer(newPlayer).fold(
+                                { lobbyError ->
+                                    game toT mapOf(newPlayer to LobbyResponse.Full.fromError(lobbyError))
+                                },
+                                { updatedLobby ->
+                                    updatedLobby toT lobbyStateMsgs(updatedLobby)
+                                }
+                        )
                     },
-                    { updatedLobby ->
-                        updatedLobby toT lobbyStateMsgs(updatedLobby)
-                    }
-                ) },
-                {  game toT lobbyStateMsgs(game) }
+                    { game toT lobbyStateMsgs(game) }
             )
         }
         is TTTGame.InGame -> {
@@ -30,21 +33,43 @@ suspend fun TTTGameServer.addNewPlayer(sessionId: SessionId, gameId: GameId): Me
 }
 
 suspend fun TTTGameServer.handleLobbyRequest(lobbyRequest: LobbyRequest): Messages = updateGame(lobbyRequest.gameId) { game ->
-    if (game !is TTTGame.Lobby) return@updateGame TODO()
-
-    val updatedGame = TTTGame.Lobby.player { it.technical.playerId == lobbyRequest.playerId }.modify(game) {
-        when (lobbyRequest) {
-            is LobbyRequest.Ready -> {
-                it.copy(isReady = lobbyRequest.content.isReady)
+    when (game) {
+        is TTTGame.InGame -> game toT inGameStateMsgs(game)
+        is TTTGame.Lobby -> {
+            val updatedGame = when (lobbyRequest) {
+                is LobbyRequest.Ready -> {
+                    val modifiedLobby = TTTGame.Lobby.player { it.technical.playerId == lobbyRequest.playerId }.modify(game) {
+                        it.copy(isReady = lobbyRequest.content.isReady)
+                    }
+                    if (modifiedLobby.players.size == 2 && modifiedLobby.players.all { it.isReady }) {
+                        val (p1, p2) = modifiedLobby.players
+                        val inGame = TTTGame.InGame(
+                                modifiedLobby.id,
+                                TTTGame.InGame.Player(p1.name, "#FF0000", p1.technical),
+                                TTTGame.InGame.Player(p2.name, "#00FF00", p2.technical),
+                                List(9) { TTTGame.InGame.CellState.EMPTY }.k(),
+                                TTTGame.InGame.PlayerRef.P1
+                        )
+                        return@updateGame inGame toT inGameStateMsgs(inGame)
+                    } else {
+                        modifiedLobby
+                    }
+                }
+                is LobbyRequest.Name -> {
+                    TTTGame.Lobby.player { it.technical.playerId == lobbyRequest.playerId }.modify(game) {
+                        it.copy(name = lobbyRequest.content.name)
+                    }
+                }
             }
-            is LobbyRequest.Name -> {
-                it.copy(name = lobbyRequest.content.name)
-            }
+            updatedGame toT lobbyStateMsgs(updatedGame)
         }
     }
-    updatedGame toT lobbyStateMsgs(updatedGame)
 }
 
 fun lobbyStateMsgs(lobby: TTTGame.Lobby): MessagesOf<LobbyResponse.State> = lobby.players.associate {
     it.technical to LobbyResponse.State.forPlayer(lobby, it)
+}
+
+fun inGameStateMsgs(inGame: TTTGame.InGame): MessagesOf<InGameResponse.State> = inGame.playersWithRef.associate { (player, ref) ->
+    player.technical to InGameResponse.State.forPlayer(inGame, ref)
 }

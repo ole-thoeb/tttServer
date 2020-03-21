@@ -18,6 +18,14 @@ fun <F, T, E> T?.fromNull(ME: ApplicativeError<F, E>, fe: () -> E): Kind<F, T> =
 inline fun <T> List<T>.update(predicate: Predicate<T>, update: (T) -> T): List<T> =
     this.map { if (predicate(it)) update(it) else it }
 
+inline fun <T> List<T>.updateIndexed(predicate: (Int, T) -> Boolean, update: (Int, T) -> T): List<T> =
+        this.mapIndexed { i, t -> if (predicate(i, t)) update(i, t) else t }
+
+fun <T> List<T>.update(index: Int, value: T): List<T> = updateIndexed(
+        { i, _ -> i == index },
+        { _, _ -> value }
+)
+
 inline fun <T: Any> List<T>.updateNotNone(predicate: Predicate<T>, update: (T) -> Option<T>): List<T> =
     this.mapNotNull { if (predicate(it)) update(it).orNull() else it }
 
@@ -25,5 +33,6 @@ typealias MessagesOf<MSG> = Map<TechnicalPlayer, MSG>
 
 typealias Messages = MessagesOf<JsonSerializable>
 
-
 fun Messages.isCouldNotMatchGame(): Boolean = size == 1 && this[TechnicalPlayer.DUMMY] is TTTResponse.NoSuchGame
+
+fun <T: JsonSerializable> noMessages(): MessagesOf<T> = emptyMap()
