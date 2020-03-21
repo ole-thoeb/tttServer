@@ -1,9 +1,6 @@
-import arrow.core.ListK
-import arrow.core.extensions.list.functor.mapConst
-import arrow.core.firstOrNone
-import arrow.core.k
-import arrow.core.toT
+import arrow.core.*
 import kotlinx.coroutines.Job
+import messages.requests.GameRequest
 import messages.requests.LobbyRequest
 import messages.responses.InGameResponse
 import messages.responses.LobbyResponse
@@ -38,9 +35,10 @@ suspend fun TTTGameServer.handleLobbyRequest(lobbyRequest: LobbyRequest): Messag
         is TTTGame.Lobby -> {
             val updatedGame = when (lobbyRequest) {
                 is LobbyRequest.Ready -> {
-                    val modifiedLobby = TTTGame.Lobby.player { it.technical.playerId == lobbyRequest.playerId }.modify(game) {
-                        it.copy(isReady = lobbyRequest.content.isReady)
-                    }
+                    val modifiedLobby = TTTGame.Lobby.player { it.technical.playerId == lobbyRequest.playerId }
+                            .modify(game) {
+                                it.copy(isReady = lobbyRequest.content.isReady)
+                            }
                     if (modifiedLobby.players.size == 2 && modifiedLobby.players.all { it.isReady }) {
                         val (p1, p2) = modifiedLobby.players
                         val inGame = TTTGame.InGame(
@@ -62,6 +60,19 @@ suspend fun TTTGameServer.handleLobbyRequest(lobbyRequest: LobbyRequest): Messag
                 }
             }
             updatedGame toT lobbyStateMsgs(updatedGame)
+        }
+    }
+}
+
+suspend fun TTTGameServer.handleGameRequest(gameRequest: GameRequest): Messages = updateGame(gameRequest.gameId) { game ->
+    when (game) {
+        is TTTGame.Lobby -> game toT lobbyStateMsgs(game)
+        is TTTGame.InGame -> {
+            val updatedGame = when (gameRequest) {
+                is GameRequest.SetPiece -> game.setPiece(gameRequest.content.index, gameRequest.playerId)
+                        .getOrElse { game }
+            }
+            updatedGame toT inGameStateMsgs(updatedGame)
         }
     }
 }

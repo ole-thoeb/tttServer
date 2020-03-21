@@ -75,12 +75,11 @@ sealed class TTTGame {
 
         enum class CellState { P1, P2, EMPTY }
 
-        fun setPiece(x: Int, y: Int, playerId: PlayerId): Either<InGameError, InGame> {
+        fun setPiece(index: Int, playerId: PlayerId): Either<InGameError, InGame> {
             val playerRef = playerId.playerRef ?: return Left(InGameError.WrongTurn(null, turn))
             if (playerRef != turn) return Left(InGameError.WrongTurn(playerRef, turn))
 
-            val index = transformIndex(x, y)
-            if (index !in board.indices || board[index] != CellState.EMPTY) return Left(InGameError.IllegalPlace(x, y))
+            if (index !in board.indices || board[index] != CellState.EMPTY) return Left(InGameError.IllegalPlace(index))
 
             return Right(copy(
                     board = board.update(index, playerRef.cellState).k(),
@@ -99,8 +98,6 @@ sealed class TTTGame {
                 player2.technical.playerId -> PlayerRef.P2
                 else -> null
             }
-
-        private fun transformIndex(x: Int, y: Int): Int = x + y * 3
 
         data class Player(val name: String, val color: String, val technical: TechnicalPlayer) {
             companion object {

@@ -15,7 +15,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import messages.requests.GameRequest
 import messages.requests.LobbyRequest
+import messages.responses.InGameResponse
 import messages.responses.TTTResponse
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
@@ -111,7 +113,8 @@ class TTTGameServer(
             mapOf(TechnicalPlayer.DUMMY to TTTResponse.NoSuchGame(unknownGameId.asString()))
 
     suspend fun handleJsonRequest(session: SessionId, request: JsonString): Messages {
-        return jsonParser.parsRequest(request, LobbyRequest.deserializers).fix().fold(
+        val deserializers = LobbyRequest.deserializers + GameRequest.deserializers
+                return jsonParser.parsRequest(request, deserializers.k()).fix().fold(
                 { error ->
                     log.info("failed to parse JSON request! session=$session, error=$error")
                     noMessages()
@@ -119,6 +122,11 @@ class TTTGameServer(
                 { parsedRequest ->
                     when (parsedRequest) {
                         is LobbyRequest -> handleLobbyRequest(parsedRequest)
+                        is GameRequest -> handleGameRequest(parsedRequest)
+                        else -> {
+                            log.info("unknown parsed request type. parsedRequest=$parsedRequest")
+                            noMessages()
+                        }
                     }
                 }
         )
