@@ -6488,14 +6488,21 @@ var $author$project$Page$TTT$Game$fromLobby = F3(
 					}));
 		}
 	});
-var $elm$core$Platform$Cmd$batch = _Platform_batch;
-var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
+var $elm$json$Json$Encode$null = _Json_encodeNull;
+var $author$project$Websocket$disconnect_ = _Platform_outgoingPort(
+	'disconnect_',
+	function ($) {
+		return $elm$json$Json$Encode$null;
+	});
+var $author$project$Websocket$disconnect = $author$project$Websocket$disconnect_(_Utils_Tuple0);
 var $author$project$Page$Home$init = F2(
 	function (session, maybeError) {
 		return _Utils_Tuple2(
 			{error: maybeError, gameId: '', lobby: $elm$core$Maybe$Nothing, session: session},
-			$elm$core$Platform$Cmd$none);
+			$author$project$Websocket$disconnect);
 	});
+var $elm$core$Platform$Cmd$batch = _Platform_batch;
+var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Page$NotFound$init = function (session) {
 	return _Utils_Tuple2(
 		{session: session},

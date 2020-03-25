@@ -22,7 +22,7 @@ import MaterialUI.Theme as Theme
 import Html
 import Url.Builder exposing (QueryParameter)
 import Url.Parser.Query as Query
-
+import Websocket
 
 
 -- MODEL
@@ -48,7 +48,7 @@ init session maybeError =
     , error = maybeError
     , lobby = Nothing
     }
-    , Cmd.none
+    , Websocket.disconnect
     )
 
 
