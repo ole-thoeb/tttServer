@@ -1,15 +1,17 @@
-module Page.Home exposing (Msg, view, update, subscriptions, toSession, init, Model)
+module Page.Home exposing (Msg, view, update, subscriptions, toSession, init, Model, JoinError(..), joinErrorToQueryParam, joinErrorQueryParser)
 
 import Browser.Navigation as Nav
-import Game.Lobby as Lobby exposing (Lobby)
+import Game.Lobby exposing (Lobby)
 import Http
-import ServerResponse.EnterLobby as EnterLobby
+import ServerResponse.EnterLobby as EnterLobbyResponse exposing (Error(..))
+import ServerResponse.InGame as InGameResponse
+import ServerResponse.InLobby as InLobbyResponse
+import ServerResponse.TTTResponse as TTTResponse
 import Session exposing (Session)
 import UIHelper exposing (..)
 
 import Element exposing (..)
 import Element.Font as Font
-import Element.Lazy exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 
@@ -18,8 +20,8 @@ import MaterialUI.TextField as TextField
 import MaterialUI.Theme as Theme
 
 import Html
-import Url exposing (Protocol(..))
-import Url.Builder
+import Url.Builder exposing (QueryParameter)
+import Url.Parser.Query as Query
 
 
 
@@ -35,15 +37,15 @@ type alias Model =
 
 
 type JoinError
-    = LobbyError EnterLobby.Error
-    | ConnectionError Http.Error
+    = LobbyError EnterLobbyResponse.Error
+    | ConnectionError (Maybe Http.Error)
 
 
-init : Session -> Maybe EnterLobby.Error -> ( Model, Cmd Msg )
+init : Session -> Maybe JoinError -> ( Model, Cmd Msg )
 init session maybeError =
     ( { session = session
     , gameId = ""
-    , error = Maybe.map LobbyError maybeError
+    , error = maybeError
     , lobby = Nothing
     }
     , Cmd.none
@@ -62,7 +64,7 @@ type Msg
     = NewTTTGame
     | JoinGame
     | GameId String
-    | ServerResponse (Result Http.Error EnterLobby.Response)
+    | ServerResponse (Result Http.Error TTTResponse.Response)
 
 
 update: Msg -> Model -> ( Model, Cmd Msg )
@@ -72,7 +74,7 @@ update msg model =
             ( model
             , Http.get
                 { url = (Url.Builder.absolute [ "newGame" ] [])
-                , expect = Http.expectJson ServerResponse EnterLobby.decoder
+                , expect = Http.expectJson (ServerResponse << Result.map TTTResponse.EnterLobbyResponse) EnterLobbyResponse.decoder
                 }
             )
 
@@ -80,7 +82,7 @@ update msg model =
             ( model
             , Http.get
                 { url = (Url.Builder.absolute [ "joinGame", Debug.log "join game url" model.gameId ] [])
-                , expect = Http.expectJson ServerResponse EnterLobby.decoder
+                , expect = Http.expectJson ServerResponse TTTResponse.decoder
                 }
             )
 
@@ -92,25 +94,43 @@ update msg model =
                 Ok response ->
                     let
                         a = Debug.log "response" response
-                    in
-                    case response of
-                        EnterLobby.LobbyState lobby ->
+                        navKey = model |> toSession |> Session.navKey
+                        navigateToLobby lobby =
                             ( { model | lobby = Just lobby }
-                            , Nav.pushUrl (model |> toSession |> Session.navKey)
+                            , Nav.pushUrl navKey
                                 <| Url.Builder.absolute
                                     [ "game"
                                     , lobby.gameId
                                     ] []
                             )
+                    in
+                    case response of
+                        TTTResponse.EnterLobbyResponse (EnterLobbyResponse.LobbyState lobby) ->
+                            navigateToLobby lobby
 
-                        EnterLobby.Error error ->
+                        TTTResponse.EnterLobbyResponse (EnterLobbyResponse.Error error) ->
                             ( { model | error = Just (LobbyError error) }, Cmd.none )
+
+                        TTTResponse.InLobbyResponse (InLobbyResponse.LobbyState lobby) ->
+                            navigateToLobby lobby
+
+                        TTTResponse.InGameResponse (InGameResponse.GameState game) ->
+                            ( model
+                            , Nav.pushUrl navKey
+                                <| Url.Builder.absolute
+                                    [ "game"
+                                    , game.gameId
+                                    ] []
+                            )
+
+                        TTTResponse.InGameResponse (InGameResponse.PlayerDisc _) ->
+                            ( model, Cmd.none )
 
                 Err httpError ->
                     let
                         a = Debug.log "http error" httpError
                     in
-                    ( { model | error = Just (ConnectionError httpError) }, Cmd.none )
+                    ( { model | error = Just <| ConnectionError (Just httpError) }, Cmd.none )
 
 
 -- VIEW
@@ -214,13 +234,13 @@ toErrorMsg joinError =
     case joinError of
         LobbyError lobbyError ->
             case lobbyError of
-                EnterLobby.LobbyFull maxPlayers ->
+                EnterLobbyResponse.LobbyFull maxPlayers ->
                     "The Game is full. There are a maximum of " ++ String.fromInt maxPlayers ++ " players allowed."
 
-                EnterLobby.GameAlreadyStarted id ->
+                EnterLobbyResponse.GameAlreadyStarted id ->
                     "The Game " ++ id ++ " has already started."
 
-                EnterLobby.NoSuchGame id ->
+                EnterLobbyResponse.NoSuchGame id ->
                     "The Game " ++ id ++ " does not exist."
 
         ConnectionError error ->
@@ -255,3 +275,51 @@ errorCard errorMsg theme =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
+
+
+-- QUERY HELPER
+
+
+joinErrorToQueryParam : JoinError -> List QueryParameter
+joinErrorToQueryParam error =
+    let
+        query = Url.Builder.string "lobbyError"
+    in
+    case error of
+        LobbyError (LobbyFull max) ->
+            [ query <| "full§" ++ String.fromInt max ]
+
+        LobbyError (GameAlreadyStarted id) ->
+            [ query <| "started§" ++ id ]
+
+        LobbyError (NoSuchGame id) ->
+            [ query <| "noGame§" ++ id ]
+
+        ConnectionError _ ->
+            [ query <| "internal" ]
+
+
+joinErrorQueryParser : Query.Parser (Maybe JoinError)
+joinErrorQueryParser =
+    Query.custom "lobbyError" <| \list ->
+        case list of
+            [ error ] ->
+                let
+                    parts = String.split "§" error
+                in
+                case parts of
+                    [ "full", max ] ->
+                        Maybe.map (LobbyError << LobbyFull) (String.toInt max)
+
+                    [ "started", id ] ->
+                        Just <| LobbyError (GameAlreadyStarted id)
+
+                    [ "noGame", id ] ->
+                        Just <| LobbyError (NoSuchGame id)
+
+                    [ "internal" ] ->
+                        Just <| ConnectionError Nothing
+
+                    _ -> Nothing
+            _ ->
+                Nothing

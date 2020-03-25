@@ -1,4 +1,4 @@
-module ServerResponse.EnterLobby exposing (decoder, Response(..), Error(..), errorToQueryParam, errorQueryParser)
+module ServerResponse.EnterLobby exposing (decoder, Response(..), Error(..))
 
 
 import Game.Lobby as Lobby exposing (Lobby)
@@ -17,45 +17,6 @@ type Error
     = LobbyFull Int
     | GameAlreadyStarted String
     | NoSuchGame String
-
-
-errorToQueryParam : Error -> List QueryParameter
-errorToQueryParam error =
-    let
-        query = Url.Builder.string "lobbyError"
-    in
-    case error of
-        LobbyFull max ->
-            [ query <| "full§" ++ String.fromInt max ]
-
-        GameAlreadyStarted id ->
-            [ query <| "started§" ++ id ]
-
-        NoSuchGame id ->
-            [ query <| "noGame§" ++ id ]
-
-
-errorQueryParser : Query.Parser (Maybe Error)
-errorQueryParser =
-    Query.custom "lobbyError" <| \list ->
-        case list of
-            [ error ] ->
-                let
-                    parts = String.split "§" error
-                in
-                case parts of
-                    [ "full", max ] ->
-                        Maybe.map LobbyFull (String.toInt max)
-
-                    [ "started", id ] ->
-                        Just (GameAlreadyStarted id)
-
-                    [ "noGame", id ] ->
-                        Just (NoSuchGame id)
-                    _ -> Nothing
-            _ ->
-                Nothing
-
 
 decoder : Decoder Response
 decoder =

@@ -5431,6 +5431,15 @@ var $elm$url$Url$Builder$absolute = F2(
 	function (pathSegments, parameters) {
 		return '/' + (A2($elm$core$String$join, '/', pathSegments) + $elm$url$Url$Builder$toQuery(parameters));
 	});
+var $author$project$ServerResponse$TTTResponse$EnterLobbyResponse = function (a) {
+	return {$: 'EnterLobbyResponse', a: a};
+};
+var $author$project$ServerResponse$TTTResponse$InGameResponse = function (a) {
+	return {$: 'InGameResponse', a: a};
+};
+var $author$project$ServerResponse$TTTResponse$InLobbyResponse = function (a) {
+	return {$: 'InLobbyResponse', a: a};
+};
 var $elm$json$Json$Decode$andThen = _Json_andThen;
 var $elm$json$Json$Decode$field = _Json_decodeField;
 var $author$project$ServerResponse$JsonHelper$contentDecoder = function (decoder) {
@@ -5518,6 +5527,112 @@ var $author$project$ServerResponse$EnterLobby$responseDecoder = function (type_)
 };
 var $author$project$ServerResponse$JsonHelper$typeDecoder = A2($elm$json$Json$Decode$field, 'type', $elm$json$Json$Decode$string);
 var $author$project$ServerResponse$EnterLobby$decoder = A2($elm$json$Json$Decode$andThen, $author$project$ServerResponse$EnterLobby$responseDecoder, $author$project$ServerResponse$JsonHelper$typeDecoder);
+var $author$project$ServerResponse$InGame$GameState = function (a) {
+	return {$: 'GameState', a: a};
+};
+var $author$project$Game$TTTGame$TTTGame = F5(
+	function (gameId, playerMe, opponent, meTurn, board) {
+		return {board: board, gameId: gameId, meTurn: meTurn, opponent: opponent, playerMe: playerMe};
+	});
+var $elm$json$Json$Decode$array = _Json_decodeArray;
+var $author$project$Game$TTTGame$Empty = {$: 'Empty'};
+var $author$project$Game$TTTGame$O = {$: 'O'};
+var $author$project$Game$TTTGame$X = {$: 'X'};
+var $author$project$Game$TTTGame$cellDecoder = A2(
+	$elm$json$Json$Decode$andThen,
+	function (stateStr) {
+		switch (stateStr) {
+			case 'X':
+				return $elm$json$Json$Decode$succeed($author$project$Game$TTTGame$X);
+			case 'O':
+				return $elm$json$Json$Decode$succeed($author$project$Game$TTTGame$O);
+			case 'EMPTY':
+				return $elm$json$Json$Decode$succeed($author$project$Game$TTTGame$Empty);
+			default:
+				return $elm$json$Json$Decode$fail('Unknown cell state ' + stateStr);
+		}
+	},
+	$elm$json$Json$Decode$string);
+var $author$project$Game$TTTGame$boardDecoder = $elm$json$Json$Decode$array($author$project$Game$TTTGame$cellDecoder);
+var $author$project$Game$TTTGamePlayer$Player = F3(
+	function (name, color, symbol) {
+		return {color: color, name: name, symbol: symbol};
+	});
+var $author$project$Game$TTTGamePlayer$colorDecoder = A2($elm$json$Json$Decode$field, 'color', $elm$json$Json$Decode$string);
+var $author$project$Game$TTTGamePlayer$nameDecoder = A2($elm$json$Json$Decode$field, 'name', $elm$json$Json$Decode$string);
+var $author$project$Game$TTTGamePlayer$O = {$: 'O'};
+var $author$project$Game$TTTGamePlayer$X = {$: 'X'};
+var $author$project$Game$TTTGamePlayer$symbolDecoder = A2(
+	$elm$json$Json$Decode$andThen,
+	function (str) {
+		switch (str) {
+			case 'X':
+				return $elm$json$Json$Decode$succeed($author$project$Game$TTTGamePlayer$X);
+			case 'O':
+				return $elm$json$Json$Decode$succeed($author$project$Game$TTTGamePlayer$O);
+			default:
+				return $elm$json$Json$Decode$fail('unknown symbol ' + str);
+		}
+	},
+	A2($elm$json$Json$Decode$field, 'symbol', $elm$json$Json$Decode$string));
+var $author$project$Game$TTTGamePlayer$decoder = A4($elm$json$Json$Decode$map3, $author$project$Game$TTTGamePlayer$Player, $author$project$Game$TTTGamePlayer$nameDecoder, $author$project$Game$TTTGamePlayer$colorDecoder, $author$project$Game$TTTGamePlayer$symbolDecoder);
+var $elm$json$Json$Decode$map5 = _Json_map5;
+var $author$project$Game$TTTGamePlayer$PlayerMe = F4(
+	function (id, name, color, symbol) {
+		return {color: color, id: id, name: name, symbol: symbol};
+	});
+var $author$project$Game$TTTGamePlayer$idDecoder = A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$string);
+var $elm$json$Json$Decode$map4 = _Json_map4;
+var $author$project$Game$TTTGamePlayer$meDecoder = A5($elm$json$Json$Decode$map4, $author$project$Game$TTTGamePlayer$PlayerMe, $author$project$Game$TTTGamePlayer$idDecoder, $author$project$Game$TTTGamePlayer$nameDecoder, $author$project$Game$TTTGamePlayer$colorDecoder, $author$project$Game$TTTGamePlayer$symbolDecoder);
+var $author$project$Game$TTTGame$decoder = A6(
+	$elm$json$Json$Decode$map5,
+	$author$project$Game$TTTGame$TTTGame,
+	A2($elm$json$Json$Decode$field, 'gameId', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'playerMe', $author$project$Game$TTTGamePlayer$meDecoder),
+	A2($elm$json$Json$Decode$field, 'opponent', $author$project$Game$TTTGamePlayer$decoder),
+	A2($elm$json$Json$Decode$field, 'meTurn', $elm$json$Json$Decode$bool),
+	A2($elm$json$Json$Decode$field, 'board', $author$project$Game$TTTGame$boardDecoder));
+var $author$project$ServerResponse$InGame$gameStateDecoder = A2($elm$json$Json$Decode$map, $author$project$ServerResponse$InGame$GameState, $author$project$Game$TTTGame$decoder);
+var $elm$core$Debug$log = _Debug_log;
+var $author$project$ServerResponse$InGame$PlayerDisc = function (a) {
+	return {$: 'PlayerDisc', a: a};
+};
+var $author$project$ServerResponse$InGame$playerDiscDecoder = A2(
+	$elm$json$Json$Decode$map,
+	$author$project$ServerResponse$InGame$PlayerDisc,
+	A2($elm$json$Json$Decode$field, 'discPlayerName', $elm$json$Json$Decode$string));
+var $author$project$ServerResponse$InGame$responseDecoder = function (type_) {
+	var _v0 = A2($elm$core$Debug$log, 'decoded type', type_);
+	switch (_v0) {
+		case 'playerDisconnected':
+			return $author$project$ServerResponse$JsonHelper$contentDecoder($author$project$ServerResponse$InGame$playerDiscDecoder);
+		case 'inGameState':
+			return $author$project$ServerResponse$JsonHelper$contentDecoder($author$project$ServerResponse$InGame$gameStateDecoder);
+		default:
+			return $elm$json$Json$Decode$fail('Unknown type \'' + (type_ + '\' to InGameResponse'));
+	}
+};
+var $author$project$ServerResponse$InGame$decoder = A2($elm$json$Json$Decode$andThen, $author$project$ServerResponse$InGame$responseDecoder, $author$project$ServerResponse$JsonHelper$typeDecoder);
+var $author$project$ServerResponse$InLobby$LobbyState = function (a) {
+	return {$: 'LobbyState', a: a};
+};
+var $author$project$ServerResponse$InLobby$lobbyStateDecoder = A2($elm$json$Json$Decode$map, $author$project$ServerResponse$InLobby$LobbyState, $author$project$Game$Lobby$decoder);
+var $author$project$ServerResponse$InLobby$responseDecoder = function (type_) {
+	if (type_ === 'lobbyState') {
+		return $author$project$ServerResponse$JsonHelper$contentDecoder($author$project$ServerResponse$InLobby$lobbyStateDecoder);
+	} else {
+		return $elm$json$Json$Decode$fail('Unknown type \'' + (type_ + '\' to InLobbyResponse'));
+	}
+};
+var $author$project$ServerResponse$InLobby$decoder = A2($elm$json$Json$Decode$andThen, $author$project$ServerResponse$InLobby$responseDecoder, $author$project$ServerResponse$JsonHelper$typeDecoder);
+var $elm$json$Json$Decode$oneOf = _Json_oneOf;
+var $author$project$ServerResponse$TTTResponse$decoder = $elm$json$Json$Decode$oneOf(
+	_List_fromArray(
+		[
+			A2($elm$json$Json$Decode$map, $author$project$ServerResponse$TTTResponse$EnterLobbyResponse, $author$project$ServerResponse$EnterLobby$decoder),
+			A2($elm$json$Json$Decode$map, $author$project$ServerResponse$TTTResponse$InLobbyResponse, $author$project$ServerResponse$InLobby$decoder),
+			A2($elm$json$Json$Decode$map, $author$project$ServerResponse$TTTResponse$InGameResponse, $author$project$ServerResponse$InGame$decoder)
+		]));
 var $elm$json$Json$Decode$decodeString = _Json_runOnString;
 var $elm$http$Http$BadStatus_ = F2(
 	function (a, b) {
@@ -6364,7 +6479,7 @@ var $author$project$Page$TTT$Game$fromLobby = F3(
 				$author$project$Page$TTT$Game$Loading(session),
 				$elm$http$Http$get(
 					{
-						expect: A2($elm$http$Http$expectJson, $author$project$Page$TTT$Game$JoinResponse, $author$project$ServerResponse$EnterLobby$decoder),
+						expect: A2($elm$http$Http$expectJson, $author$project$Page$TTT$Game$JoinResponse, $author$project$ServerResponse$TTTResponse$decoder),
 						url: A2(
 							$elm$url$Url$Builder$absolute,
 							_List_fromArray(
@@ -6373,30 +6488,12 @@ var $author$project$Page$TTT$Game$fromLobby = F3(
 					}));
 		}
 	});
-var $author$project$Page$Home$LobbyError = function (a) {
-	return {$: 'LobbyError', a: a};
-};
-var $elm$core$Maybe$map = F2(
-	function (f, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return $elm$core$Maybe$Just(
-				f(value));
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Page$Home$init = F2(
 	function (session, maybeError) {
 		return _Utils_Tuple2(
-			{
-				error: A2($elm$core$Maybe$map, $author$project$Page$Home$LobbyError, maybeError),
-				gameId: '',
-				lobby: $elm$core$Maybe$Nothing,
-				session: session
-			},
+			{error: maybeError, gameId: '', lobby: $elm$core$Maybe$Nothing, session: session},
 			$elm$core$Platform$Cmd$none);
 	});
 var $author$project$Page$NotFound$init = function (session) {
@@ -6730,7 +6827,6 @@ var $author$project$Session$fromKey = function (key) {
 	return A2($author$project$Session$Guest, key, $author$project$MaterialUI$Themes$Dark$theme);
 };
 var $author$project$Route$NotFound = {$: 'NotFound'};
-var $elm$core$Debug$log = _Debug_log;
 var $elm$url$Url$Parser$State = F5(
 	function (visited, unvisited, params, frag, value) {
 		return {frag: frag, params: params, unvisited: unvisited, value: value, visited: visited};
@@ -6856,6 +6952,12 @@ var $author$project$Route$Game = function (a) {
 var $author$project$Route$Home = function (a) {
 	return {$: 'Home', a: a};
 };
+var $author$project$Page$Home$ConnectionError = function (a) {
+	return {$: 'ConnectionError', a: a};
+};
+var $author$project$Page$Home$LobbyError = function (a) {
+	return {$: 'LobbyError', a: a};
+};
 var $elm$url$Url$Parser$Internal$Parser = function (a) {
 	return {$: 'Parser', a: a};
 };
@@ -6879,39 +6981,64 @@ var $elm$url$Url$Parser$Query$custom = F2(
 						A2($elm$core$Dict$get, key, dict)));
 			});
 	});
-var $author$project$ServerResponse$EnterLobby$errorQueryParser = A2(
+var $elm$core$Maybe$map = F2(
+	function (f, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return $elm$core$Maybe$Just(
+				f(value));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $author$project$Page$Home$joinErrorQueryParser = A2(
 	$elm$url$Url$Parser$Query$custom,
 	'lobbyError',
 	function (list) {
 		if (list.b && (!list.b.b)) {
 			var error = list.a;
 			var parts = A2($elm$core$String$split, '§', error);
-			_v1$3:
+			_v1$4:
 			while (true) {
-				if ((parts.b && parts.b.b) && (!parts.b.b.b)) {
-					switch (parts.a) {
-						case 'full':
-							var _v2 = parts.b;
-							var max = _v2.a;
-							return A2(
-								$elm$core$Maybe$map,
-								$author$project$ServerResponse$EnterLobby$LobbyFull,
-								$elm$core$String$toInt(max));
-						case 'started':
-							var _v3 = parts.b;
-							var id = _v3.a;
+				if (parts.b) {
+					if (parts.b.b) {
+						if (!parts.b.b.b) {
+							switch (parts.a) {
+								case 'full':
+									var _v2 = parts.b;
+									var max = _v2.a;
+									return A2(
+										$elm$core$Maybe$map,
+										A2($elm$core$Basics$composeL, $author$project$Page$Home$LobbyError, $author$project$ServerResponse$EnterLobby$LobbyFull),
+										$elm$core$String$toInt(max));
+								case 'started':
+									var _v3 = parts.b;
+									var id = _v3.a;
+									return $elm$core$Maybe$Just(
+										$author$project$Page$Home$LobbyError(
+											$author$project$ServerResponse$EnterLobby$GameAlreadyStarted(id)));
+								case 'noGame':
+									var _v4 = parts.b;
+									var id = _v4.a;
+									return $elm$core$Maybe$Just(
+										$author$project$Page$Home$LobbyError(
+											$author$project$ServerResponse$EnterLobby$NoSuchGame(id)));
+								default:
+									break _v1$4;
+							}
+						} else {
+							break _v1$4;
+						}
+					} else {
+						if (parts.a === 'internal') {
 							return $elm$core$Maybe$Just(
-								$author$project$ServerResponse$EnterLobby$GameAlreadyStarted(id));
-						case 'noGame':
-							var _v4 = parts.b;
-							var id = _v4.a;
-							return $elm$core$Maybe$Just(
-								$author$project$ServerResponse$EnterLobby$NoSuchGame(id));
-						default:
-							break _v1$3;
+								$author$project$Page$Home$ConnectionError($elm$core$Maybe$Nothing));
+						} else {
+							break _v1$4;
+						}
 					}
 				} else {
-					break _v1$3;
+					break _v1$4;
 				}
 			}
 			return $elm$core$Maybe$Nothing;
@@ -7094,7 +7221,7 @@ var $author$project$Route$parser = $elm$url$Url$Parser$oneOf(
 			A2(
 			$elm$url$Url$Parser$map,
 			$author$project$Route$Home,
-			A2($elm$url$Url$Parser$questionMark, $elm$url$Url$Parser$top, $author$project$ServerResponse$EnterLobby$errorQueryParser)),
+			A2($elm$url$Url$Parser$questionMark, $elm$url$Url$Parser$top, $author$project$Page$Home$joinErrorQueryParser)),
 			A2(
 			$elm$url$Url$Parser$map,
 			$author$project$Route$Game,
@@ -7213,12 +7340,20 @@ var $elm$url$Url$toString = function (url) {
 					_Utils_ap(http, url.host)),
 				url.path)));
 };
-var $author$project$Page$Home$ConnectionError = function (a) {
-	return {$: 'ConnectionError', a: a};
-};
 var $author$project$Page$Home$ServerResponse = function (a) {
 	return {$: 'ServerResponse', a: a};
 };
+var $elm$core$Result$map = F2(
+	function (func, ra) {
+		if (ra.$ === 'Ok') {
+			var a = ra.a;
+			return $elm$core$Result$Ok(
+				func(a));
+		} else {
+			var e = ra.a;
+			return $elm$core$Result$Err(e);
+		}
+	});
 var $author$project$Page$Home$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -7227,7 +7362,13 @@ var $author$project$Page$Home$update = F2(
 					model,
 					$elm$http$Http$get(
 						{
-							expect: A2($elm$http$Http$expectJson, $author$project$Page$Home$ServerResponse, $author$project$ServerResponse$EnterLobby$decoder),
+							expect: A2(
+								$elm$http$Http$expectJson,
+								A2(
+									$elm$core$Basics$composeL,
+									$author$project$Page$Home$ServerResponse,
+									$elm$core$Result$map($author$project$ServerResponse$TTTResponse$EnterLobbyResponse)),
+								$author$project$ServerResponse$EnterLobby$decoder),
 							url: A2(
 								$elm$url$Url$Builder$absolute,
 								_List_fromArray(
@@ -7239,7 +7380,7 @@ var $author$project$Page$Home$update = F2(
 					model,
 					$elm$http$Http$get(
 						{
-							expect: A2($elm$http$Http$expectJson, $author$project$Page$Home$ServerResponse, $author$project$ServerResponse$EnterLobby$decoder),
+							expect: A2($elm$http$Http$expectJson, $author$project$Page$Home$ServerResponse, $author$project$ServerResponse$TTTResponse$decoder),
 							url: A2(
 								$elm$url$Url$Builder$absolute,
 								_List_fromArray(
@@ -7260,9 +7401,9 @@ var $author$project$Page$Home$update = F2(
 				var result = msg.a;
 				if (result.$ === 'Ok') {
 					var response = result.a;
-					var a = A2($elm$core$Debug$log, 'response', response);
-					if (response.$ === 'LobbyState') {
-						var lobby = response.a;
+					var navKey = $author$project$Session$navKey(
+						$author$project$Page$Home$toSession(model));
+					var navigateToLobby = function (lobby) {
 						return _Utils_Tuple2(
 							_Utils_update(
 								model,
@@ -7271,23 +7412,49 @@ var $author$project$Page$Home$update = F2(
 								}),
 							A2(
 								$elm$browser$Browser$Navigation$pushUrl,
-								$author$project$Session$navKey(
-									$author$project$Page$Home$toSession(model)),
+								navKey,
 								A2(
 									$elm$url$Url$Builder$absolute,
 									_List_fromArray(
 										['game', lobby.gameId]),
 									_List_Nil)));
-					} else {
-						var error = response.a;
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{
-									error: $elm$core$Maybe$Just(
-										$author$project$Page$Home$LobbyError(error))
-								}),
-							$elm$core$Platform$Cmd$none);
+					};
+					var a = A2($elm$core$Debug$log, 'response', response);
+					switch (response.$) {
+						case 'EnterLobbyResponse':
+							if (response.a.$ === 'LobbyState') {
+								var lobby = response.a.a;
+								return navigateToLobby(lobby);
+							} else {
+								var error = response.a.a;
+								return _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{
+											error: $elm$core$Maybe$Just(
+												$author$project$Page$Home$LobbyError(error))
+										}),
+									$elm$core$Platform$Cmd$none);
+							}
+						case 'InLobbyResponse':
+							var lobby = response.a.a;
+							return navigateToLobby(lobby);
+						default:
+							if (response.a.$ === 'GameState') {
+								var game = response.a.a;
+								return _Utils_Tuple2(
+									model,
+									A2(
+										$elm$browser$Browser$Navigation$pushUrl,
+										navKey,
+										A2(
+											$elm$url$Url$Builder$absolute,
+											_List_fromArray(
+												['game', game.gameId]),
+											_List_Nil)));
+							} else {
+								return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+							}
 					}
 				} else {
 					var httpError = result.a;
@@ -7297,7 +7464,8 @@ var $author$project$Page$Home$update = F2(
 							model,
 							{
 								error: $elm$core$Maybe$Just(
-									$author$project$Page$Home$ConnectionError(httpError))
+									$author$project$Page$Home$ConnectionError(
+										$elm$core$Maybe$Just(httpError)))
 							}),
 						$elm$core$Platform$Cmd$none);
 				}
@@ -7319,106 +7487,15 @@ var $author$project$Page$TTT$Game$GotInGameMsg = function (a) {
 var $author$project$Page$TTT$Game$InGame = function (a) {
 	return {$: 'InGame', a: a};
 };
-var $author$project$ServerResponse$InGame$GameState = function (a) {
-	return {$: 'GameState', a: a};
-};
-var $author$project$Game$TTTGame$TTTGame = F5(
-	function (gameId, playerMe, opponent, meTurn, board) {
-		return {board: board, gameId: gameId, meTurn: meTurn, opponent: opponent, playerMe: playerMe};
-	});
-var $elm$json$Json$Decode$array = _Json_decodeArray;
-var $author$project$Game$TTTGame$Empty = {$: 'Empty'};
-var $author$project$Game$TTTGame$O = {$: 'O'};
-var $author$project$Game$TTTGame$X = {$: 'X'};
-var $author$project$Game$TTTGame$cellDecoder = A2(
-	$elm$json$Json$Decode$andThen,
-	function (stateStr) {
-		switch (stateStr) {
-			case 'X':
-				return $elm$json$Json$Decode$succeed($author$project$Game$TTTGame$X);
-			case 'O':
-				return $elm$json$Json$Decode$succeed($author$project$Game$TTTGame$O);
-			case 'EMPTY':
-				return $elm$json$Json$Decode$succeed($author$project$Game$TTTGame$Empty);
-			default:
-				return $elm$json$Json$Decode$fail('Unknown cell state ' + stateStr);
-		}
-	},
-	$elm$json$Json$Decode$string);
-var $author$project$Game$TTTGame$boardDecoder = $elm$json$Json$Decode$array($author$project$Game$TTTGame$cellDecoder);
-var $author$project$Game$TTTGamePlayer$Player = F3(
-	function (name, color, symbol) {
-		return {color: color, name: name, symbol: symbol};
-	});
-var $author$project$Game$TTTGamePlayer$colorDecoder = A2($elm$json$Json$Decode$field, 'color', $elm$json$Json$Decode$string);
-var $author$project$Game$TTTGamePlayer$nameDecoder = A2($elm$json$Json$Decode$field, 'name', $elm$json$Json$Decode$string);
-var $author$project$Game$TTTGamePlayer$O = {$: 'O'};
-var $author$project$Game$TTTGamePlayer$X = {$: 'X'};
-var $author$project$Game$TTTGamePlayer$symbolDecoder = A2(
-	$elm$json$Json$Decode$andThen,
-	function (str) {
-		switch (str) {
-			case 'X':
-				return $elm$json$Json$Decode$succeed($author$project$Game$TTTGamePlayer$X);
-			case 'O':
-				return $elm$json$Json$Decode$succeed($author$project$Game$TTTGamePlayer$O);
-			default:
-				return $elm$json$Json$Decode$fail('unknown symbol ' + str);
-		}
-	},
-	A2($elm$json$Json$Decode$field, 'symbol', $elm$json$Json$Decode$string));
-var $author$project$Game$TTTGamePlayer$decoder = A4($elm$json$Json$Decode$map3, $author$project$Game$TTTGamePlayer$Player, $author$project$Game$TTTGamePlayer$nameDecoder, $author$project$Game$TTTGamePlayer$colorDecoder, $author$project$Game$TTTGamePlayer$symbolDecoder);
-var $elm$json$Json$Decode$map5 = _Json_map5;
-var $author$project$Game$TTTGamePlayer$PlayerMe = F4(
-	function (id, name, color, symbol) {
-		return {color: color, id: id, name: name, symbol: symbol};
-	});
-var $author$project$Game$TTTGamePlayer$idDecoder = A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$string);
-var $elm$json$Json$Decode$map4 = _Json_map4;
-var $author$project$Game$TTTGamePlayer$meDecoder = A5($elm$json$Json$Decode$map4, $author$project$Game$TTTGamePlayer$PlayerMe, $author$project$Game$TTTGamePlayer$idDecoder, $author$project$Game$TTTGamePlayer$nameDecoder, $author$project$Game$TTTGamePlayer$colorDecoder, $author$project$Game$TTTGamePlayer$symbolDecoder);
-var $author$project$Game$TTTGame$decoder = A6(
-	$elm$json$Json$Decode$map5,
-	$author$project$Game$TTTGame$TTTGame,
-	A2($elm$json$Json$Decode$field, 'gameId', $elm$json$Json$Decode$string),
-	A2($elm$json$Json$Decode$field, 'playerMe', $author$project$Game$TTTGamePlayer$meDecoder),
-	A2($elm$json$Json$Decode$field, 'opponent', $author$project$Game$TTTGamePlayer$decoder),
-	A2($elm$json$Json$Decode$field, 'meTurn', $elm$json$Json$Decode$bool),
-	A2($elm$json$Json$Decode$field, 'board', $author$project$Game$TTTGame$boardDecoder));
-var $author$project$ServerResponse$InGame$gameStateDecoder = A2($elm$json$Json$Decode$map, $author$project$ServerResponse$InGame$GameState, $author$project$Game$TTTGame$decoder);
-var $author$project$ServerResponse$InGame$PlayerDisc = function (a) {
-	return {$: 'PlayerDisc', a: a};
-};
-var $author$project$ServerResponse$InGame$playerDiscDecoder = A2(
-	$elm$json$Json$Decode$map,
-	$author$project$ServerResponse$InGame$PlayerDisc,
-	A2($elm$json$Json$Decode$field, 'discPlayerName', $elm$json$Json$Decode$string));
-var $author$project$ServerResponse$InGame$responseDecoder = function (type_) {
-	var _v0 = A2($elm$core$Debug$log, 'decoded type', type_);
-	switch (_v0) {
-		case 'playerDisconnected':
-			return $author$project$ServerResponse$JsonHelper$contentDecoder($author$project$ServerResponse$InGame$playerDiscDecoder);
-		case 'inGameState':
-			return $author$project$ServerResponse$JsonHelper$contentDecoder($author$project$ServerResponse$InGame$gameStateDecoder);
-		default:
-			return $elm$json$Json$Decode$fail('Unknown type \'' + (type_ + '\' to InGameResponse'));
-	}
-};
-var $author$project$ServerResponse$InGame$decoder = A2($elm$json$Json$Decode$andThen, $author$project$ServerResponse$InGame$responseDecoder, $author$project$ServerResponse$JsonHelper$typeDecoder);
-var $author$project$ServerResponse$InLobby$LobbyState = function (a) {
-	return {$: 'LobbyState', a: a};
-};
-var $author$project$ServerResponse$InLobby$lobbyStateDecoder = A2($elm$json$Json$Decode$map, $author$project$ServerResponse$InLobby$LobbyState, $author$project$Game$Lobby$decoder);
-var $author$project$ServerResponse$InLobby$responseDecoder = function (type_) {
-	if (type_ === 'lobbyState') {
-		return $author$project$ServerResponse$JsonHelper$contentDecoder($author$project$ServerResponse$InLobby$lobbyStateDecoder);
-	} else {
-		return $elm$json$Json$Decode$fail('Unknown type \'' + (type_ + '\' to InLobbyResponse'));
-	}
-};
-var $author$project$ServerResponse$InLobby$decoder = A2($elm$json$Json$Decode$andThen, $author$project$ServerResponse$InLobby$responseDecoder, $author$project$ServerResponse$JsonHelper$typeDecoder);
 var $author$project$Util$dummy = F2(
 	function (b, a) {
 		return a;
+	});
+var $author$project$Page$TTT$InGame$init = F2(
+	function (session, game) {
+		return _Utils_Tuple2(
+			{game: game, session: session},
+			$author$project$Websocket$connect(game.gameId));
 	});
 var $elm$url$Url$Builder$QueryParameter = F2(
 	function (a, b) {
@@ -7432,37 +7509,37 @@ var $elm$url$Url$Builder$string = F2(
 			$elm$url$Url$percentEncode(key),
 			$elm$url$Url$percentEncode(value));
 	});
-var $author$project$ServerResponse$EnterLobby$errorToQueryParam = function (error) {
+var $author$project$Page$Home$joinErrorToQueryParam = function (error) {
 	var query = $elm$url$Url$Builder$string('lobbyError');
-	switch (error.$) {
-		case 'LobbyFull':
-			var max = error.a;
-			return _List_fromArray(
-				[
-					query(
-					'full§' + $elm$core$String$fromInt(max))
-				]);
-		case 'GameAlreadyStarted':
-			var id = error.a;
-			return _List_fromArray(
-				[
-					query('started§' + id)
-				]);
-		default:
-			var id = error.a;
-			return _List_fromArray(
-				[
-					query('noGame§' + id)
-				]);
+	if (error.$ === 'LobbyError') {
+		switch (error.a.$) {
+			case 'LobbyFull':
+				var max = error.a.a;
+				return _List_fromArray(
+					[
+						query(
+						'full§' + $elm$core$String$fromInt(max))
+					]);
+			case 'GameAlreadyStarted':
+				var id = error.a.a;
+				return _List_fromArray(
+					[
+						query('started§' + id)
+					]);
+			default:
+				var id = error.a.a;
+				return _List_fromArray(
+					[
+						query('noGame§' + id)
+					]);
+		}
+	} else {
+		return _List_fromArray(
+			[
+				query('internal')
+			]);
 	}
 };
-var $author$project$Page$TTT$InGame$init = F2(
-	function (session, game) {
-		return _Utils_Tuple2(
-			{game: game, session: session},
-			$author$project$Websocket$connect(game.gameId));
-	});
-var $elm$core$Debug$todo = _Debug_todo;
 var $author$project$Websocket$send = _Platform_outgoingPort('send', $elm$core$Basics$identity);
 var $elm$json$Json$Encode$int = _Json_wrap;
 var $author$project$ServerRequest$JsonHelper$remoteMsg = F2(
@@ -7711,33 +7788,60 @@ var $author$project$Page$TTT$Game$update = F2(
 						var result = _v0.a.a;
 						if (result.$ === 'Ok') {
 							var response = result.a;
-							if (response.$ === 'LobbyState') {
-								var lobby = response.a;
-								return A3(
-									$author$project$Util$updateWith,
-									$author$project$Page$TTT$Game$Lobby,
-									$author$project$Page$TTT$Game$GotLobbyMsg,
-									A2($author$project$Page$TTT$Lobby$init, session, lobby));
-							} else {
-								var error = response.a;
-								return _Utils_Tuple2(
-									model,
-									A2(
-										$elm$browser$Browser$Navigation$pushUrl,
-										$author$project$Session$navKey(session),
-										A2(
-											$elm$url$Url$Builder$absolute,
-											_List_Nil,
-											$author$project$ServerResponse$EnterLobby$errorToQueryParam(error))));
+							switch (response.$) {
+								case 'EnterLobbyResponse':
+									if (response.a.$ === 'LobbyState') {
+										var lobby = response.a.a;
+										return A3(
+											$author$project$Util$updateWith,
+											$author$project$Page$TTT$Game$Lobby,
+											$author$project$Page$TTT$Game$GotLobbyMsg,
+											A2($author$project$Page$TTT$Lobby$init, session, lobby));
+									} else {
+										var error = response.a.a;
+										return _Utils_Tuple2(
+											model,
+											A2(
+												$elm$browser$Browser$Navigation$pushUrl,
+												$author$project$Session$navKey(session),
+												A2(
+													$elm$url$Url$Builder$absolute,
+													_List_Nil,
+													$author$project$Page$Home$joinErrorToQueryParam(
+														$author$project$Page$Home$LobbyError(error)))));
+									}
+								case 'InLobbyResponse':
+									var lobby = response.a.a;
+									return A3(
+										$author$project$Util$updateWith,
+										$author$project$Page$TTT$Game$Lobby,
+										$author$project$Page$TTT$Game$GotLobbyMsg,
+										A2($author$project$Page$TTT$Lobby$init, session, lobby));
+								default:
+									if (response.a.$ === 'GameState') {
+										var game = response.a.a;
+										return A3(
+											$author$project$Util$updateWith,
+											$author$project$Page$TTT$Game$InGame,
+											$author$project$Page$TTT$Game$GotInGameMsg,
+											A2($author$project$Page$TTT$InGame$init, session, game));
+									} else {
+										return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+									}
 							}
 						} else {
 							var error = result.a;
-							return _Debug_todo(
-								'Page.TTT.Game',
-								{
-									start: {line: 95, column: 21},
-									end: {line: 95, column: 31}
-								})('handle error');
+							return _Utils_Tuple2(
+								model,
+								A2(
+									$elm$browser$Browser$Navigation$pushUrl,
+									$author$project$Session$navKey(session),
+									A2(
+										$elm$url$Url$Builder$absolute,
+										_List_Nil,
+										$author$project$Page$Home$joinErrorToQueryParam(
+											$author$project$Page$Home$ConnectionError(
+												$elm$core$Maybe$Just(error))))));
 						}
 					} else {
 						break _v0$4;

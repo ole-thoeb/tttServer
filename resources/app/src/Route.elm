@@ -1,13 +1,13 @@
 module Route exposing (Route(..), fromUrl)
 
 
-import ServerResponse.EnterLobby as EnterLobby
+import Page.Home as Home
 import Url exposing (Url)
 import Url.Parser as Parser exposing ((</>), (<?>),  Parser, oneOf, s, string)
 
 
 type Route
-    = Home (Maybe EnterLobby.Error)
+    = Home (Maybe Home.JoinError)
     | Game String
     | NotFound
 
@@ -15,7 +15,7 @@ type Route
 parser : Parser (Route -> a) a
 parser =
     oneOf
-        [ Parser.map Home (Parser.top <?> EnterLobby.errorQueryParser)
+        [ Parser.map Home (Parser.top <?> Home.joinErrorQueryParser)
         , Parser.map Game (s "game" </> string)
         ]
 

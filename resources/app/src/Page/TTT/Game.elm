@@ -4,13 +4,15 @@ import Browser.Navigation as Nav
 import Game.Lobby as Lobby
 import Html
 import Http
-import Json.Decode as Decode
+import Json.Decode as Decode exposing (Decoder)
 import Page.Blank
+import Page.Home as Home
 import Page.TTT.InGame as InGame
 import Page.TTT.Lobby as Lobby
-import ServerResponse.EnterLobby as EnterLobby
+import ServerResponse.EnterLobby as EnterLobbyResponse
 import ServerResponse.InGame as InGameResponse
 import ServerResponse.InLobby as InLobbyResponse
+import ServerResponse.TTTResponse as TTTResponse
 import Session exposing (Session)
 import Url.Builder
 
@@ -50,7 +52,7 @@ fromLobby session gameId maybeLobby =
             ( Loading session
             , Http.get
                 { url = (Url.Builder.absolute [ "joinGame", gameId ] [])
-                , expect = Http.expectJson JoinResponse EnterLobby.decoder
+                , expect = Http.expectJson JoinResponse TTTResponse.decoder
                 }
             )
 
@@ -61,7 +63,7 @@ fromLobby session gameId maybeLobby =
 type Msg
     = GotLobbyMsg Lobby.Msg
     | GotInGameMsg InGame.Msg
-    | JoinResponse (Result Http.Error EnterLobby.Response)
+    | JoinResponse (Result Http.Error TTTResponse.Response)
     | WebSocketIn String
 
 
@@ -83,16 +85,29 @@ update msg model =
             case result of
                 Ok response ->
                     case response of
-                        EnterLobby.LobbyState lobby ->
+                        TTTResponse.EnterLobbyResponse (EnterLobbyResponse.LobbyState lobby) ->
                             Lobby.init session lobby
                                 |> updateWith Lobby GotLobbyMsg
 
-                        EnterLobby.Error error ->
+                        TTTResponse.EnterLobbyResponse (EnterLobbyResponse.Error error) ->
                             ( model
-                            , Nav.pushUrl (Session.navKey session) (Url.Builder.absolute [] (EnterLobby.errorToQueryParam error)) )
+                            , Nav.pushUrl (Session.navKey session) (Url.Builder.absolute [] (Home.joinErrorToQueryParam <| Home.LobbyError error))
+                            )
+
+                        TTTResponse.InLobbyResponse (InLobbyResponse.LobbyState lobby) ->
+                            Lobby.init session lobby
+                                |> updateWith Lobby GotLobbyMsg
+
+                        TTTResponse.InGameResponse (InGameResponse.GameState game) ->
+                            InGame.init session game
+                                |> updateWith InGame GotInGameMsg
+
+                        TTTResponse.InGameResponse (InGameResponse.PlayerDisc _) ->
+                            ( model, Cmd.none )
 
                 Err error ->
-                    Debug.todo "handle error"
+                    ( model
+                    , Nav.pushUrl (Session.navKey session) (Url.Builder.absolute [] (Home.joinErrorToQueryParam <| Home.ConnectionError (Just error))))
 
         ( WebSocketIn message, _ ) ->
             case model of
@@ -166,3 +181,6 @@ subscriptions model =
 
         Loading session ->
             Sub.none
+
+
+-- GAME RESPONSE

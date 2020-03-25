@@ -24,7 +24,10 @@ suspend fun TTTGameServer.addNewPlayer(sessionId: SessionId, gameId: GameId): Me
             )
         }
         is TTTGame.InGame -> {
-            game toT mapOf(newPlayer to LobbyResponse.GameAlreadyStarted(game.id.asString()))
+            when (sessionId) {
+                game.player1.technical.sessionId, game.player2.technical.sessionId -> game toT inGameStateMsgs(game)
+                else -> game toT mapOf(newPlayer to LobbyResponse.GameAlreadyStarted(game.id.asString()))
+            }
         }
     }
 }
