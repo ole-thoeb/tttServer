@@ -1,4 +1,4 @@
-module Game.TTTGamePlayer exposing (Symbol(..), PlayerMe, Player, decoder, meDecoder)
+module Game.TTTGamePlayer exposing (Symbol(..), PlayerMe, Player, decoder, meDecoder, playerRefDecoder, PlayerRef(..))
 
 import Json.Decode as Decode exposing (Decoder)
 
@@ -11,6 +11,7 @@ type alias PlayerMe =
     , name : String
     , color : String
     , symbol : Symbol
+    , playerRef : PlayerRef
     }
 
 
@@ -18,7 +19,11 @@ type alias Player =
     { name : String
     , color : String
     , symbol : Symbol
+    , playerRef : PlayerRef
     }
+
+
+type PlayerRef = P1 | P2
 
 
 -- DECODER
@@ -26,12 +31,12 @@ type alias Player =
 
 decoder : Decoder Player
 decoder =
-    Decode.map3 Player nameDecoder colorDecoder symbolDecoder
+    Decode.map4 Player nameDecoder colorDecoder symbolDecoder (Decode.field "playerRef" playerRefDecoder)
 
 
 meDecoder : Decoder PlayerMe
 meDecoder =
-    Decode.map4 PlayerMe idDecoder nameDecoder colorDecoder symbolDecoder
+    Decode.map5 PlayerMe idDecoder nameDecoder colorDecoder symbolDecoder (Decode.field "playerRef" playerRefDecoder)
 
 
 idDecoder : Decoder String
@@ -56,4 +61,14 @@ symbolDecoder =
             "X" -> Decode.succeed X
             "O" -> Decode.succeed O
             _ -> Decode.fail ("unknown symbol " ++ str)
+        )
+
+
+playerRefDecoder : Decoder PlayerRef
+playerRefDecoder =
+    Decode.string |> Decode.andThen
+        (\ref -> case ref of
+            "P1" -> Decode.succeed P1
+            "P2" -> Decode.succeed P2
+            _ -> Decode.fail ("unknown playerRef " ++ ref)
         )

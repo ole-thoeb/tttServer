@@ -29,6 +29,17 @@ fun <T> List<T>.update(index: Int, value: T): List<T> = updateIndexed(
 inline fun <T: Any> List<T>.updateNotNone(predicate: Predicate<T>, update: (T) -> Option<T>): List<T> =
     this.mapNotNull { if (predicate(it)) update(it).orNull() else it }
 
+
+fun <T> Iterable<T>.allEqual(): Boolean {
+    val iter = iterator()
+    if (!iter.hasNext()) return false
+    val element = iter.next()
+    while (iter.hasNext()) {
+        if (element != iter.next()) return false;
+    }
+    return true
+}
+
 typealias MessagesOf<MSG> = Map<TechnicalPlayer, MSG>
 
 typealias Messages = MessagesOf<JsonSerializable>

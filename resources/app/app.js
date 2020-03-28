@@ -5530,9 +5530,9 @@ var $author$project$ServerResponse$EnterLobby$decoder = A2($elm$json$Json$Decode
 var $author$project$ServerResponse$InGame$GameState = function (a) {
 	return {$: 'GameState', a: a};
 };
-var $author$project$Game$TTTGame$TTTGame = F5(
-	function (gameId, playerMe, opponent, meTurn, board) {
-		return {board: board, gameId: gameId, meTurn: meTurn, opponent: opponent, playerMe: playerMe};
+var $author$project$Game$TTTGame$TTTGame = F6(
+	function (gameId, playerMe, opponent, meTurn, board, status) {
+		return {board: board, gameId: gameId, meTurn: meTurn, opponent: opponent, playerMe: playerMe, status: status};
 	});
 var $elm$json$Json$Decode$array = _Json_decodeArray;
 var $author$project$Game$TTTGame$Empty = {$: 'Empty'};
@@ -5554,12 +5554,28 @@ var $author$project$Game$TTTGame$cellDecoder = A2(
 	},
 	$elm$json$Json$Decode$string);
 var $author$project$Game$TTTGame$boardDecoder = $elm$json$Json$Decode$array($author$project$Game$TTTGame$cellDecoder);
-var $author$project$Game$TTTGamePlayer$Player = F3(
-	function (name, color, symbol) {
-		return {color: color, name: name, symbol: symbol};
+var $author$project$Game$TTTGamePlayer$Player = F4(
+	function (name, color, symbol, playerRef) {
+		return {color: color, name: name, playerRef: playerRef, symbol: symbol};
 	});
 var $author$project$Game$TTTGamePlayer$colorDecoder = A2($elm$json$Json$Decode$field, 'color', $elm$json$Json$Decode$string);
+var $elm$json$Json$Decode$map4 = _Json_map4;
 var $author$project$Game$TTTGamePlayer$nameDecoder = A2($elm$json$Json$Decode$field, 'name', $elm$json$Json$Decode$string);
+var $author$project$Game$TTTGamePlayer$P1 = {$: 'P1'};
+var $author$project$Game$TTTGamePlayer$P2 = {$: 'P2'};
+var $author$project$Game$TTTGamePlayer$playerRefDecoder = A2(
+	$elm$json$Json$Decode$andThen,
+	function (ref) {
+		switch (ref) {
+			case 'P1':
+				return $elm$json$Json$Decode$succeed($author$project$Game$TTTGamePlayer$P1);
+			case 'P2':
+				return $elm$json$Json$Decode$succeed($author$project$Game$TTTGamePlayer$P2);
+			default:
+				return $elm$json$Json$Decode$fail('unknown playerRef ' + ref);
+		}
+	},
+	$elm$json$Json$Decode$string);
 var $author$project$Game$TTTGamePlayer$O = {$: 'O'};
 var $author$project$Game$TTTGamePlayer$X = {$: 'X'};
 var $author$project$Game$TTTGamePlayer$symbolDecoder = A2(
@@ -5575,23 +5591,65 @@ var $author$project$Game$TTTGamePlayer$symbolDecoder = A2(
 		}
 	},
 	A2($elm$json$Json$Decode$field, 'symbol', $elm$json$Json$Decode$string));
-var $author$project$Game$TTTGamePlayer$decoder = A4($elm$json$Json$Decode$map3, $author$project$Game$TTTGamePlayer$Player, $author$project$Game$TTTGamePlayer$nameDecoder, $author$project$Game$TTTGamePlayer$colorDecoder, $author$project$Game$TTTGamePlayer$symbolDecoder);
-var $elm$json$Json$Decode$map5 = _Json_map5;
-var $author$project$Game$TTTGamePlayer$PlayerMe = F4(
-	function (id, name, color, symbol) {
-		return {color: color, id: id, name: name, symbol: symbol};
+var $author$project$Game$TTTGamePlayer$decoder = A5(
+	$elm$json$Json$Decode$map4,
+	$author$project$Game$TTTGamePlayer$Player,
+	$author$project$Game$TTTGamePlayer$nameDecoder,
+	$author$project$Game$TTTGamePlayer$colorDecoder,
+	$author$project$Game$TTTGamePlayer$symbolDecoder,
+	A2($elm$json$Json$Decode$field, 'playerRef', $author$project$Game$TTTGamePlayer$playerRefDecoder));
+var $elm$json$Json$Decode$map6 = _Json_map6;
+var $author$project$Game$TTTGamePlayer$PlayerMe = F5(
+	function (id, name, color, symbol, playerRef) {
+		return {color: color, id: id, name: name, playerRef: playerRef, symbol: symbol};
 	});
 var $author$project$Game$TTTGamePlayer$idDecoder = A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$string);
-var $elm$json$Json$Decode$map4 = _Json_map4;
-var $author$project$Game$TTTGamePlayer$meDecoder = A5($elm$json$Json$Decode$map4, $author$project$Game$TTTGamePlayer$PlayerMe, $author$project$Game$TTTGamePlayer$idDecoder, $author$project$Game$TTTGamePlayer$nameDecoder, $author$project$Game$TTTGamePlayer$colorDecoder, $author$project$Game$TTTGamePlayer$symbolDecoder);
-var $author$project$Game$TTTGame$decoder = A6(
+var $elm$json$Json$Decode$map5 = _Json_map5;
+var $author$project$Game$TTTGamePlayer$meDecoder = A6(
 	$elm$json$Json$Decode$map5,
+	$author$project$Game$TTTGamePlayer$PlayerMe,
+	$author$project$Game$TTTGamePlayer$idDecoder,
+	$author$project$Game$TTTGamePlayer$nameDecoder,
+	$author$project$Game$TTTGamePlayer$colorDecoder,
+	$author$project$Game$TTTGamePlayer$symbolDecoder,
+	A2($elm$json$Json$Decode$field, 'playerRef', $author$project$Game$TTTGamePlayer$playerRefDecoder));
+var $author$project$Game$TTTGame$Draw = {$: 'Draw'};
+var $author$project$Game$TTTGame$OnGoing = {$: 'OnGoing'};
+var $author$project$Game$TTTGame$Win = F4(
+	function (a, b, c, d) {
+		return {$: 'Win', a: a, b: b, c: c, d: d};
+	});
+var $author$project$Game$TTTGame$winDecoder = A5(
+	$elm$json$Json$Decode$map4,
+	$author$project$Game$TTTGame$Win,
+	A2($elm$json$Json$Decode$field, 'winner', $author$project$Game$TTTGamePlayer$playerRefDecoder),
+	A2($elm$json$Json$Decode$field, 'winField1', $elm$json$Json$Decode$int),
+	A2($elm$json$Json$Decode$field, 'winField2', $elm$json$Json$Decode$int),
+	A2($elm$json$Json$Decode$field, 'winField3', $elm$json$Json$Decode$int));
+var $author$project$Game$TTTGame$statusDecoder = A2(
+	$elm$json$Json$Decode$andThen,
+	function (status) {
+		switch (status) {
+			case 'OnGoing':
+				return $elm$json$Json$Decode$succeed($author$project$Game$TTTGame$OnGoing);
+			case 'Draw':
+				return $elm$json$Json$Decode$succeed($author$project$Game$TTTGame$Draw);
+			case 'Win':
+				return $author$project$Game$TTTGame$winDecoder;
+			default:
+				return $elm$json$Json$Decode$fail('Unknown status ' + status);
+		}
+	},
+	A2($elm$json$Json$Decode$field, 'type', $elm$json$Json$Decode$string));
+var $author$project$Game$TTTGame$decoder = A7(
+	$elm$json$Json$Decode$map6,
 	$author$project$Game$TTTGame$TTTGame,
 	A2($elm$json$Json$Decode$field, 'gameId', $elm$json$Json$Decode$string),
 	A2($elm$json$Json$Decode$field, 'playerMe', $author$project$Game$TTTGamePlayer$meDecoder),
 	A2($elm$json$Json$Decode$field, 'opponent', $author$project$Game$TTTGamePlayer$decoder),
 	A2($elm$json$Json$Decode$field, 'meTurn', $elm$json$Json$Decode$bool),
-	A2($elm$json$Json$Decode$field, 'board', $author$project$Game$TTTGame$boardDecoder));
+	A2($elm$json$Json$Decode$field, 'board', $author$project$Game$TTTGame$boardDecoder),
+	A2($elm$json$Json$Decode$field, 'status', $author$project$Game$TTTGame$statusDecoder));
 var $author$project$ServerResponse$InGame$gameStateDecoder = A2($elm$json$Json$Decode$map, $author$project$ServerResponse$InGame$GameState, $author$project$Game$TTTGame$decoder);
 var $elm$core$Debug$log = _Debug_log;
 var $author$project$ServerResponse$InGame$PlayerDisc = function (a) {
@@ -7582,11 +7640,24 @@ var $author$project$ServerRequest$InGame$setPiece = F3(
 var $author$project$Page$TTT$InGame$update = F2(
 	function (msg, model) {
 		var game = model.game;
-		var index = msg.a;
-		return _Utils_Tuple2(
-			model,
-			$author$project$Websocket$send(
-				A3($author$project$ServerRequest$InGame$setPiece, game.gameId, game.playerMe.id, index)));
+		switch (msg.$) {
+			case 'CellClicked':
+				var index = msg.a;
+				return _Utils_Tuple2(
+					model,
+					$author$project$Websocket$send(
+						A3($author$project$ServerRequest$InGame$setPiece, game.gameId, game.playerMe.id, index)));
+			case 'Rematch':
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			default:
+				return _Utils_Tuple2(
+					model,
+					A2(
+						$elm$browser$Browser$Navigation$pushUrl,
+						$author$project$Session$navKey(
+							$author$project$Page$TTT$InGame$toSession(model)),
+						A2($elm$url$Url$Builder$absolute, _List_Nil, _List_Nil)));
+		}
 	});
 var $author$project$ClipBoard$copyToClipBoard = _Platform_outgoingPort('copyToClipBoard', $elm$json$Json$Encode$string);
 var $arturopala$elm_monocle$Monocle$Lens$modify = F2(
@@ -16079,8 +16150,6 @@ var $author$project$Page$NotFound$view = function (model) {
 		title: 'Page Not Found'
 	};
 };
-var $author$project$Page$TTT$InGame$Left = {$: 'Left'};
-var $author$project$Page$TTT$InGame$Right = {$: 'Right'};
 var $author$project$Page$TTT$InGame$CellClicked = function (a) {
 	return {$: 'CellClicked', a: a};
 };
@@ -16088,36 +16157,25 @@ var $elm$svg$Svg$circle = $elm$svg$Svg$trustedNode('circle');
 var $elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
 var $elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
 var $elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
-var $elm$svg$Svg$Attributes$preserveAspectRatio = _VirtualDom_attribute('preserveAspectRatio');
 var $elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
 var $elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
 var $elm$svg$Svg$Attributes$strokeWidth = _VirtualDom_attribute('stroke-width');
-var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
-var $elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
 var $author$project$Page$TTT$SvgSymbol$circle = function (color) {
-	return A2(
-		$elm$svg$Svg$svg,
-		_List_fromArray(
-			[
-				$elm$svg$Svg$Attributes$width('100%'),
-				$elm$svg$Svg$Attributes$preserveAspectRatio('xMinYMin'),
-				$elm$svg$Svg$Attributes$viewBox('0 0 120 120')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$svg$Svg$circle,
-				_List_fromArray(
-					[
-						$elm$svg$Svg$Attributes$cx('60'),
-						$elm$svg$Svg$Attributes$cy('60'),
-						$elm$svg$Svg$Attributes$r('50'),
-						$elm$svg$Svg$Attributes$stroke(color),
-						$elm$svg$Svg$Attributes$strokeWidth('2'),
-						$elm$svg$Svg$Attributes$fill('none')
-					]),
-				_List_Nil)
-			]));
+	return _List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$circle,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$cx('60'),
+					$elm$svg$Svg$Attributes$cy('60'),
+					$elm$svg$Svg$Attributes$r('50'),
+					$elm$svg$Svg$Attributes$stroke(color),
+					$elm$svg$Svg$Attributes$strokeWidth('2'),
+					$elm$svg$Svg$Attributes$fill('none')
+				]),
+			_List_Nil)
+		]);
 };
 var $elm$svg$Svg$line = $elm$svg$Svg$trustedNode('line');
 var $elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
@@ -16125,51 +16183,119 @@ var $elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
 var $elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
 var $elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
 var $author$project$Page$TTT$SvgSymbol$cross = function (color) {
-	return A2(
-		$elm$svg$Svg$svg,
-		_List_fromArray(
-			[
-				$elm$svg$Svg$Attributes$width('100%'),
-				$elm$svg$Svg$Attributes$preserveAspectRatio('xMinYMin'),
-				$elm$svg$Svg$Attributes$viewBox('0 0 120 120')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$svg$Svg$line,
-				_List_fromArray(
-					[
-						$elm$svg$Svg$Attributes$stroke(color),
-						$elm$svg$Svg$Attributes$strokeWidth('2'),
-						$elm$svg$Svg$Attributes$x1('10'),
-						$elm$svg$Svg$Attributes$y1('10'),
-						$elm$svg$Svg$Attributes$x2('110'),
-						$elm$svg$Svg$Attributes$y2('110')
-					]),
-				_List_Nil),
-				A2(
-				$elm$svg$Svg$line,
-				_List_fromArray(
-					[
-						$elm$svg$Svg$Attributes$stroke(color),
-						$elm$svg$Svg$Attributes$strokeWidth('2'),
-						$elm$svg$Svg$Attributes$x1('110'),
-						$elm$svg$Svg$Attributes$y1('10'),
-						$elm$svg$Svg$Attributes$x2('10'),
-						$elm$svg$Svg$Attributes$y2('110')
-					]),
-				_List_Nil)
-			]));
-};
-var $author$project$Page$TTT$SvgSymbol$empty = A2(
-	$elm$svg$Svg$svg,
-	_List_fromArray(
+	return _List_fromArray(
 		[
-			$elm$svg$Svg$Attributes$width('100%'),
-			$elm$svg$Svg$Attributes$preserveAspectRatio('xMinYMin'),
-			$elm$svg$Svg$Attributes$viewBox('0 0 120 120')
-		]),
-	_List_Nil);
+			A2(
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$stroke(color),
+					$elm$svg$Svg$Attributes$strokeWidth('2'),
+					$elm$svg$Svg$Attributes$x1('10'),
+					$elm$svg$Svg$Attributes$y1('10'),
+					$elm$svg$Svg$Attributes$x2('110'),
+					$elm$svg$Svg$Attributes$y2('110')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$stroke(color),
+					$elm$svg$Svg$Attributes$strokeWidth('2'),
+					$elm$svg$Svg$Attributes$x1('110'),
+					$elm$svg$Svg$Attributes$y1('10'),
+					$elm$svg$Svg$Attributes$x2('10'),
+					$elm$svg$Svg$Attributes$y2('110')
+				]),
+			_List_Nil)
+		]);
+};
+var $author$project$Page$TTT$SvgSymbol$empty = _List_Nil;
+var $author$project$Page$TTT$SvgSymbol$lineDiaBotTop = function (color) {
+	return A2(
+		$elm$svg$Svg$line,
+		_List_fromArray(
+			[
+				$elm$svg$Svg$Attributes$stroke(color),
+				$elm$svg$Svg$Attributes$strokeWidth('4'),
+				$elm$svg$Svg$Attributes$x1('120'),
+				$elm$svg$Svg$Attributes$y1('0'),
+				$elm$svg$Svg$Attributes$x2('0'),
+				$elm$svg$Svg$Attributes$y2('120')
+			]),
+		_List_Nil);
+};
+var $author$project$Page$TTT$SvgSymbol$lineDiaTopBot = function (color) {
+	return A2(
+		$elm$svg$Svg$line,
+		_List_fromArray(
+			[
+				$elm$svg$Svg$Attributes$stroke(color),
+				$elm$svg$Svg$Attributes$strokeWidth('4'),
+				$elm$svg$Svg$Attributes$x1('0'),
+				$elm$svg$Svg$Attributes$y1('0'),
+				$elm$svg$Svg$Attributes$x2('120'),
+				$elm$svg$Svg$Attributes$y2('120')
+			]),
+		_List_Nil);
+};
+var $author$project$Page$TTT$SvgSymbol$lineHor = function (color) {
+	return A2(
+		$elm$svg$Svg$line,
+		_List_fromArray(
+			[
+				$elm$svg$Svg$Attributes$stroke(color),
+				$elm$svg$Svg$Attributes$strokeWidth('4'),
+				$elm$svg$Svg$Attributes$x1('0'),
+				$elm$svg$Svg$Attributes$y1('60'),
+				$elm$svg$Svg$Attributes$x2('120'),
+				$elm$svg$Svg$Attributes$y2('60')
+			]),
+		_List_Nil);
+};
+var $author$project$Page$TTT$SvgSymbol$lineVert = function (color) {
+	return A2(
+		$elm$svg$Svg$line,
+		_List_fromArray(
+			[
+				$elm$svg$Svg$Attributes$stroke(color),
+				$elm$svg$Svg$Attributes$strokeWidth('4'),
+				$elm$svg$Svg$Attributes$x1('60'),
+				$elm$svg$Svg$Attributes$y1('0'),
+				$elm$svg$Svg$Attributes$x2('60'),
+				$elm$svg$Svg$Attributes$y2('120')
+			]),
+		_List_Nil);
+};
+var $author$project$Page$TTT$InGame$gameStatusToLine = F2(
+	function (status, cellNumber) {
+		switch (status.$) {
+			case 'OnGoing':
+				return _List_Nil;
+			case 'Draw':
+				return _List_Nil;
+			default:
+				var f1 = status.b;
+				var f2 = status.c;
+				var f3 = status.d;
+				return (_Utils_eq(
+					A2($elm$core$Debug$log, 'cNum', cellNumber),
+					f1) || (_Utils_eq(cellNumber, f2) || _Utils_eq(cellNumber, f3))) ? ((_Utils_eq(f1 + 1, f2) && _Utils_eq(f2 + 1, f3)) ? _List_fromArray(
+					[
+						$author$project$Page$TTT$SvgSymbol$lineHor('white')
+					]) : ((_Utils_eq(f1 + 3, f2) && _Utils_eq(f2 + 3, f3)) ? _List_fromArray(
+					[
+						$author$project$Page$TTT$SvgSymbol$lineVert('white')
+					]) : ((_Utils_eq(f1 + 4, f2) && _Utils_eq(f2 + 4, f3)) ? _List_fromArray(
+					[
+						$author$project$Page$TTT$SvgSymbol$lineDiaTopBot('white')
+					]) : ((_Utils_eq(f1 + 2, f2) && _Utils_eq(f2 + 2, f3)) ? _List_fromArray(
+					[
+						$author$project$Page$TTT$SvgSymbol$lineDiaBotTop('white')
+					]) : A2($elm$core$Debug$log, 'no sequence match', _List_Nil))))) : A2($elm$core$Debug$log, 'no field match', _List_Nil);
+		}
+	});
 var $elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
 var $elm$core$Array$bitMask = 4294967295 >>> (32 - $elm$core$Array$shiftStep);
 var $elm$core$Elm$JsArray$unsafeGet = _JsArray_unsafeGet;
@@ -16209,30 +16335,43 @@ var $elm$core$Array$get = F2(
 			A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, tail)) : $elm$core$Maybe$Just(
 			A3($elm$core$Array$getHelp, startShift, index, tree)));
 	});
+var $elm$svg$Svg$Attributes$preserveAspectRatio = _VirtualDom_attribute('preserveAspectRatio');
+var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
+var $elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
+var $author$project$Page$TTT$SvgSymbol$toHtml = $elm$svg$Svg$svg(
+	_List_fromArray(
+		[
+			$elm$svg$Svg$Attributes$width('100%'),
+			$elm$svg$Svg$Attributes$preserveAspectRatio('xMinYMin'),
+			$elm$svg$Svg$Attributes$viewBox('0 0 120 120')
+		]));
 var $author$project$Page$TTT$InGame$boardCell = F3(
 	function (theme, cellNumber, game) {
 		var board = game.board;
-		var svgIcon = function () {
-			var _v0 = A2($elm$core$Array$get, cellNumber, board);
-			_v0$2:
-			while (true) {
-				if (_v0.$ === 'Just') {
-					switch (_v0.a.$) {
-						case 'X':
-							var _v1 = _v0.a;
-							return $author$project$Page$TTT$SvgSymbol$cross('red');
-						case 'O':
-							var _v2 = _v0.a;
-							return $author$project$Page$TTT$SvgSymbol$circle('blue');
-						default:
+		var svgIcon = $author$project$Page$TTT$SvgSymbol$toHtml(
+			_Utils_ap(
+				A2($author$project$Page$TTT$InGame$gameStatusToLine, game.status, cellNumber),
+				function () {
+					var _v0 = A2($elm$core$Array$get, cellNumber, board);
+					_v0$2:
+					while (true) {
+						if (_v0.$ === 'Just') {
+							switch (_v0.a.$) {
+								case 'X':
+									var _v1 = _v0.a;
+									return $author$project$Page$TTT$SvgSymbol$cross('red');
+								case 'O':
+									var _v2 = _v0.a;
+									return $author$project$Page$TTT$SvgSymbol$circle('blue');
+								default:
+									break _v0$2;
+							}
+						} else {
 							break _v0$2;
+						}
 					}
-				} else {
-					break _v0$2;
-				}
-			}
-			return $author$project$Page$TTT$SvgSymbol$empty;
-		}();
+					return $author$project$Page$TTT$SvgSymbol$empty;
+				}()));
 		return A2(
 			$mdgriffith$elm_ui$Element$el,
 			_List_fromArray(
@@ -16256,8 +16395,53 @@ var $author$project$Page$TTT$InGame$hLine = function (theme) {
 			]),
 		$mdgriffith$elm_ui$Element$none);
 };
-var $author$project$MaterialUI$Theme$SecondaryVariant = {$: 'SecondaryVariant'};
+var $author$project$Page$TTT$InGame$Left = {$: 'Left'};
+var $author$project$Page$TTT$InGame$Right = {$: 'Right'};
 var $mdgriffith$elm_ui$Element$Font$alignLeft = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontAlignment, $mdgriffith$elm_ui$Internal$Style$classes.textLeft);
+var $author$project$Page$TTT$InGame$Leave = {$: 'Leave'};
+var $author$project$Page$TTT$InGame$Rematch = {$: 'Rematch'};
+var $author$project$Page$TTT$InGame$headerButtonColumn = function (theme) {
+	return A2(
+		$mdgriffith$elm_ui$Element$column,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$width(
+				$mdgriffith$elm_ui$Element$fillPortion(1)),
+				$mdgriffith$elm_ui$Element$spacing(8)
+			]),
+		_List_fromArray(
+			[
+				A3(
+				$author$project$MaterialUI$Button$outlined,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+					]),
+				{
+					color: $author$project$MaterialUI$Theme$Primary,
+					disabled: false,
+					icon: $elm$core$Maybe$Nothing,
+					onPress: $elm$core$Maybe$Just($author$project$Page$TTT$InGame$Rematch),
+					text: 'Rematch'
+				},
+				theme),
+				A3(
+				$author$project$MaterialUI$Button$outlined,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+					]),
+				{
+					color: $author$project$MaterialUI$Theme$Primary,
+					disabled: false,
+					icon: $elm$core$Maybe$Nothing,
+					onPress: $elm$core$Maybe$Just($author$project$Page$TTT$InGame$Leave),
+					text: 'Leave'
+				},
+				theme)
+			]));
+};
+var $author$project$MaterialUI$Theme$SecondaryVariant = {$: 'SecondaryVariant'};
 var $mdgriffith$elm_ui$Internal$Model$Right = {$: 'Right'};
 var $mdgriffith$elm_ui$Element$alignRight = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Right);
 var $elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
@@ -16379,6 +16563,77 @@ var $author$project$Page$TTT$InGame$playerHeader = F4(
 				]));
 	});
 var $mdgriffith$elm_ui$Element$spaceEvenly = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$spacing, $mdgriffith$elm_ui$Internal$Style$classes.spaceEvenly);
+var $author$project$Page$TTT$InGame$header = function (model) {
+	var theme = $author$project$Session$theme(
+		$author$project$Page$TTT$InGame$toSession(model));
+	var game = model.game;
+	var _v0 = game.status;
+	switch (_v0.$) {
+		case 'OnGoing':
+			return A2(
+				$mdgriffith$elm_ui$Element$row,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$spaceEvenly,
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+					]),
+				_List_fromArray(
+					[
+						A4($author$project$Page$TTT$InGame$playerHeader, theme, game.playerMe, game.meTurn, $author$project$Page$TTT$InGame$Left),
+						A4($author$project$Page$TTT$InGame$playerHeader, theme, game.opponent, !game.meTurn, $author$project$Page$TTT$InGame$Right)
+					]));
+		case 'Draw':
+			return A2(
+				$mdgriffith$elm_ui$Element$row,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$spacing(8)
+					]),
+				_List_fromArray(
+					[
+						A4(
+						$author$project$UIHelper$materialText,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$Font$alignLeft,
+								$mdgriffith$elm_ui$Element$width(
+								$mdgriffith$elm_ui$Element$fillPortion(2))
+							]),
+						'Draw',
+						$author$project$MaterialUI$Theme$H3,
+						theme),
+						$author$project$Page$TTT$InGame$headerButtonColumn(theme)
+					]));
+		default:
+			var winner = _v0.a;
+			var field1 = _v0.b;
+			var filed2 = _v0.c;
+			var field3 = _v0.d;
+			return A2(
+				$mdgriffith$elm_ui$Element$row,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$spacing(8)
+					]),
+				_List_fromArray(
+					[
+						A4(
+						$author$project$UIHelper$materialText,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$Font$alignLeft,
+								$mdgriffith$elm_ui$Element$width(
+								$mdgriffith$elm_ui$Element$fillPortion(2))
+							]),
+						_Utils_eq(game.playerMe.playerRef, winner) ? 'Victory' : 'Defeat',
+						$author$project$MaterialUI$Theme$H3,
+						theme),
+						$author$project$Page$TTT$InGame$headerButtonColumn(theme)
+					]));
+	}
+};
 var $author$project$Page$TTT$InGame$vLine = function (theme) {
 	return A2(
 		$mdgriffith$elm_ui$Element$el,
@@ -16416,18 +16671,7 @@ var $author$project$Page$TTT$InGame$view = function (model) {
 					]),
 				_List_fromArray(
 					[
-						A2(
-						$mdgriffith$elm_ui$Element$row,
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$spaceEvenly,
-								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-							]),
-						_List_fromArray(
-							[
-								A4($author$project$Page$TTT$InGame$playerHeader, theme, game.playerMe, game.meTurn, $author$project$Page$TTT$InGame$Left),
-								A4($author$project$Page$TTT$InGame$playerHeader, theme, game.opponent, !game.meTurn, $author$project$Page$TTT$InGame$Right)
-							])),
+						$author$project$Page$TTT$InGame$header(model),
 						A2(
 						$mdgriffith$elm_ui$Element$column,
 						_List_fromArray(

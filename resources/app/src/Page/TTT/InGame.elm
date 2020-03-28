@@ -1,16 +1,17 @@
-module Page.TTT.InGame exposing (..)
+module Page.TTT.InGame exposing (Model, init, toSession, Msg, update, updateFromWebsocket, view)
 
 
 import Array exposing (Array)
+import Browser.Navigation as Nav
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Events as Events
 import Element.Font as Font
-import Element.Input as Input
 import Game.TTTGame as TTTGame exposing (CellState, TTTGame)
 import Game.TTTGamePlayer as TTTGamePlayer exposing (Symbol)
 import Html
+import MaterialUI.Button as Button
 import MaterialUI.Icon as Icon exposing (Icon)
 import MaterialUI.Icons.Navigation as Navigation
 import MaterialUI.Icons.Toggle as Toggle
@@ -19,7 +20,9 @@ import Page.TTT.SvgSymbol as SvgSymbol
 import ServerRequest.InGame as InGameRequest
 import ServerResponse.InGame as InGameResponse
 import Session exposing (Session)
+import Svg exposing (Svg)
 import UIHelper exposing (materialText)
+import Url.Builder
 import Websocket
 
 
@@ -51,6 +54,8 @@ toSession =
 
 type Msg
     = CellClicked Int
+    | Rematch
+    | Leave
 
 
 update: Msg -> Model -> ( Model, Cmd Msg )
@@ -61,6 +66,14 @@ update msg model =
     case msg of
         CellClicked index ->
             ( model, Websocket.send (InGameRequest.setPiece game.gameId game.playerMe.id index) )
+
+        Rematch ->
+            ( model, Cmd.none )
+
+        Leave ->
+            ( model
+            , Nav.pushUrl (model |> toSession |> Session.navKey) <| Url.Builder.absolute [] []
+            )
 
 
 updateFromWebsocket : InGameResponse.Response -> Model -> ( Model, Cmd Msg )
@@ -93,13 +106,7 @@ view model =
                 , padding 16
                 , spacing 16
                 ]
-                [ row
-                   [ spaceEvenly
-                   , width fill
-                   ]
-                   [ (playerHeader theme game.playerMe game.meTurn Left)
-                   , (playerHeader theme game.opponent (not game.meTurn) Right)
-                   ]
+                [ header model
                 , column
                     [ centerX
                     , width (fill |> maximum 500)
@@ -139,6 +146,82 @@ view model =
                     ]
                 ]
     }
+
+
+header : Model -> Element Msg
+header model =
+    let
+        game = model.game
+        theme = model |> toSession |> Session.theme
+    in
+    case game.status of
+        TTTGame.OnGoing ->
+            row
+                [ spaceEvenly
+                , width fill
+                ]
+                [ (playerHeader theme game.playerMe game.meTurn Left)
+                , (playerHeader theme game.opponent (not game.meTurn) Right)
+                ]
+
+        TTTGame.Draw ->
+            row
+                [ width fill
+                , spacing 8
+                ]
+                [ materialText
+                    [ Font.alignLeft
+                    , width <| fillPortion 2
+                    ]
+                    "Draw"
+                    Theme.H3
+                    theme
+                , headerButtonColumn theme
+                ]
+
+        TTTGame.Win winner field1 filed2 field3 ->
+            row
+                [ width fill
+                , spacing 8
+                ]
+                [ materialText
+                    [ Font.alignLeft
+                    , width <| fillPortion 2
+                    ]
+                    (if game.playerMe.playerRef == winner then "Victory" else "Defeat")
+                    Theme.H3
+                    theme
+                , headerButtonColumn theme
+                ]
+
+
+headerButtonColumn : Theme a -> Element Msg
+headerButtonColumn theme =
+    column
+        [ width <| fillPortion 1
+        , spacing 8
+        ]
+        [ Button.outlined
+            [ width fill
+            ]
+            { icon = Nothing
+            , color = Theme.Primary
+            , text = "Rematch"
+            , onPress = Just Rematch
+            , disabled = False
+            }
+            theme
+        , Button.outlined
+            [ width fill
+            ]
+            { icon = Nothing
+            , color = Theme.Primary
+            , text = "Leave"
+            , onPress = Just Leave
+            , disabled = False
+            }
+            theme
+        ]
 
 
 type Alignment
@@ -196,9 +279,9 @@ boardCell : Theme a -> Int -> TTTGame -> Element Msg
 boardCell theme cellNumber game =
     let
         board = game.board
-        svgIcon = case Array.get cellNumber board of
+        svgIcon = SvgSymbol.toHtml <| gameStatusToLine game.status cellNumber ++ case Array.get cellNumber board of
             Just TTTGame.X ->
-                SvgSymbol.cross "red"
+               SvgSymbol.cross "red"
 
             Just TTTGame.O ->
                 SvgSymbol.circle "blue"
@@ -210,6 +293,25 @@ boardCell theme cellNumber game =
         , Events.onClick (CellClicked cellNumber)
         ]
         (html svgIcon)
+
+
+gameStatusToLine : TTTGame.Status -> Int-> List (Svg msg)
+gameStatusToLine status cellNumber =
+    case status of
+        TTTGame.OnGoing -> []
+        TTTGame.Draw -> []
+        TTTGame.Win _ f1 f2 f3 ->
+            if Debug.log "cNum" cellNumber == f1 || cellNumber == f2 || cellNumber == f3 then
+                if f1 + 1 == f2 && f2 + 1 == f3 then
+                    [ SvgSymbol.lineHor "white" ]
+                else if  f1 + 3 == f2 && f2 + 3 == f3 then
+                    [ SvgSymbol.lineVert "white" ]
+                else if f1 + 4 == f2 && f2 + 4 == f3 then
+                    [ SvgSymbol.lineDiaTopBot "white" ]
+                else if f1 + 2 == f2 && f2 + 2 == f3 then
+                    [ SvgSymbol.lineDiaBotTop "white" ]
+                else Debug.log "no sequence match" []
+            else Debug.log "no field match" []
 
 
 vLine : Theme a -> Element Msg

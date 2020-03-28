@@ -49,7 +49,8 @@ suspend fun TTTGameServer.handleLobbyRequest(lobbyRequest: LobbyRequest): Messag
                                 TTTGame.InGame.Player(p1.name, "#FF0000", p1.technical),
                                 TTTGame.InGame.Player(p2.name, "#00FF00", p2.technical),
                                 List(9) { TTTGame.InGame.CellState.EMPTY }.k(),
-                                TTTGame.InGame.PlayerRef.P1
+                                TTTGame.InGame.PlayerRef.P1,
+                                TTTGame.InGame.Status.OnGoing
                         )
                         return@updateGame inGame toT inGameStateMsgs(inGame)
                     } else {

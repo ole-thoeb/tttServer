@@ -24,7 +24,8 @@ sealed class InGameResponse : JsonSerializable {
                 val playerMe: PlayerMe,
                 val opponent: Player,
                 val board: List<Symbol>,
-                val meTurn: Boolean
+                val meTurn: Boolean,
+                val status: SeriaizedStatus
         ) {
             fun toMsg(): State = State(this)
         }
@@ -41,14 +42,15 @@ sealed class InGameResponse : JsonSerializable {
                 val meSymbol = Symbol.fromCellState(playerRef.cellState)
                 val opponentSymbol = !meSymbol
 
-                val serialPlayerMe = PlayerMe(playerMe.technical.playerId.asString(), playerMe.name, playerMe.color, meSymbol)
-                val serialOpponent = Player(opponent.name, opponent.color, opponentSymbol)
+                val serialPlayerMe = PlayerMe(playerMe.technical.playerId.asString(), playerMe.name, playerMe.color, meSymbol, playerRef)
+                val serialOpponent = Player(opponent.name, opponent.color, opponentSymbol, !playerRef)
 
                 return Content(inGame.id.asString(),
                         serialPlayerMe,
                         serialOpponent,
                         inGame.board.map(Symbol.Companion::fromCellState),
-                        playerRef == inGame.turn
+                        playerRef == inGame.turn,
+                        SeriaizedStatus.fromRealStatus(inGame.status)
                 ).toMsg()
             }
         }
@@ -74,9 +76,31 @@ sealed class InGameResponse : JsonSerializable {
     }
 
     @Serializable
-    data class Player(val name: String, val color: String, val symbol: Symbol)
+    class SeriaizedStatus private constructor(
+            val type: String,
+            val winner: TTTGame.InGame.PlayerRef? = null,
+            val winField1: Int? = null,
+            val winField2: Int? = null,
+            val winField3: Int? = null
+    ) {
+        companion object {
+            val OnGoing = SeriaizedStatus("OnGoing")
+            val Draw = SeriaizedStatus("Draw")
+            fun Win(playerRef: TTTGame.InGame.PlayerRef, winField1: Int, winField2: Int, winField3: Int) =
+                    SeriaizedStatus("Win", playerRef, winField1, winField2, winField3)
+
+            fun fromRealStatus(status: TTTGame.InGame.Status) = when (status) {
+                is TTTGame.InGame.Status.Win -> Win(status.winner, status.winField1, status.winField2, status.winField3)
+                TTTGame.InGame.Status.Draw -> Draw
+                TTTGame.InGame.Status.OnGoing -> OnGoing
+            }
+        }
+    }
 
     @Serializable
-    data class PlayerMe(val id: String, val name: String, val color: String, val symbol: Symbol)
+    data class Player(val name: String, val color: String, val symbol: Symbol, val playerRef: TTTGame.InGame.PlayerRef)
+
+    @Serializable
+    data class PlayerMe(val id: String, val name: String, val color: String, val symbol: Symbol, val playerRef: TTTGame.InGame.PlayerRef)
 }
 
