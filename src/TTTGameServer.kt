@@ -17,7 +17,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import messages.requests.GameRequest
 import messages.requests.LobbyRequest
-import messages.responses.InGameResponse
 import messages.responses.TTTResponse
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
@@ -29,6 +28,8 @@ class TTTGameServer(
 
     private val games: ConcurrentHashMap<GameId, TTTGame> = ConcurrentHashMap()
     private val locks: ConcurrentHashMap<GameId, Mutex> = ConcurrentHashMap()
+
+    private val rematchMap: ConcurrentHashMap<GameId, GameId> = ConcurrentHashMap()
 
     private val jsonParser = JsonParser(Either.monadError())
     private val log get() = application.log
@@ -44,6 +45,16 @@ class TTTGameServer(
         locks[gameId] = Mutex()
         games[gameId] = game
         return game
+    }
+
+    fun rematchIdOfGame(gameId: GameId): GameId {
+        val rematchId = rematchMap[gameId]
+        if (rematchId != null)
+            return rematchId
+
+        val rematch = newGame()
+        rematchMap[gameId] = rematch.id
+        return rematch.id
     }
 
     suspend fun <MSG : JsonSerializable> updateGame(gameId: GameId, update: (TTTGame) -> Tuple2<TTTGame, MessagesOf<MSG>>): Messages {
@@ -114,7 +125,7 @@ class TTTGameServer(
 
     suspend fun handleJsonRequest(session: SessionId, request: JsonString): Messages {
         val deserializers = LobbyRequest.deserializers + GameRequest.deserializers
-                return jsonParser.parsRequest(request, deserializers.k()).fix().fold(
+        return jsonParser.parsRequest(request, deserializers.k()).fix().fold(
                 { error ->
                     log.info("failed to parse JSON request! session=$session, error=$error")
                     noMessages()

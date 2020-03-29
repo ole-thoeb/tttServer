@@ -5394,11 +5394,17 @@ var $author$project$Main$GotHomeMsg = function (a) {
 var $author$project$Main$GotNotFoundMsg = function (a) {
 	return {$: 'GotNotFoundMsg', a: a};
 };
+var $author$project$Main$GotRematchMsg = function (a) {
+	return {$: 'GotRematchMsg', a: a};
+};
 var $author$project$Main$Home = function (a) {
 	return {$: 'Home', a: a};
 };
 var $author$project$Main$NotFound = function (a) {
 	return {$: 'NotFound', a: a};
+};
+var $author$project$Main$Rematch = function (a) {
+	return {$: 'Rematch', a: a};
 };
 var $author$project$Page$TTT$Game$GotLobbyMsg = function (a) {
 	return {$: 'GotLobbyMsg', a: a};
@@ -6566,11 +6572,40 @@ var $author$project$Page$NotFound$init = function (session) {
 		{session: session},
 		$elm$core$Platform$Cmd$none);
 };
+var $author$project$Page$Rematch$Loading = function (a) {
+	return {$: 'Loading', a: a};
+};
+var $author$project$Page$Rematch$ServerResponse = function (a) {
+	return {$: 'ServerResponse', a: a};
+};
+var $author$project$Page$Rematch$init = F2(
+	function (session, oldGameId) {
+		return _Utils_Tuple2(
+			$author$project$Page$Rematch$Loading(session),
+			$elm$core$Platform$Cmd$batch(
+				_List_fromArray(
+					[
+						$author$project$Websocket$disconnect,
+						$elm$http$Http$get(
+						{
+							expect: A2($elm$http$Http$expectJson, $author$project$Page$Rematch$ServerResponse, $author$project$ServerResponse$EnterLobby$decoder),
+							url: A2(
+								$elm$url$Url$Builder$absolute,
+								_List_fromArray(
+									['rematch', oldGameId]),
+								_List_Nil)
+						})
+					])));
+	});
 var $author$project$Page$Home$toSession = function (model) {
 	return model.session;
 };
 var $author$project$Page$NotFound$toSession = function (model) {
 	return model.session;
+};
+var $author$project$Page$Rematch$toSession = function (model) {
+	var session = model.a;
+	return session;
 };
 var $author$project$Page$TTT$InGame$toSession = function ($) {
 	return $.session;
@@ -6602,6 +6637,9 @@ var $author$project$Main$toSession = function (model) {
 		case 'NotFound':
 			var notFound = model.a;
 			return $author$project$Page$NotFound$toSession(notFound);
+		case 'Rematch':
+			var rematch = model.a;
+			return $author$project$Page$Rematch$toSession(rematch);
 		default:
 			var game = model.a;
 			return $author$project$Page$TTT$Game$toSession(game);
@@ -6633,6 +6671,13 @@ var $author$project$Main$changeRouteTo = F2(
 					$author$project$Main$Game,
 					$author$project$Main$GotGameMsg,
 					A3($author$project$Page$TTT$Game$fromLobby, session, gameId, lobby));
+			case 'Rematch':
+				var oldGameId = route.a;
+				return A3(
+					$author$project$Util$updateWith,
+					$author$project$Main$Rematch,
+					$author$project$Main$GotRematchMsg,
+					A2($author$project$Page$Rematch$init, session, oldGameId));
 			default:
 				return A3(
 					$author$project$Util$updateWith,
@@ -7017,6 +7062,9 @@ var $author$project$Route$Game = function (a) {
 var $author$project$Route$Home = function (a) {
 	return {$: 'Home', a: a};
 };
+var $author$project$Route$Rematch = function (a) {
+	return {$: 'Rematch', a: a};
+};
 var $author$project$Page$Home$ConnectionError = function (a) {
 	return {$: 'ConnectionError', a: a};
 };
@@ -7293,6 +7341,13 @@ var $author$project$Route$parser = $elm$url$Url$Parser$oneOf(
 			A2(
 				$elm$url$Url$Parser$slash,
 				$elm$url$Url$Parser$s('game'),
+				$elm$url$Url$Parser$string)),
+			A2(
+			$elm$url$Url$Parser$map,
+			$author$project$Route$Rematch,
+			A2(
+				$elm$url$Url$Parser$slash,
+				$elm$url$Url$Parser$s('joinRematch'),
 				$elm$url$Url$Parser$string))
 		]));
 var $author$project$Route$fromUrl = function (url) {
@@ -7316,6 +7371,9 @@ var $elm$core$Platform$Sub$map = _Platform_map;
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $author$project$Page$Home$subscriptions = function (model) {
+	return $elm$core$Platform$Sub$none;
+};
+var $author$project$Page$Rematch$subscriptions = function (model) {
 	return $elm$core$Platform$Sub$none;
 };
 var $author$project$Page$TTT$Game$WebSocketIn = function (a) {
@@ -7351,6 +7409,12 @@ var $author$project$Main$subscriptions = function (model) {
 				$elm$core$Platform$Sub$map,
 				$author$project$Main$GotGameMsg,
 				$author$project$Page$TTT$Game$subscriptions(game));
+		case 'Rematch':
+			var rematch = model.a;
+			return A2(
+				$elm$core$Platform$Sub$map,
+				$author$project$Main$GotRematchMsg,
+				$author$project$Page$Rematch$subscriptions(rematch));
 		default:
 			return $elm$core$Platform$Sub$none;
 	}
@@ -7546,22 +7610,6 @@ var $author$project$Page$NotFound$update = F2(
 					$author$project$Page$NotFound$toSession(model)),
 				A2($elm$url$Url$Builder$absolute, _List_Nil, _List_Nil)));
 	});
-var $author$project$Page$TTT$Game$GotInGameMsg = function (a) {
-	return {$: 'GotInGameMsg', a: a};
-};
-var $author$project$Page$TTT$Game$InGame = function (a) {
-	return {$: 'InGame', a: a};
-};
-var $author$project$Util$dummy = F2(
-	function (b, a) {
-		return a;
-	});
-var $author$project$Page$TTT$InGame$init = F2(
-	function (session, game) {
-		return _Utils_Tuple2(
-			{game: game, session: session},
-			$author$project$Websocket$connect(game.gameId));
-	});
 var $elm$url$Url$Builder$QueryParameter = F2(
 	function (a, b) {
 		return {$: 'QueryParameter', a: a, b: b};
@@ -7605,6 +7653,68 @@ var $author$project$Page$Home$joinErrorToQueryParam = function (error) {
 			]);
 	}
 };
+var $author$project$Page$Rematch$update = F2(
+	function (msg, model) {
+		var session = $author$project$Page$Rematch$toSession(model);
+		var result = msg.a;
+		if (result.$ === 'Ok') {
+			var response = result.a;
+			if (response.$ === 'LobbyState') {
+				var lobby = response.a;
+				return _Utils_Tuple2(
+					model,
+					A2(
+						$elm$browser$Browser$Navigation$pushUrl,
+						$author$project$Session$navKey(session),
+						A2(
+							$elm$url$Url$Builder$absolute,
+							_List_fromArray(
+								['game', lobby.gameId]),
+							_List_Nil)));
+			} else {
+				var error = response.a;
+				return _Utils_Tuple2(
+					model,
+					A2(
+						$elm$browser$Browser$Navigation$pushUrl,
+						$author$project$Session$navKey(session),
+						A2(
+							$elm$url$Url$Builder$absolute,
+							_List_Nil,
+							$author$project$Page$Home$joinErrorToQueryParam(
+								$author$project$Page$Home$LobbyError(error)))));
+			}
+		} else {
+			var error = result.a;
+			return _Utils_Tuple2(
+				model,
+				A2(
+					$elm$browser$Browser$Navigation$pushUrl,
+					$author$project$Session$navKey(session),
+					A2(
+						$elm$url$Url$Builder$absolute,
+						_List_Nil,
+						$author$project$Page$Home$joinErrorToQueryParam(
+							$author$project$Page$Home$ConnectionError(
+								$elm$core$Maybe$Just(error))))));
+		}
+	});
+var $author$project$Page$TTT$Game$GotInGameMsg = function (a) {
+	return {$: 'GotInGameMsg', a: a};
+};
+var $author$project$Page$TTT$Game$InGame = function (a) {
+	return {$: 'InGame', a: a};
+};
+var $author$project$Util$dummy = F2(
+	function (b, a) {
+		return a;
+	});
+var $author$project$Page$TTT$InGame$init = F2(
+	function (session, game) {
+		return _Utils_Tuple2(
+			{game: game, session: session},
+			$author$project$Websocket$connect(game.gameId));
+	});
 var $author$project$Websocket$send = _Platform_outgoingPort('send', $elm$core$Basics$identity);
 var $elm$json$Json$Encode$int = _Json_wrap;
 var $author$project$ServerRequest$JsonHelper$remoteMsg = F2(
@@ -7639,6 +7749,8 @@ var $author$project$ServerRequest$InGame$setPiece = F3(
 	});
 var $author$project$Page$TTT$InGame$update = F2(
 	function (msg, model) {
+		var navKey = $author$project$Session$navKey(
+			$author$project$Page$TTT$InGame$toSession(model));
 		var game = model.game;
 		switch (msg.$) {
 			case 'CellClicked':
@@ -7648,14 +7760,22 @@ var $author$project$Page$TTT$InGame$update = F2(
 					$author$project$Websocket$send(
 						A3($author$project$ServerRequest$InGame$setPiece, game.gameId, game.playerMe.id, index)));
 			case 'Rematch':
-				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				return _Utils_Tuple2(
+					model,
+					A2(
+						$elm$browser$Browser$Navigation$pushUrl,
+						navKey,
+						A2(
+							$elm$url$Url$Builder$absolute,
+							_List_fromArray(
+								['joinRematch', game.gameId]),
+							_List_Nil)));
 			default:
 				return _Utils_Tuple2(
 					model,
 					A2(
 						$elm$browser$Browser$Navigation$pushUrl,
-						$author$project$Session$navKey(
-							$author$project$Page$TTT$InGame$toSession(model)),
+						navKey,
 						A2($elm$url$Url$Builder$absolute, _List_Nil, _List_Nil)));
 		}
 	});
@@ -7989,7 +8109,7 @@ var $author$project$Page$TTT$Game$update = F2(
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		var _v0 = _Utils_Tuple2(msg, model);
-		_v0$5:
+		_v0$6:
 		while (true) {
 			switch (_v0.a.$) {
 				case 'UrlChanged':
@@ -8025,7 +8145,7 @@ var $author$project$Main$update = F2(
 							$author$project$Main$GotHomeMsg,
 							A2($author$project$Page$Home$update, subMsg, home));
 					} else {
-						break _v0$5;
+						break _v0$6;
 					}
 				case 'GotGameMsg':
 					if (_v0.b.$ === 'Game') {
@@ -8037,7 +8157,19 @@ var $author$project$Main$update = F2(
 							$author$project$Main$GotGameMsg,
 							A2($author$project$Page$TTT$Game$update, subMsg, game));
 					} else {
-						break _v0$5;
+						break _v0$6;
+					}
+				case 'GotRematchMsg':
+					if (_v0.b.$ === 'Rematch') {
+						var subMsg = _v0.a.a;
+						var rematch = _v0.b.a;
+						return A3(
+							$author$project$Util$updateWith,
+							$author$project$Main$Rematch,
+							$author$project$Main$GotRematchMsg,
+							A2($author$project$Page$Rematch$update, subMsg, rematch));
+					} else {
+						break _v0$6;
 					}
 				default:
 					if (_v0.b.$ === 'NotFound') {
@@ -8049,7 +8181,7 @@ var $author$project$Main$update = F2(
 							$author$project$Main$GotNotFoundMsg,
 							A2($author$project$Page$NotFound$update, subMsg, notFound));
 					} else {
-						break _v0$5;
+						break _v0$6;
 					}
 			}
 		}
@@ -16150,6 +16282,38 @@ var $author$project$Page$NotFound$view = function (model) {
 		title: 'Page Not Found'
 	};
 };
+var $author$project$UIHelper$loading = function (theme) {
+	return A2(
+		$mdgriffith$elm_ui$Element$el,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$Background$color(theme.color.background),
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
+			]),
+		A4(
+			$author$project$UIHelper$materialText,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$centerX,
+					$mdgriffith$elm_ui$Element$centerY,
+					$mdgriffith$elm_ui$Element$Font$color(theme.color.onBackground)
+				]),
+			'Loading...',
+			$author$project$MaterialUI$Theme$Body1,
+			theme));
+};
+var $author$project$Page$Rematch$view = function (model) {
+	var theme = $author$project$Session$theme(
+		$author$project$Page$Rematch$toSession(model));
+	return {
+		body: A2(
+			$mdgriffith$elm_ui$Element$layout,
+			_List_Nil,
+			$author$project$UIHelper$loading(theme)),
+		title: 'Rematch'
+	};
+};
 var $author$project$Page$TTT$InGame$CellClicked = function (a) {
 	return {$: 'CellClicked', a: a};
 };
@@ -16967,7 +17131,14 @@ var $author$project$Page$TTT$Game$view = function (model) {
 				$author$project$Page$TTT$InGame$view(inGame));
 		default:
 			var session = model.a;
-			return $author$project$Page$Blank$view;
+			return {
+				body: A2(
+					$mdgriffith$elm_ui$Element$layout,
+					_List_Nil,
+					$author$project$UIHelper$loading(
+						$author$project$Session$theme(session))),
+				title: 'TTT'
+			};
 	}
 };
 var $author$project$Util$viewPage = F2(
@@ -17007,6 +17178,12 @@ var $author$project$Main$view = function (model) {
 				$author$project$Util$viewPage,
 				$author$project$Main$GotNotFoundMsg,
 				$author$project$Page$NotFound$view(notFound));
+		case 'Rematch':
+			var rematch = model.a;
+			return A2(
+				$author$project$Util$viewPage,
+				$author$project$Main$GotRematchMsg,
+				$author$project$Page$Rematch$view(rematch));
 		default:
 			var game = model.a;
 			return A2(

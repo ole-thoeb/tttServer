@@ -1,7 +1,9 @@
 module UIHelper exposing (..)
 
 import Element exposing (..)
-import MaterialUI.Theme as Theme
+import Element.Font as Font
+import MaterialUI.Theme as Theme exposing (Theme)
+import Element.Background as Background
 
 
 
@@ -17,3 +19,20 @@ materialText attr displayStr fontScale theme =
 nonEl : List (Element.Attribute msg) -> Element msg
 nonEl attributes =
     el attributes none
+
+
+loading : Theme a -> Element msg
+loading theme =
+    el
+        [ Background.color theme.color.background
+        , width fill
+        , height fill
+        ]
+        <| materialText
+            [ centerX
+            , centerY
+            , Font.color theme.color.onBackground
+            ]
+            "Loading..."
+            Theme.Body1
+            theme

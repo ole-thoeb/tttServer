@@ -9,6 +9,7 @@ import Url.Parser as Parser exposing ((</>), (<?>),  Parser, oneOf, s, string)
 type Route
     = Home (Maybe Home.JoinError)
     | Game String
+    | Rematch String
     | NotFound
 
 
@@ -17,6 +18,7 @@ parser =
     oneOf
         [ Parser.map Home (Parser.top <?> Home.joinErrorQueryParser)
         , Parser.map Game (s "game" </> string)
+        , Parser.map Rematch (s "joinRematch" </> string)
         ]
 
 

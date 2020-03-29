@@ -3,6 +3,7 @@ module Main exposing (..)
 
 import Browser
 import Browser.Navigation as Nav
+import Page.Rematch as Rematch
 import Page.TTT.Game as Game
 import Route exposing (Route)
 import Url
@@ -22,6 +23,7 @@ type Model
     = Initial Session
     | Home Home.Model
     | Game Game.Model
+    | Rematch Rematch.Model
     | NotFound NotFound.Model
 
 
@@ -33,6 +35,7 @@ type Msg
     | LinkClicked Browser.UrlRequest
     | GotHomeMsg Home.Msg
     | GotGameMsg Game.Msg
+    | GotRematchMsg Rematch.Msg
     | GotNotFoundMsg NotFound.Msg
 
 
@@ -47,6 +50,9 @@ toSession model =
 
         NotFound notFound ->
             NotFound.toSession notFound
+
+        Rematch rematch ->
+            Rematch.toSession rematch
 
         Game game ->
             Game.toSession game
@@ -72,10 +78,13 @@ changeRouteTo route model =
             Game.fromLobby session gameId lobby
                 |> updateWith Game GotGameMsg
 
+        Route.Rematch oldGameId ->
+            Rematch.init session oldGameId
+                |> updateWith Rematch GotRematchMsg
+
         Route.NotFound ->
             NotFound.init session
                 |> updateWith NotFound GotNotFoundMsg
-
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -99,6 +108,10 @@ update msg model =
         ( GotGameMsg subMsg, Game game ) ->
             Game.update subMsg game
                 |> updateWith Game GotGameMsg
+
+        ( GotRematchMsg subMsg, Rematch rematch ) ->
+                    Rematch.update subMsg rematch
+                        |> updateWith Rematch GotRematchMsg
 
         ( GotNotFoundMsg subMsg, NotFound notFound ) ->
             NotFound.update subMsg notFound
@@ -129,6 +142,9 @@ view model =
         NotFound notFound ->
             viewPage GotNotFoundMsg (NotFound.view notFound)
 
+        Rematch rematch ->
+            viewPage GotRematchMsg (Rematch.view rematch)
+
         Game game ->
             viewPage GotGameMsg (Game.view game)
 
@@ -147,6 +163,9 @@ subscriptions model =
 
         Game game ->
             Sub.map GotGameMsg (Game.subscriptions game)
+
+        Rematch rematch ->
+            Sub.map GotRematchMsg (Rematch.subscriptions rematch)
 
         NotFound _ ->
             Sub.none

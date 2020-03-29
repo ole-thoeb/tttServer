@@ -1,6 +1,7 @@
 module Page.TTT.Game exposing (Model, toSession, fromLobby, Msg, update, view, subscriptions)
 
 import Browser.Navigation as Nav
+import Element
 import Game.Lobby as Lobby
 import Html
 import Http
@@ -14,6 +15,7 @@ import ServerResponse.InGame as InGameResponse
 import ServerResponse.InLobby as InLobbyResponse
 import ServerResponse.TTTResponse as TTTResponse
 import Session exposing (Session)
+import UIHelper
 import Url.Builder
 
 import Util exposing (dummy, updateWith)
@@ -158,7 +160,9 @@ view model =
             viewFragment GotInGameMsg (InGame.view inGame)
 
         Loading session ->
-            Page.Blank.view
+            { title = "TTT"
+            , body = Element.layout [] (UIHelper.loading <| Session.theme session)
+            }
 
 
 viewFragment : (subMsg -> Msg) -> { title: String, body: Html.Html subMsg } ->  { title: String, body: Html.Html Msg }

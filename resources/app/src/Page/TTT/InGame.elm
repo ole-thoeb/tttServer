@@ -62,17 +62,18 @@ update: Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
         game = model.game
+        navKey = model |> toSession |> Session.navKey
     in
     case msg of
         CellClicked index ->
             ( model, Websocket.send (InGameRequest.setPiece game.gameId game.playerMe.id index) )
 
         Rematch ->
-            ( model, Cmd.none )
+            ( model, Nav.pushUrl navKey <| Url.Builder.absolute [ "joinRematch", game.gameId ] [] )
 
         Leave ->
             ( model
-            , Nav.pushUrl (model |> toSession |> Session.navKey) <| Url.Builder.absolute [] []
+            , Nav.pushUrl navKey <| Url.Builder.absolute [] []
             )
 
 
