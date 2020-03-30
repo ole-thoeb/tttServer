@@ -145,6 +145,6 @@ suspend fun PipelineContext<*, ApplicationCall>.addPlayerToGame(gameId: GameId, 
         val respondMsg = msgs.entries.firstOrNull { it.key.sessionId == sessionId }
                 ?: throw IllegalStateException("no join response was produced")
         call.respondJson(respondMsg.value)
-        sendViaWebsocket(msgs)
+        context.application.sendViaWebsocket(msgs)
     }
 }
