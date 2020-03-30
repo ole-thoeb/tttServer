@@ -67,7 +67,8 @@ update msg model =
     case msg of
         Name name ->
             let
-                newLobby = Lobby.playerNameOfLobby.set name lobby
+                limitedName = String.slice 0 19 name
+                newLobby = Lobby.playerNameOfLobby.set limitedName lobby
             in
             ( { model | lobby = newLobby }, InLobbyRequest.nameChangedMsg newLobby.gameId newLobby.playerMe |> Websocket.send )
 

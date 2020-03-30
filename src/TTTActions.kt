@@ -59,7 +59,7 @@ suspend fun TTTGameServer.handleLobbyRequest(lobbyRequest: LobbyRequest): Messag
                 }
                 is LobbyRequest.Name -> {
                     TTTGame.Lobby.player { it.technical.playerId == lobbyRequest.playerId }.modify(game) {
-                        it.copy(name = lobbyRequest.content.name)
+                        it.copy(name = lobbyRequest.content.name.limit(20))
                     }
                 }
             }

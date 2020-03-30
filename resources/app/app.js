@@ -7924,7 +7924,8 @@ var $author$project$Page$TTT$Lobby$update = F2(
 		switch (msg.$) {
 			case 'Name':
 				var name = msg.a;
-				var newLobby = A2($author$project$Game$Lobby$playerNameOfLobby.set, name, lobby);
+				var limitedName = A3($elm$core$String$slice, 0, 19, name);
+				var newLobby = A2($author$project$Game$Lobby$playerNameOfLobby.set, limitedName, lobby);
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,

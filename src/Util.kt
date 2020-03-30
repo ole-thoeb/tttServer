@@ -40,6 +40,8 @@ fun <T> Iterable<T>.allEqual(): Boolean {
     return true
 }
 
+fun String.limit(n: Int) = if (length > n) slice(0 until n) else this
+
 typealias MessagesOf<MSG> = Map<TechnicalPlayer, MSG>
 
 typealias Messages = MessagesOf<JsonSerializable>
