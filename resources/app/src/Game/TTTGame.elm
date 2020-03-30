@@ -1,4 +1,4 @@
-module Game.TTTGame exposing (TTTGame, decoder, CellState(..), cellStateFromSymbol, Status(..))
+module Game.TTTGame exposing (TTTGame, decoder, CellState(..), cellStateFromSymbol, Status(..), playerOfSymbol, playerFromRef)
 
 
 import Array exposing (Array)
@@ -25,15 +25,23 @@ type alias TTTGame =
     }
 
 
-decoder : Decoder TTTGame
-decoder =
-    Decode.map6 TTTGame
-        (Decode.field "gameId" Decode.string)
-        (Decode.field "playerMe" TTTPlayer.meDecoder)
-        (Decode.field "opponent" TTTPlayer.decoder)
-        (Decode.field "meTurn" Decode.bool)
-        (Decode.field "board" boardDecoder)
-        (Decode.field "status" statusDecoder)
+-- UTILITY
+
+
+playerOfSymbol : TTTGame -> TTTPlayer.Symbol -> TTTPlayer.Player
+playerOfSymbol game symbol =
+    if game.playerMe.symbol == symbol then
+        TTTPlayer.meAsPlayer game.playerMe
+    else
+        game.opponent
+
+
+playerFromRef : TTTGame -> TTTPlayer.PlayerRef -> TTTPlayer.Player
+playerFromRef game ref =
+    if game.playerMe.playerRef == ref then
+        TTTPlayer.meAsPlayer game.playerMe
+    else
+        game.opponent
 
 
 cellStateFromSymbol : TTTPlayer.Symbol -> CellState
@@ -44,6 +52,20 @@ cellStateFromSymbol symbol =
 
         TTTPlayer.O ->
             O
+
+
+-- DECODER
+
+
+decoder : Decoder TTTGame
+decoder =
+    Decode.map6 TTTGame
+        (Decode.field "gameId" Decode.string)
+        (Decode.field "playerMe" TTTPlayer.meDecoder)
+        (Decode.field "opponent" TTTPlayer.decoder)
+        (Decode.field "meTurn" Decode.bool)
+        (Decode.field "board" boardDecoder)
+        (Decode.field "status" statusDecoder)
 
 
 boardDecoder : Decoder (Array CellState)

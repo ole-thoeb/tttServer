@@ -6690,6 +6690,16 @@ var $author$project$Session$Guest = F2(
 	function (a, b) {
 		return {$: 'Guest', a: a, b: b};
 	});
+var $author$project$Session$Player1Color = {$: 'Player1Color'};
+var $author$project$Session$Player2Color = {$: 'Player2Color'};
+var $mdgriffith$elm_ui$Internal$Model$Rgba = F4(
+	function (a, b, c, d) {
+		return {$: 'Rgba', a: a, b: b, c: c, d: d};
+	});
+var $mdgriffith$elm_ui$Element$rgb255 = F3(
+	function (red, green, blue) {
+		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, red / 255, green / 255, blue / 255, 1);
+	});
 var $avh4$elm_color$Color$RgbaSpace = F4(
 	function (a, b, c, d) {
 		return {$: 'RgbaSpace', a: a, b: b, c: c, d: d};
@@ -6839,14 +6849,6 @@ var $author$project$MaterialUI$Theme$defaultTypescale = {
 		weight: $author$project$MaterialUI$Theme$Medium
 	}
 };
-var $mdgriffith$elm_ui$Internal$Model$Rgba = F4(
-	function (a, b, c, d) {
-		return {$: 'Rgba', a: a, b: b, c: c, d: d};
-	});
-var $mdgriffith$elm_ui$Element$rgb255 = F3(
-	function (red, green, blue) {
-		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, red / 255, green / 255, blue / 255, 1);
-	});
 var $author$project$MaterialUI$Theme$Dp = function (a) {
 	return {$: 'Dp', a: a};
 };
@@ -6933,8 +6935,33 @@ var $author$project$MaterialUI$Themes$Dark$theme = function () {
 				})
 		});
 }();
+var $author$project$Session$defaultDarkTheme = function () {
+	var baseTheme = $author$project$MaterialUI$Themes$Dark$theme;
+	var baseColor = baseTheme.color;
+	return _Utils_update(
+		baseTheme,
+		{
+			color: _Utils_update(
+				baseColor,
+				{
+					alternative: _List_fromArray(
+						[
+							_Utils_Tuple2(
+							$author$project$Session$Player1Color,
+							A3($mdgriffith$elm_ui$Element$rgb255, 236, 64, 122)),
+							_Utils_Tuple2(
+							$author$project$Session$Player2Color,
+							A3($mdgriffith$elm_ui$Element$rgb255, 92, 107, 192))
+						]),
+					primary: A3($mdgriffith$elm_ui$Element$rgb255, 102, 187, 106),
+					primaryVariant: A3($mdgriffith$elm_ui$Element$rgb255, 152, 238, 153),
+					secondary: A3($mdgriffith$elm_ui$Element$rgb255, 255, 202, 40),
+					secondaryVariant: A3($mdgriffith$elm_ui$Element$rgb255, 255, 253, 97)
+				})
+		});
+}();
 var $author$project$Session$fromKey = function (key) {
-	return A2($author$project$Session$Guest, key, $author$project$MaterialUI$Themes$Dark$theme);
+	return A2($author$project$Session$Guest, key, $author$project$Session$defaultDarkTheme);
 };
 var $author$project$Route$NotFound = {$: 'NotFound'};
 var $elm$url$Url$Parser$State = F5(
@@ -7373,7 +7400,7 @@ var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $author$project$Page$Home$subscriptions = function (model) {
 	return $elm$core$Platform$Sub$none;
 };
-var $author$project$Page$Rematch$subscriptions = function (model) {
+var $author$project$Page$Rematch$subscriptions = function (_v0) {
 	return $elm$core$Platform$Sub$none;
 };
 var $author$project$Page$TTT$Game$WebSocketIn = function (a) {
@@ -16314,6 +16341,9 @@ var $author$project$Page$Rematch$view = function (model) {
 		title: 'Rematch'
 	};
 };
+var $author$project$MaterialUI$Theme$Alternative = function (a) {
+	return {$: 'Alternative', a: a};
+};
 var $author$project$Page$TTT$InGame$CellClicked = function (a) {
 	return {$: 'CellClicked', a: a};
 };
@@ -16499,6 +16529,42 @@ var $elm$core$Array$get = F2(
 			A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, tail)) : $elm$core$Maybe$Just(
 			A3($elm$core$Array$getHelp, startShift, index, tree)));
 	});
+var $author$project$Game$TTTGamePlayer$meAsPlayer = function (playerMe) {
+	return {color: playerMe.color, name: playerMe.name, playerRef: playerMe.playerRef, symbol: playerMe.symbol};
+};
+var $author$project$Game$TTTGame$playerOfSymbol = F2(
+	function (game, symbol) {
+		return _Utils_eq(game.playerMe.symbol, symbol) ? $author$project$Game$TTTGamePlayer$meAsPlayer(game.playerMe) : game.opponent;
+	});
+var $avh4$elm_color$Color$toCssString = function (_v0) {
+	var r = _v0.a;
+	var g = _v0.b;
+	var b = _v0.c;
+	var a = _v0.d;
+	var roundTo = function (x) {
+		return $elm$core$Basics$round(x * 1000) / 1000;
+	};
+	var pct = function (x) {
+		return $elm$core$Basics$round(x * 10000) / 100;
+	};
+	return $elm$core$String$concat(
+		_List_fromArray(
+			[
+				'rgba(',
+				$elm$core$String$fromFloat(
+				pct(r)),
+				'%,',
+				$elm$core$String$fromFloat(
+				pct(g)),
+				'%,',
+				$elm$core$String$fromFloat(
+				pct(b)),
+				'%,',
+				$elm$core$String$fromFloat(
+				roundTo(a)),
+				')'
+			]));
+};
 var $elm$svg$Svg$Attributes$preserveAspectRatio = _VirtualDom_attribute('preserveAspectRatio');
 var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
 var $elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
@@ -16511,6 +16577,22 @@ var $author$project$Page$TTT$SvgSymbol$toHtml = $elm$svg$Svg$svg(
 		]));
 var $author$project$Page$TTT$InGame$boardCell = F3(
 	function (theme, cellNumber, game) {
+		var toCssString = function (color) {
+			return $avh4$elm_color$Color$toCssString(
+				$avh4$elm_color$Color$fromRgba(
+					$mdgriffith$elm_ui$Element$toRgb(color)));
+		};
+		var colorKeyForSymbol = function (symbol) {
+			return $author$project$MaterialUI$Theme$Alternative(
+				function () {
+					var _v3 = A2($author$project$Game$TTTGame$playerOfSymbol, game, symbol).playerRef;
+					if (_v3.$ === 'P1') {
+						return $author$project$Session$Player1Color;
+					} else {
+						return $author$project$Session$Player2Color;
+					}
+				}());
+		};
 		var board = game.board;
 		var svgIcon = $author$project$Page$TTT$SvgSymbol$toHtml(
 			_Utils_ap(
@@ -16523,10 +16605,20 @@ var $author$project$Page$TTT$InGame$boardCell = F3(
 							switch (_v0.a.$) {
 								case 'X':
 									var _v1 = _v0.a;
-									return $author$project$Page$TTT$SvgSymbol$cross('red');
+									return $author$project$Page$TTT$SvgSymbol$cross(
+										toCssString(
+											A2(
+												$author$project$MaterialUI$Theme$getColor,
+												colorKeyForSymbol($author$project$Game$TTTGamePlayer$X),
+												theme)));
 								case 'O':
 									var _v2 = _v0.a;
-									return $author$project$Page$TTT$SvgSymbol$circle('blue');
+									return $author$project$Page$TTT$SvgSymbol$circle(
+										toCssString(
+											A2(
+												$author$project$MaterialUI$Theme$getColor,
+												colorKeyForSymbol($author$project$Game$TTTGamePlayer$O),
+												theme)));
 								default:
 									break _v0$2;
 							}
@@ -16605,7 +16697,6 @@ var $author$project$Page$TTT$InGame$headerButtonColumn = function (theme) {
 				theme)
 			]));
 };
-var $author$project$MaterialUI$Theme$SecondaryVariant = {$: 'SecondaryVariant'};
 var $mdgriffith$elm_ui$Internal$Model$Right = {$: 'Right'};
 var $mdgriffith$elm_ui$Element$alignRight = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Right);
 var $elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
@@ -16681,14 +16772,23 @@ var $author$project$MaterialUI$Icons$Toggle$radio_button_unchecked = $author$pro
 var $author$project$Page$TTT$InGame$playerHeader = F4(
 	function (theme, player, highlight, alignment) {
 		var symbolIcon = function () {
-			var _v2 = player.symbol;
-			if (_v2.$ === 'X') {
+			var _v3 = player.symbol;
+			if (_v3.$ === 'X') {
 				return $author$project$MaterialUI$Icons$Navigation$close;
 			} else {
 				return $author$project$MaterialUI$Icons$Toggle$radio_button_unchecked;
 			}
 		}();
-		var borderColor = highlight ? theme.color.secondary : theme.color.onBackground;
+		var playerColor = $author$project$MaterialUI$Theme$Alternative(
+			function () {
+				var _v2 = player.playerRef;
+				if (_v2.$ === 'P1') {
+					return $author$project$Session$Player1Color;
+				} else {
+					return $author$project$Session$Player2Color;
+				}
+			}());
+		var borderColor = highlight ? A2($author$project$MaterialUI$Theme$getColor, playerColor, theme) : theme.color.onBackground;
 		var _v0 = function () {
 			if (alignment.$ === 'Left') {
 				return _Utils_Tuple2($mdgriffith$elm_ui$Element$Font$alignLeft, $mdgriffith$elm_ui$Element$alignLeft);
@@ -16723,7 +16823,7 @@ var $author$project$Page$TTT$InGame$playerHeader = F4(
 					player.name,
 					$author$project$MaterialUI$Theme$Body1,
 					theme),
-					A4($author$project$MaterialUI$Icon$view, theme, $author$project$MaterialUI$Theme$SecondaryVariant, 20, symbolIcon)
+					A4($author$project$MaterialUI$Icon$view, theme, playerColor, 20, symbolIcon)
 				]));
 	});
 var $mdgriffith$elm_ui$Element$spaceEvenly = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$spacing, $mdgriffith$elm_ui$Internal$Style$classes.spaceEvenly);

@@ -1,11 +1,17 @@
-module Session exposing (Session, navKey, fromKey, theme)
+module Session exposing (Session, navKey, fromKey, theme, CustomColor(..))
 
 import Browser.Navigation as Nav
+import Element
 import MaterialUI.Theme as Theme exposing (Theme)
 import MaterialUI.Themes.Dark as Dark
 
+type CustomColor
+    = Player1Color
+    | Player2Color
+
+
 type Session =
-    Guest Nav.Key (Theme ())
+    Guest Nav.Key (Theme CustomColor)
 
 
 navKey : Session -> Nav.Key
@@ -15,7 +21,7 @@ navKey session =
             key
 
 
-theme : Session -> Theme ()
+theme : Session -> Theme CustomColor
 theme session =
     case session of
         Guest _ t ->
@@ -24,4 +30,25 @@ theme session =
 
 fromKey : Nav.Key -> Session
 fromKey key =
-    Guest key Dark.theme--Theme.defaultTheme
+    Guest key defaultDarkTheme--Theme.defaultTheme
+
+
+defaultDarkTheme : Theme CustomColor
+defaultDarkTheme =
+    let
+        baseTheme = Dark.theme
+        baseColor = baseTheme.color
+    in
+    { baseTheme
+    | color =
+        { baseColor
+        | primary = Element.rgb255 102 187 106
+        , primaryVariant = Element.rgb255 152 238 153
+        , secondary = Element.rgb255 255 202 40
+        , secondaryVariant = Element.rgb255 255 253 97
+        , alternative =
+            [ ( Player1Color, Element.rgb255 236 64 122 )
+            , ( Player2Color, Element.rgb255 92 107 192 )
+            ]
+        }
+    }

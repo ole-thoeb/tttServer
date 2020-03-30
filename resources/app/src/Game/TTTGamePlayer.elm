@@ -1,4 +1,4 @@
-module Game.TTTGamePlayer exposing (Symbol(..), PlayerMe, Player, decoder, meDecoder, playerRefDecoder, PlayerRef(..))
+module Game.TTTGamePlayer exposing (Symbol(..), PlayerMe, Player, decoder, meDecoder, playerRefDecoder, PlayerRef(..), meAsPlayer)
 
 import Json.Decode as Decode exposing (Decoder)
 
@@ -24,6 +24,15 @@ type alias Player =
 
 
 type PlayerRef = P1 | P2
+
+
+meAsPlayer : PlayerMe -> Player
+meAsPlayer playerMe =
+    { name = playerMe.name
+    , symbol =  playerMe.symbol
+    , color = playerMe.color
+    , playerRef = playerMe.playerRef
+    }
 
 
 -- DECODER

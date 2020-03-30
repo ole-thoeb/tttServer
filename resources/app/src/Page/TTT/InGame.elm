@@ -3,6 +3,7 @@ module Page.TTT.InGame exposing (Model, init, toSession, Msg, update, updateFrom
 
 import Array exposing (Array)
 import Browser.Navigation as Nav
+import Color
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -230,18 +231,24 @@ type Alignment
     | Right
 
 
-playerHeader : Theme a  ->
+playerHeader : Theme Session.CustomColor  ->
     { player
     | name : String
     , color : String
     , symbol : Symbol
+    , playerRef : TTTGamePlayer.PlayerRef
     } ->
     Bool ->
     Alignment ->
     Element Msg
 playerHeader theme player highlight alignment =
     let
-        borderColor = if highlight then theme.color.secondary else theme.color.onBackground
+        playerColor = Theme.Alternative <| case player.playerRef of
+                TTTGamePlayer.P1 -> Session.Player1Color
+                TTTGamePlayer.P2 -> Session.Player2Color
+
+
+        borderColor = if highlight then Theme.getColor playerColor theme else theme.color.onBackground
         symbolIcon = case player.symbol of
             TTTGamePlayer.X ->
                 Navigation.close
@@ -272,20 +279,28 @@ playerHeader theme player highlight alignment =
             player.name
             Theme.Body1
             theme
-        , Icon.view theme Theme.SecondaryVariant 20 symbolIcon
+        , Icon.view theme playerColor 20 symbolIcon
         ]
 
 
-boardCell : Theme a -> Int -> TTTGame -> Element Msg
+boardCell : Theme (Session.CustomColor) -> Int -> TTTGame -> Element Msg
 boardCell theme cellNumber game =
     let
         board = game.board
+        toCssString color = Element.toRgb color
+            |> Color.fromRgba
+            |> Color.toCssString
+
+        colorKeyForSymbol symbol = Theme.Alternative <| case  TTTGame.playerOfSymbol game symbol |> .playerRef of
+            TTTGamePlayer.P1 -> Session.Player1Color
+            TTTGamePlayer.P2 -> Session.Player2Color
+
         svgIcon = SvgSymbol.toHtml <| gameStatusToLine game.status cellNumber ++ case Array.get cellNumber board of
             Just TTTGame.X ->
-               SvgSymbol.cross "red"
+               SvgSymbol.cross (Theme.getColor (colorKeyForSymbol TTTGamePlayer.X) theme |> toCssString)
 
             Just TTTGame.O ->
-                SvgSymbol.circle "blue"
+                SvgSymbol.circle (Theme.getColor (colorKeyForSymbol TTTGamePlayer.O) theme |> toCssString)
 
             _ -> SvgSymbol.empty
     in
