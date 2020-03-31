@@ -43,7 +43,7 @@ suspend fun TTTGameServer.handleLobbyRequest(lobbyRequest: LobbyRequest): Messag
                                 it.copy(isReady = lobbyRequest.content.isReady)
                             }
                     if (modifiedLobby.players.size == 2 && modifiedLobby.players.all { it.isReady }) {
-                        val (p1, p2) = modifiedLobby.players
+                        val (p1, p2) = modifiedLobby.players.shuffled()
                         val inGame = TTTGame.InGame(
                                 modifiedLobby.id,
                                 TTTGame.InGame.Player(p1.name.ifBlank { "Player 1" }, "#FF0000", p1.technical),
