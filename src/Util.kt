@@ -32,7 +32,7 @@ inline fun <T: Any> List<T>.updateNotNone(predicate: Predicate<T>, update: (T) -
 
 fun <T> Iterable<T>.allEqual(): Boolean {
     val iter = iterator()
-    if (!iter.hasNext()) return false
+    if (!iter.hasNext()) return true
     val element = iter.next()
     while (iter.hasNext()) {
         if (element != iter.next()) return false;
