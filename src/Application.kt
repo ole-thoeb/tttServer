@@ -1,3 +1,6 @@
+import arrow.core.ListK
+import arrow.core.k
+import arrow.core.toT
 import io.ktor.application.*
 import io.ktor.features.CallLogging
 import io.ktor.features.DefaultHeaders
@@ -16,6 +19,8 @@ import io.ktor.sessions.*
 import io.ktor.util.pipeline.PipelineContext
 import io.ktor.websocket.WebSockets
 import io.ktor.websocket.webSocket
+import json.JsonSerializable
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import messages.responses.TTTResponse
 import org.slf4j.event.Level
@@ -105,7 +110,32 @@ fun Application.module(testing: Boolean = false) {
         }
         get<Rematch> { rematch ->
             val rematchId = tttGameServer.rematchIdOfGame(GameId(rematch.oldGameId))
-            addPlayerToGame(rematchId, tttGameServer)
+            val sessionId = call.sessions.get<SessionId>()
+            if (sessionId == null) {
+                call.respond(HttpStatusCode.BadRequest, "No Session!")
+                return@get
+            }
+            var oldPlayerName: String? = null
+            tttGameServer.updateGame(GameId(rematch.oldGameId)) { game ->
+                oldPlayerName = when (game) {
+                    is TTTGame.Lobby -> game.players
+                            .firstOrNull { it.technical.sessionId == sessionId }
+                            ?.name
+                    is TTTGame.InGame -> game.playersWithRef
+                            .map { it.a }
+                            .firstOrNull { it.technical.sessionId == sessionId }
+                            ?.name
+                }
+                game toT noMessages<JsonSerializable>()
+            }
+            val oldPlayerNameLocal = oldPlayerName
+            if (oldPlayerNameLocal != null) {
+                val technical = TechnicalPlayer(PlayerId.create(), sessionId, ListK.empty(), emptyMap<String, Job>().k())
+                val player = TTTGame.Lobby.Player(oldPlayerNameLocal, false, technical)
+                handleAddPlayerMsgs(rematchId, sessionId, tttGameServer.addNewPlayer(player, rematchId))
+            } else {
+                addPlayerToGame(rematchId, tttGameServer, sessionId)
+            }
         }
         static {
             defaultIndexHtml()
@@ -132,13 +162,16 @@ data class JoinGame(val gameId: String)
 data class Rematch(val oldGameId: String)
 
 
-suspend fun PipelineContext<*, ApplicationCall>.addPlayerToGame(gameId: GameId, tttGameServer: TTTGameServer, paramSessionId: SessionId? = null) {
+private suspend fun PipelineContext<*, ApplicationCall>.addPlayerToGame(gameId: GameId, tttGameServer: TTTGameServer, paramSessionId: SessionId? = null) {
     val sessionId = paramSessionId ?: call.sessions.get<SessionId>()
     if (sessionId == null) {
         call.respond(HttpStatusCode.BadRequest, "No Session!")
         return
     }
-    val msgs = tttGameServer.addNewPlayer(sessionId, gameId)
+    handleAddPlayerMsgs(gameId, sessionId, tttGameServer.addNewPlayer(sessionId, gameId))
+}
+
+private suspend fun PipelineContext<*, ApplicationCall>.handleAddPlayerMsgs(gameId: GameId, sessionId: SessionId, msgs: Messages) {
     if (msgs.isCouldNotMatchGame()) {
         call.respondJson(TTTResponse.NoSuchGame(gameId.asString()))
     } else {

@@ -6,29 +6,45 @@ import messages.responses.InGameResponse
 import messages.responses.LobbyResponse
 
 suspend fun TTTGameServer.addNewPlayer(sessionId: SessionId, gameId: GameId): Messages = updateGame(gameId) { game ->
-    val newPlayer = TechnicalPlayer(PlayerId.create(), sessionId, ListK.empty(), emptyMap<String, Job>().k())
-    when (game) {
-        is TTTGame.Lobby -> {
-            game.players.firstOrNone { it.technical.sessionId == sessionId }.fold(
-                    {
-                        game.addPlayer(newPlayer).fold(
-                                { lobbyError ->
-                                    game toT mapOf(newPlayer to LobbyResponse.Full.fromError(lobbyError))
-                                },
-                                { updatedLobby ->
-                                    updatedLobby toT lobbyStateMsgs(updatedLobby)
-                                }
-                        )
-                    },
-                    { game toT lobbyStateMsgs(game) }
-            )
-        }
-        is TTTGame.InGame -> {
-            when (sessionId) {
-                game.player1.technical.sessionId, game.player2.technical.sessionId -> game toT inGameStateMsgs(game)
-                else -> game toT mapOf(newPlayer to LobbyResponse.GameAlreadyStarted(game.id.asString()))
-            }
-        }
+    val technical = TechnicalPlayer(PlayerId.create(), sessionId, ListK.empty(), emptyMap<String, Job>().k())
+    game.joinLobby(technical) { lobby ->
+        val player = TTTGame.Lobby.Player("Player ${lobby.players.size + 1}", false, technical)
+        addNewPlayer(player, lobby)
+    }
+}
+
+suspend fun TTTGameServer.addNewPlayer(player: TTTGame.Lobby.Player, gameId: GameId): Messages = updateGame(gameId) { game ->
+    game.joinLobby(player.technical) { lobby ->
+        addNewPlayer(player, lobby)
+    }
+}
+
+private fun addNewPlayer(player: TTTGame.Lobby.Player, lobby: TTTGame.Lobby): Tuple2<TTTGame, Messages> {
+    val technical = player.technical
+    return lobby.players.firstOrNone { it.technical.sessionId == technical.sessionId }.fold(
+            {
+                lobby.addPlayer(player).fold(
+                        { lobbyError ->
+                            lobby toT mapOf(technical to LobbyResponse.Full.fromError(lobbyError))
+                        },
+                        { updatedLobby ->
+                            updatedLobby toT lobbyStateMsgs(updatedLobby)
+                        }
+                )
+            },
+            { lobby toT lobbyStateMsgs(lobby) }
+    )
+}
+
+private inline fun TTTGame.joinLobby(
+        player: TechnicalPlayer,
+        addPlayer: (TTTGame.Lobby) -> Tuple2<TTTGame, Messages>
+): Tuple2<TTTGame, Messages> = when (this) {
+
+    is TTTGame.Lobby -> addPlayer(this)
+    is TTTGame.InGame -> when (player.sessionId) {
+        player1.technical.sessionId, player2.technical.sessionId -> this toT inGameStateMsgs(this)
+        else -> this toT mapOf(player to LobbyResponse.GameAlreadyStarted(id.asString()))
     }
 }
 
