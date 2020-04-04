@@ -142,89 +142,62 @@ view model =
         theme = model |> toSession |> Session.theme
     in
     { title = "Home"
-    , body =
-        layout
-            [ Background.color theme.color.background
-            , Font.color theme.color.onBackground
+    , body = defaultTopColumn "Join/Create Game" theme
+        [ row
+            [ width fill
+            , spacing 10
             ]
-            <| column
-                [ centerX
-                , width (fill |> maximum 900)
-                , padding 16
-                , spacing 16
+            [ el
+                [ width <| fillPortion 2 ]
+                <| TextField.text
+                    [ width fill
+                    ]
+                    { label = "Game id"
+                    , hideLabel = False
+                    , type_ = TextField.Outlined
+                    , color = Theme.Primary
+                    , text = model.gameId
+                    , onChange = GameId
+                    , state = TextField.Idle
+                    , errorText = Nothing
+                    , helperText = Nothing
+                    }
+                    theme
+            , Button.outlined
+                [ alignLeft
+                , width <| fillPortion 1
                 ]
-                <| [ row
-                    [ width fill
-                    , spacing 10
-                    ]
-                    [ materialText
-                        [ width <| fillPortion 2
-                        , Font.alignRight
-                        , padding 16
-                        ]
-                        "Join/Create Game"
-                        Theme.H5
-                        theme
-                    , nonEl
-                        [ width <| fillPortion 1
-                        , padding 16 -- emulate button padding
-                        ]
-                    ]
-                , row
-                    [ width fill
-                    , spacing 10
-                    ]
-                    [ el
-                        [ width <| fillPortion 2 ]
-                        <| TextField.text
-                            [ width fill
-                            ]
-                            { label = "Game id"
-                            , hideLabel = False
-                            , type_ = TextField.Outlined
-                            , color = Theme.Primary
-                            , text = model.gameId
-                            , onChange = GameId
-                            , state = TextField.Idle
-                            , errorText = Nothing
-                            , helperText = Nothing
-                            }
-                            theme
-                    , Button.outlined
-                        [ alignLeft
-                        , width <| fillPortion 1
-                        ]
-                        { icon = Nothing
-                        , color = Theme.Primary
-                        , text = "Join Game"
-                        , onPress = Just JoinGame
-                        , disabled = False
-                        }
-                        theme
-                    ]
-                , row
-                    [ width fill
-                    , spacing 10
-                    ]
-                    [ nonEl [ width <| fillPortion 2 ]
-                    ,Button.outlined
-                        [ alignLeft
-                        , width <| fillPortion 1
-                        ]
-                        { icon = Nothing
-                        , color = Theme.Primary
-                        , text = "Create Game"
-                        , onPress = Just NewTTTGame
-                        , disabled = False
-                        }
-                        theme
-                    ]
-                ] ++ case model.error of
-                    Just error ->
-                        [ errorCard (error |> toErrorMsg) theme ]
+                { icon = Nothing
+                , color = Theme.Primary
+                , text = "Join Game"
+                , onPress = Just JoinGame
+                , disabled = False
+                }
+                theme
+            ]
+        , row
+            [ width fill
+            , spacing 10
+            ]
+            [ nonEl [ width <| fillPortion 2 ]
+            ,Button.outlined
+                [ alignLeft
+                , width <| fillPortion 1
+                ]
+                { icon = Nothing
+                , color = Theme.Primary
+                , text = "Create Game"
+                , onPress = Just NewTTTGame
+                , disabled = False
+                }
+                theme
+            ]
+        ] ++ case model.error of
+            Just error ->
+                [ errorCard (error |> toErrorMsg) theme ]
 
-                    Nothing ->
-                        []
+            Nothing ->
+                []
 
     }
 

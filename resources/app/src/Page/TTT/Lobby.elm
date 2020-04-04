@@ -104,87 +104,86 @@ view model =
         theme = model |> toSession |> Session.theme
     in
     { title = "Home"
-    , body =
-        defaultTopColumn "Lobby" theme
+    , body = defaultTopColumn "Lobby" theme
+        [ row
+            [ width fill
+            , spacing 10
+            ]
+            [ el
+                [ width <| fillPortion 2 ]
+                <| TextField.text
+                    [ width fill
+                    ]
+                    { label = "Name"
+                    , hideLabel = False
+                    , type_ = TextField.Outlined
+                    , color = Theme.Primary
+                    , text = model.lobby.playerMe.name
+                    , onChange = Name
+                    , state = TextField.Idle
+                    , errorText = Nothing
+                    , helperText = Nothing
+                   }
+                   theme
+            , let
+                bText = if model.lobby.playerMe.isReady then "Not Ready" else "Ready"
+            in
+            Button.outlined
+                [ alignLeft
+                , width <| fillPortion 1
+                ]
+                { icon = Nothing
+                , color = Theme.Primary
+                , text = bText
+                , onPress = Just Ready
+                , disabled = False
+                }
+                theme
+            ]
+        , row
+            [ width fill
+            , spacing 10
+            ]
             [ row
-                [ width fill
-                , spacing 10
+                [ width <| fillPortion 2
+                , padding 4
                 ]
-                [ el
-                    [ width <| fillPortion 2 ]
-                    <| TextField.text
-                        [ width fill
+                [ column
+                    [ spacing 4
+                    , width fill
+                    ]
+                    [ materialText
+                        [ Font.alignLeft
+                        , alignLeft
                         ]
-                        { label = "Name"
-                        , hideLabel = False
-                        , type_ = TextField.Outlined
-                        , color = Theme.Primary
-                        , text = model.lobby.playerMe.name
-                        , onChange = Name
-                        , state = TextField.Idle
-                        , errorText = Nothing
-                        , helperText = Nothing
-                       }
-                       theme
-                , let
-                    bText = if model.lobby.playerMe.isReady then "Not Ready" else "Ready"
-                in
-                Button.outlined
-                    [ alignLeft
-                    , width <| fillPortion 1
-                    ]
-                    { icon = Nothing
-                    , color = Theme.Primary
-                    , text = bText
-                    , onPress = Just Ready
-                    , disabled = False
-                    }
-                    theme
-                ]
-            , row
-                [ width fill
-                , spacing 10
-                ]
-                [ row
-                    [ width <| fillPortion 2
-                    , padding 4
-                    ]
-                    [ column
-                        [ spacing 4
-                        , width fill
+                        "Game Id"
+                        Theme.Overline
+                        theme
+                    , materialText
+                        [ Font.alignLeft
+                        , alignLeft
                         ]
-                        [ materialText
-                            [ Font.alignLeft
-                            , alignLeft
-                            ]
-                            "Game Id"
-                            Theme.Overline
-                            theme
-                        , materialText
-                            [ Font.alignLeft
-                            , alignLeft
-                            ]
-                            model.lobby.gameId
-                            Theme.Body1
-                            theme
-                        ]
-                    , Icon.button
-                        [ Events.onClick CopyGameId ]
-                        theme Theme.OnBackground 24 Content.content_copy
+                        model.lobby.gameId
+                        Theme.Body1
+                        theme
                     ]
-                , Button.outlined
-                    [ alignLeft
-                    , width <| fillPortion 1
-                    ]
-                    { icon = Nothing
-                    , color = Theme.Primary
-                    , text = "Add Bot"
-                    , onPress = Nothing
-                    , disabled = True
-                    }
-                    theme
+                , Icon.button
+                    [ Events.onClick CopyGameId ]
+                    theme Theme.OnBackground 24 Content.content_copy
                 ]
-            ] ++ (Lobby.allPlayers model.lobby |> List.map (playerRow theme))
+            , Button.outlined
+                [ alignLeft
+                , width <| fillPortion 1
+                ]
+                { icon = Nothing
+                , color = Theme.Primary
+                , text = "Add Bot"
+                , onPress = Nothing
+                , disabled = True
+                }
+                theme
+            ]
+        ] ++ (Lobby.allPlayers model.lobby |> List.map (playerRow theme))
     }
 
 
