@@ -17003,14 +17003,77 @@ var $author$project$Page$TTT$Lobby$CopyGameId = {$: 'CopyGameId'};
 var $author$project$Page$TTT$Lobby$Name = function (a) {
 	return {$: 'Name', a: a};
 };
+var $author$project$MaterialUI$Theme$OnBackground = {$: 'OnBackground'};
+var $author$project$MaterialUI$Theme$Overline = {$: 'Overline'};
 var $author$project$Page$TTT$Lobby$Ready = {$: 'Ready'};
-var $author$project$MaterialUI$Theme$Subtitle2 = {$: 'Subtitle2'};
 var $author$project$Game$Lobby$allPlayers = function (lobby) {
 	return A2(
 		$elm$core$List$cons,
 		A2($author$project$Game$LobbyPlayer$Player, lobby.playerMe.name, lobby.playerMe.isReady),
 		lobby.players);
 };
+var $author$project$MaterialUI$Icon$button = F5(
+	function (attributes, theme, colorKey, size, _v0) {
+		var icon = _v0.a;
+		var padding = 8;
+		var color = A2($author$project$MaterialUI$Theme$getColor, colorKey, theme);
+		var iconColor = $avh4$elm_color$Color$fromRgba(
+			$mdgriffith$elm_ui$Element$toRgb(color));
+		var attr = _Utils_ap(
+			attributes,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width(
+					$mdgriffith$elm_ui$Element$px(size + (2 * padding))),
+					$mdgriffith$elm_ui$Element$height(
+					$mdgriffith$elm_ui$Element$px(size + (2 * padding))),
+					$mdgriffith$elm_ui$Element$padding(padding),
+					$mdgriffith$elm_ui$Element$Border$rounded(50),
+					$mdgriffith$elm_ui$Element$mouseDown(
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$Background$color(
+							A2($author$project$MaterialUI$Theme$setAlpha, 0.2, color))
+						])),
+					$mdgriffith$elm_ui$Element$focused(
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$Background$color(
+							A2($author$project$MaterialUI$Theme$setAlpha, 0.15, color))
+						])),
+					$mdgriffith$elm_ui$Element$mouseOver(
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$Background$color(
+							A2($author$project$MaterialUI$Theme$setAlpha, 0.1, color))
+						]))
+				]));
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			attr,
+			$mdgriffith$elm_ui$Element$html(
+				A2(
+					$elm$svg$Svg$svg,
+					_List_Nil,
+					_List_fromArray(
+						[
+							A2(icon, iconColor, size)
+						]))));
+	});
+var $danmarcab$material_icons$Material$Icons$Content$content_copy = A2(
+	$danmarcab$material_icons$Material$Icons$Internal$icon,
+	'0 0 48 48',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$path,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$d('M32 2H8C5.79 2 4 3.79 4 6v28h4V6h24V2zm6 8H16c-2.21 0-4 1.79-4 4v28c0 2.21 1.79 4 4 4h22c2.21 0 4-1.79 4-4V14c0-2.21-1.79-4-4-4zm0 32H16V14h22v28z')
+				]),
+			_List_Nil)
+		]));
+var $author$project$MaterialUI$Icons$Content$content_copy = $author$project$MaterialUI$Icon$makeIcon($danmarcab$material_icons$Material$Icons$Content$content_copy);
 var $mdgriffith$elm_ui$Element$Font$italic = $mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.italic);
 var $author$project$Page$TTT$Lobby$playerRow = F2(
 	function (theme, player) {
@@ -17088,32 +17151,19 @@ var $author$project$Page$TTT$Lobby$view = function (model) {
 								]),
 							_List_fromArray(
 								[
-									A2(
-									$mdgriffith$elm_ui$Element$column,
+									A4(
+									$author$project$UIHelper$materialText,
 									_List_fromArray(
 										[
+											$mdgriffith$elm_ui$Element$Font$alignRight,
+											$mdgriffith$elm_ui$Element$alignRight,
 											$mdgriffith$elm_ui$Element$width(
 											$mdgriffith$elm_ui$Element$fillPortion(2)),
-											$mdgriffith$elm_ui$Element$padding(16),
-											$mdgriffith$elm_ui$Element$spacing(8)
+											$mdgriffith$elm_ui$Element$padding(16)
 										]),
-									_List_fromArray(
-										[
-											A4(
-											$author$project$UIHelper$materialText,
-											_List_fromArray(
-												[$mdgriffith$elm_ui$Element$Font$alignRight, $mdgriffith$elm_ui$Element$alignRight]),
-											'Lobby',
-											$author$project$MaterialUI$Theme$H5,
-											theme),
-											A4(
-											$author$project$UIHelper$materialText,
-											_List_fromArray(
-												[$mdgriffith$elm_ui$Element$Font$alignRight, $mdgriffith$elm_ui$Element$alignRight]),
-											model.lobby.gameId,
-											$author$project$MaterialUI$Theme$Subtitle2,
-											theme)
-										])),
+									'Lobby',
+									$author$project$MaterialUI$Theme$H5,
+									theme),
 									$author$project$UIHelper$nonEl(
 									_List_fromArray(
 										[
@@ -17146,40 +17196,8 @@ var $author$project$Page$TTT$Lobby$view = function (model) {
 											]),
 										{color: $author$project$MaterialUI$Theme$Primary, errorText: $elm$core$Maybe$Nothing, helperText: $elm$core$Maybe$Nothing, hideLabel: false, label: 'Name', onChange: $author$project$Page$TTT$Lobby$Name, state: $author$project$MaterialUI$TextField$Idle, text: model.lobby.playerMe.name, type_: $author$project$MaterialUI$TextField$Outlined},
 										theme)),
-									A3(
-									$author$project$MaterialUI$Button$outlined,
-									_List_fromArray(
-										[
-											$mdgriffith$elm_ui$Element$alignLeft,
-											$mdgriffith$elm_ui$Element$width(
-											$mdgriffith$elm_ui$Element$fillPortion(1))
-										]),
-									{
-										color: $author$project$MaterialUI$Theme$Primary,
-										disabled: false,
-										icon: $elm$core$Maybe$Nothing,
-										onPress: $elm$core$Maybe$Just($author$project$Page$TTT$Lobby$CopyGameId),
-										text: 'Invite Link'
-									},
-									theme)
-								])),
-							A2(
-							$mdgriffith$elm_ui$Element$row,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-									$mdgriffith$elm_ui$Element$spacing(10)
-								]),
-							_List_fromArray(
-								[
-									$author$project$UIHelper$nonEl(
-									_List_fromArray(
-										[
-											$mdgriffith$elm_ui$Element$width(
-											$mdgriffith$elm_ui$Element$fillPortion(2))
-										])),
 									function () {
-									var bText = model.lobby.playerMe.isReady ? 'Ready' : 'Not Ready';
+									var bText = model.lobby.playerMe.isReady ? 'Not Ready' : 'Ready';
 									return A3(
 										$author$project$MaterialUI$Button$outlined,
 										_List_fromArray(
@@ -17197,6 +17215,71 @@ var $author$project$Page$TTT$Lobby$view = function (model) {
 										},
 										theme);
 								}()
+								])),
+							A2(
+							$mdgriffith$elm_ui$Element$row,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+									$mdgriffith$elm_ui$Element$spacing(10)
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$mdgriffith$elm_ui$Element$row,
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$width(
+											$mdgriffith$elm_ui$Element$fillPortion(2)),
+											$mdgriffith$elm_ui$Element$padding(4)
+										]),
+									_List_fromArray(
+										[
+											A2(
+											$mdgriffith$elm_ui$Element$column,
+											_List_fromArray(
+												[
+													$mdgriffith$elm_ui$Element$spacing(4),
+													$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+												]),
+											_List_fromArray(
+												[
+													A4(
+													$author$project$UIHelper$materialText,
+													_List_fromArray(
+														[$mdgriffith$elm_ui$Element$Font$alignLeft, $mdgriffith$elm_ui$Element$alignLeft]),
+													'Game Id',
+													$author$project$MaterialUI$Theme$Overline,
+													theme),
+													A4(
+													$author$project$UIHelper$materialText,
+													_List_fromArray(
+														[$mdgriffith$elm_ui$Element$Font$alignLeft, $mdgriffith$elm_ui$Element$alignLeft]),
+													model.lobby.gameId,
+													$author$project$MaterialUI$Theme$Body1,
+													theme)
+												])),
+											A5(
+											$author$project$MaterialUI$Icon$button,
+											_List_fromArray(
+												[
+													$mdgriffith$elm_ui$Element$Events$onClick($author$project$Page$TTT$Lobby$CopyGameId)
+												]),
+											theme,
+											$author$project$MaterialUI$Theme$OnBackground,
+											24,
+											$author$project$MaterialUI$Icons$Content$content_copy)
+										])),
+									A3(
+									$author$project$MaterialUI$Button$outlined,
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$alignLeft,
+											$mdgriffith$elm_ui$Element$width(
+											$mdgriffith$elm_ui$Element$fillPortion(1))
+										]),
+									{color: $author$project$MaterialUI$Theme$Primary, disabled: false, icon: $elm$core$Maybe$Nothing, onPress: $elm$core$Maybe$Nothing, text: 'Add Bot'},
+									theme)
 								]))
 						]),
 					A2(

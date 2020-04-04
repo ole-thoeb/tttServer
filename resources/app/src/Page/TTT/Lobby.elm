@@ -1,13 +1,13 @@
 module Page.TTT.Lobby exposing (Model, init, toSession, Msg, update, view, updateFromWebsocket)
 
-import Browser.Navigation as Nav
 import ClipBoard
+import Element.Events as Events
 import Game.Lobby as Lobby exposing (Lobby)
 import Game.LobbyPlayer exposing (Player)
-import Http
+import MaterialUI.Icons.Content as Content
+import MaterialUI.Icon as Icon
 import Monocle.Lens as Lens exposing (Lens)
 import ServerRequest.InLobby as InLobbyRequest
-import ServerResponse.EnterLobby as EnterLobby
 import ServerResponse.InLobby as InLobbyResponse
 import Session exposing (Session)
 import UIHelper exposing (..)
@@ -105,98 +105,86 @@ view model =
     in
     { title = "Home"
     , body =
-        layout
-            [ Background.color theme.color.background
-            , Font.color theme.color.onBackground
-            ]
-            <| column
-                [ centerX
-                , width (fill |> maximum 900)
-                , padding 16
-                , spacing 16
+        defaultTopColumn "Lobby" theme
+            [ row
+                [ width fill
+                , spacing 10
                 ]
-                <| [ row
-                    [ width fill
-                    , spacing 10
+                [ el
+                    [ width <| fillPortion 2 ]
+                    <| TextField.text
+                        [ width fill
+                        ]
+                        { label = "Name"
+                        , hideLabel = False
+                        , type_ = TextField.Outlined
+                        , color = Theme.Primary
+                        , text = model.lobby.playerMe.name
+                        , onChange = Name
+                        , state = TextField.Idle
+                        , errorText = Nothing
+                        , helperText = Nothing
+                       }
+                       theme
+                , let
+                    bText = if model.lobby.playerMe.isReady then "Not Ready" else "Ready"
+                in
+                Button.outlined
+                    [ alignLeft
+                    , width <| fillPortion 1
+                    ]
+                    { icon = Nothing
+                    , color = Theme.Primary
+                    , text = bText
+                    , onPress = Just Ready
+                    , disabled = False
+                    }
+                    theme
+                ]
+            , row
+                [ width fill
+                , spacing 10
+                ]
+                [ row
+                    [ width <| fillPortion 2
+                    , padding 4
                     ]
                     [ column
-                        [ width <| fillPortion 2
-                        , padding 16
-                        , spacing 8
+                        [ spacing 4
+                        , width fill
                         ]
                         [ materialText
-                            [ Font.alignRight
-                            , alignRight
+                            [ Font.alignLeft
+                            , alignLeft
                             ]
-                            "Lobby"
-                            Theme.H5
+                            "Game Id"
+                            Theme.Overline
                             theme
                         , materialText
-                            [ Font.alignRight
-                            , alignRight
+                            [ Font.alignLeft
+                            , alignLeft
                             ]
                             model.lobby.gameId
-                            Theme.Subtitle2
+                            Theme.Body1
                             theme
                         ]
-                    , nonEl
-                        [ width <| fillPortion 1
-                        , padding 16 -- emulate button padding
-                        ]
+                    , Icon.button
+                        [ Events.onClick CopyGameId ]
+                        theme Theme.OnBackground 24 Content.content_copy
                     ]
-                , row
-                    [ width fill
-                    , spacing 10
+                , Button.outlined
+                    [ alignLeft
+                    , width <| fillPortion 1
                     ]
-                    [ el
-                        [ width <| fillPortion 2 ]
-                        <| TextField.text
-                            [ width fill
-                            ]
-                            { label = "Name"
-                            , hideLabel = False
-                            , type_ = TextField.Outlined
-                            , color = Theme.Primary
-                            , text = model.lobby.playerMe.name
-                            , onChange = Name
-                            , state = TextField.Idle
-                            , errorText = Nothing
-                            , helperText = Nothing
-                            }
-                            theme
-                    , Button.outlined
-                        [ alignLeft
-                        , width <| fillPortion 1
-                        ]
-                        { icon = Nothing
-                        , color = Theme.Primary
-                        , text = "Invite Link"
-                        , onPress = Just CopyGameId
-                        , disabled = False
-                        }
-                        theme
-                    ]
-                , row
-                    [ width fill
-                    , spacing 10
-                    ]
-                    [ nonEl [ width <| fillPortion 2 ]
-                    , let
-                        bText = if model.lobby.playerMe.isReady then "Ready" else "Not Ready"
-                    in
-                    Button.outlined
-                        [ alignLeft
-                        , width <| fillPortion 1
-                        ]
-                        { icon = Nothing
-                        , color = Theme.Primary
-                        , text = bText
-                        , onPress = Just Ready
-                        , disabled = False
-                        }
-                        theme
-                    ]
-                ] ++ (Lobby.allPlayers model.lobby |> List.map (playerRow theme))
+                    { icon = Nothing
+                    , color = Theme.Primary
+                    , text = "Add Bot"
+                    , onPress = Nothing
+                    , disabled = True
+                    }
+                    theme
+                ]
+            ] ++ (Lobby.allPlayers model.lobby |> List.map (playerRow theme))
     }
 
 
