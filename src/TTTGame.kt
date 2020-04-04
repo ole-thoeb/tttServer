@@ -110,7 +110,7 @@ sealed class TTTGame {
         private fun checkStatus(board: ListK<CellState>): Status {
             if (board.size != 9) return Status.OnGoing
             val indexes = listOf(listOf(0, 1, 2), listOf(3, 4, 5), listOf(6, 7, 8), listOf(0, 3, 6), listOf(1, 4, 7), listOf(2, 5, 8), listOf(0, 4, 8), listOf(2, 4, 6))
-            val winningIndices = indexes.firstOrNone { board.slice(it).allEqual() }
+            val winningIndices = indexes.firstOrNone { board.slice(it).allEqual() && board[it.first()] != CellState.EMPTY }
             return winningIndices.flatMap { (i1, i2, i3) ->
                 val winningPlayerRef = when (board[i1]) {
                     CellState.P1 -> PlayerRef.P1
