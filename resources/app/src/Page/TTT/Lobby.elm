@@ -105,7 +105,7 @@ view model =
     in
     { title = "Home"
     , body = defaultTopColumn "Lobby" theme
-        [ row
+        <| [ row
             [ width fill
             , spacing 10
             ]

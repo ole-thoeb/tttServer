@@ -143,7 +143,7 @@ view model =
     in
     { title = "Home"
     , body = defaultTopColumn "Join/Create Game" theme
-        [ row
+        <| [ row
             [ width fill
             , spacing 10
             ]
