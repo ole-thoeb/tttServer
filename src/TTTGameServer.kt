@@ -26,8 +26,9 @@ class TTTGameServer(
         val testing: Boolean
 ) : CoroutineScope by application {
 
-    private val games: ConcurrentHashMap<GameId, TTTGame> = ConcurrentHashMap()
-    private val locks: ConcurrentHashMap<GameId, Mutex> = ConcurrentHashMap()
+    data class GameWithLock(val game: TTTGame, val lock: Mutex)
+
+    private val games: ConcurrentHashMap<GameId, GameWithLock> = ConcurrentHashMap()
 
     private val rematchMap: ConcurrentHashMap<GameId, GameId> = ConcurrentHashMap()
 
@@ -41,10 +42,9 @@ class TTTGameServer(
 
     fun newGame(): TTTGame {
         val gameId = if (testing) GameId(testGameId.incrementAndGet().toString()) else GameId.create()
-        val game = TTTGame.Lobby(gameId)
-        locks[gameId] = Mutex()
-        games[gameId] = game
-        return game
+        val gameWithLock = GameWithLock(TTTGame.Lobby(gameId), Mutex())
+        games[gameId] = gameWithLock
+        return gameWithLock.game
     }
 
     fun rematchIdOfGame(gameId: GameId): GameId {
@@ -58,14 +58,20 @@ class TTTGameServer(
     }
 
     suspend fun <MSG : JsonSerializable> updateGame(gameId: GameId, update: (TTTGame) -> Tuple2<TTTGame, MessagesOf<MSG>>): Messages {
-        val mutex = locks[gameId] ?: return noSuchGame(gameId)
-
-        mutex.withLock {
-            val game = games[gameId] ?: return noSuchGame(gameId)
-
-            val (updatedGame, msgs) = update(game)
-            games[gameId] = updatedGame
+        val gameWithLock = games[gameId] ?: return noSuchGame(gameId)
+        gameWithLock.lock.withLock {
+            val (updatedGame, msgs) = update(gameWithLock.game)
+            games[gameId] = gameWithLock.copy(game = updatedGame)
             return msgs
+        }
+    }
+
+    suspend fun <T> withGame(gameId: GameId, action: (TTTGame?) -> T): T {
+        val gameWithLock = games[gameId]
+        return if (gameWithLock == null) {
+            action(null)
+        } else {
+            gameWithLock.lock.withLock { action(gameWithLock.game) }
         }
     }
 
@@ -145,13 +151,12 @@ class TTTGameServer(
 
     private fun startDisconnectJob(gameId: GameId, playerId: PlayerId): Job = launch {
         delay(CLIENT_TIME_OUT)
-        val lock = locks[gameId] ?: return@launch
-        lock.withLock {
-            val game = games[gameId] ?: return@launch
+        val gameWithLock = games[gameId] ?: return@launch
+        gameWithLock.lock.withLock {
+            val game = gameWithLock.game
 
             val removeGame = {
                 games.remove(game.id)
-                locks.remove(game.id)
             }
 
             when (game) {
@@ -163,7 +168,7 @@ class TTTGameServer(
                     if (updatedGame.technicalPlayers.isEmpty()) {
                         removeGame()
                     } else {
-                        games[game.id] = updatedGame
+                        games[game.id] = gameWithLock.copy(game = updatedGame)
                         messageChannel.send(lobbyStateMsgs(updatedGame))
                     }
                 }

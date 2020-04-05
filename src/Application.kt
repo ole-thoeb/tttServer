@@ -1,6 +1,5 @@
 import arrow.core.ListK
 import arrow.core.k
-import arrow.core.toT
 import io.ktor.application.*
 import io.ktor.features.CallLogging
 import io.ktor.features.DefaultHeaders
@@ -19,7 +18,6 @@ import io.ktor.sessions.*
 import io.ktor.util.pipeline.PipelineContext
 import io.ktor.websocket.WebSockets
 import io.ktor.websocket.webSocket
-import json.JsonSerializable
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import messages.responses.TTTResponse
@@ -115,9 +113,9 @@ fun Application.module(testing: Boolean = false) {
                 call.respond(HttpStatusCode.BadRequest, "No Session!")
                 return@get
             }
-            var oldPlayerName: String? = null
-            tttGameServer.updateGame(GameId(rematch.oldGameId)) { game ->
-                oldPlayerName = when (game) {
+            val oldPlayerName: String? = tttGameServer.withGame(GameId(rematch.oldGameId)) { game ->
+                when (game) {
+                    null -> null
                     is TTTGame.Lobby -> game.players
                             .firstOrNull { it.technical.sessionId == sessionId }
                             ?.name
@@ -126,12 +124,10 @@ fun Application.module(testing: Boolean = false) {
                             .firstOrNull { it.technical.sessionId == sessionId }
                             ?.name
                 }
-                game toT noMessages<JsonSerializable>()
             }
-            val oldPlayerNameLocal = oldPlayerName
-            if (oldPlayerNameLocal != null) {
+            if (oldPlayerName != null) {
                 val technical = TechnicalPlayer(PlayerId.create(), sessionId, ListK.empty(), emptyMap<String, Job>().k())
-                val player = TTTGame.Lobby.Player(oldPlayerNameLocal, false, technical)
+                val player = TTTGame.Lobby.Player(oldPlayerName, false, technical)
                 handleAddPlayerMsgs(rematchId, sessionId, tttGameServer.addNewPlayer(player, rematchId))
             } else {
                 addPlayerToGame(rematchId, tttGameServer, sessionId)
