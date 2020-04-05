@@ -20,6 +20,7 @@ import messages.requests.LobbyRequest
 import messages.responses.InGameResponse
 import messages.responses.LobbyResponse
 import messages.responses.TTTResponse
+import org.slf4j.Logger
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -161,9 +162,9 @@ class TTTGameServer(
         )
     }
 
-    private fun startDisconnectJob(gameId: GameId, playerId: PlayerId): Job = launch {
+    private fun startDisconnectJob(gameId: GameId, playerId: PlayerId): Job = launchAsyncAction {
         delay(CLIENT_TIME_OUT)
-        val gameWithLock = games[gameId] ?: return@launch
+        val gameWithLock = games[gameId] ?: return@launchAsyncAction
         gameWithLock.lock.withLock {
             val game = gameWithLock.game
 
@@ -197,6 +198,25 @@ class TTTGameServer(
                 }
             }
             return@withLock
+        }
+    }
+
+    data class AsyncActionContext(
+            val messageChanel: Channel<Messages>,
+            val log: Logger,
+            val scope: CoroutineScope
+    ) : CoroutineScope by scope
+
+    fun launchAsyncAction(block: suspend AsyncActionContext.() -> Unit): Job = launch {
+        block(AsyncActionContext(messageChannel, log, this@TTTGameServer))
+    }
+
+    suspend fun AsyncActionContext.asyncUpdateGame(gameId: GameId, update: suspend (TTTGame) -> Tuple2<TTTGame, Messages>) {
+        val gameWithLock = games[gameId] ?: return
+        gameWithLock.lock.withLock {
+            val (updatedGame, msgs) = update(gameWithLock.game)
+            games[gameId] = gameWithLock.copy(game = updatedGame)
+            messageChanel.send(msgs)
         }
     }
 

@@ -1,4 +1,4 @@
-module ServerRequest.InLobby exposing (nameChangedMsg, readyChangedMsg)
+module ServerRequest.InLobby exposing (nameChangedMsg, readyChangedMsg, addBotMsg)
 
 
 import Game.LobbyPlayer exposing (PlayerMe)
@@ -20,6 +20,13 @@ readyChangedMsg gameId changedPlayer =
         ( (header gameId changedPlayer) ++
         [ ( "isReady", Encode.bool changedPlayer.isReady ) ] )
         |> remoteMsg "lobbyReady"
+
+
+addBotMsg : String -> PlayerMe -> Encode.Value
+addBotMsg gameId requestingPlayer =
+    Encode.object
+        (header gameId requestingPlayer)
+        |> remoteMsg "addBot"
 
 
 header : String -> PlayerMe -> List ( String, Encode.Value )

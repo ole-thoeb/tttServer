@@ -7806,18 +7806,6 @@ var $author$project$Page$TTT$InGame$update = F2(
 						A2($elm$url$Url$Builder$absolute, _List_Nil, _List_Nil)));
 		}
 	});
-var $author$project$ClipBoard$copyToClipBoard = _Platform_outgoingPort('copyToClipBoard', $elm$json$Json$Encode$string);
-var $arturopala$elm_monocle$Monocle$Lens$modify = F2(
-	function (lens, f) {
-		var mf = function (a) {
-			return function (b) {
-				return A2(lens.set, b, a);
-			}(
-				f(
-					lens.get(a)));
-		};
-		return mf;
-	});
 var $author$project$ServerRequest$InLobby$header = F2(
 	function (gameId, player) {
 		return _List_fromArray(
@@ -7829,6 +7817,26 @@ var $author$project$ServerRequest$InLobby$header = F2(
 				'playerId',
 				$elm$json$Json$Encode$string(player.id))
 			]);
+	});
+var $author$project$ServerRequest$InLobby$addBotMsg = F2(
+	function (gameId, requestingPlayer) {
+		return A2(
+			$author$project$ServerRequest$JsonHelper$remoteMsg,
+			'addBot',
+			$elm$json$Json$Encode$object(
+				A2($author$project$ServerRequest$InLobby$header, gameId, requestingPlayer)));
+	});
+var $author$project$ClipBoard$copyToClipBoard = _Platform_outgoingPort('copyToClipBoard', $elm$json$Json$Encode$string);
+var $arturopala$elm_monocle$Monocle$Lens$modify = F2(
+	function (lens, f) {
+		var mf = function (a) {
+			return function (b) {
+				return A2(lens.set, b, a);
+			}(
+				f(
+					lens.get(a)));
+		};
+		return mf;
 	});
 var $author$project$ServerRequest$InLobby$nameChangedMsg = F2(
 	function (gameId, changedPlayer) {
@@ -7940,6 +7948,11 @@ var $author$project$Page$TTT$Lobby$update = F2(
 						{lobby: newLobby}),
 					$author$project$Websocket$send(
 						A2($author$project$ServerRequest$InLobby$readyChangedMsg, newLobby.gameId, newLobby.playerMe)));
+			case 'AddBot':
+				return _Utils_Tuple2(
+					model,
+					$author$project$Websocket$send(
+						A2($author$project$ServerRequest$InLobby$addBotMsg, lobby.gameId, lobby.playerMe)));
 			default:
 				var a = A2($elm$core$Debug$log, 'copying gameId', '');
 				return _Utils_Tuple2(
@@ -8224,7 +8237,6 @@ var $author$project$Page$Blank$view = {
 var $author$project$Page$Home$GameId = function (a) {
 	return {$: 'GameId', a: a};
 };
-var $author$project$MaterialUI$Theme$H5 = {$: 'H5'};
 var $author$project$MaterialUI$TextField$Idle = {$: 'Idle'};
 var $author$project$Page$Home$JoinGame = {$: 'JoinGame'};
 var $author$project$Page$Home$NewTTTGame = {$: 'NewTTTGame'};
@@ -8235,6 +8247,9 @@ var $mdgriffith$elm_ui$Internal$Model$AlignX = function (a) {
 };
 var $mdgriffith$elm_ui$Internal$Model$Left = {$: 'Left'};
 var $mdgriffith$elm_ui$Element$alignLeft = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Left);
+var $author$project$MaterialUI$Theme$H5 = {$: 'H5'};
+var $mdgriffith$elm_ui$Internal$Model$Right = {$: 'Right'};
+var $mdgriffith$elm_ui$Element$alignRight = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Right);
 var $mdgriffith$elm_ui$Internal$Model$Class = F2(
 	function (a, b) {
 		return {$: 'Class', a: a, b: b};
@@ -13643,332 +13658,10 @@ var $mdgriffith$elm_ui$Element$column = F2(
 						attrs))),
 			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
 	});
-var $mdgriffith$elm_ui$Element$el = F2(
-	function (attrs, child) {
-		return A4(
-			$mdgriffith$elm_ui$Internal$Model$element,
-			$mdgriffith$elm_ui$Internal$Model$asEl,
-			$mdgriffith$elm_ui$Internal$Model$div,
-			A2(
-				$elm$core$List$cons,
-				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-				A2(
-					$elm$core$List$cons,
-					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-					attrs)),
-			$mdgriffith$elm_ui$Internal$Model$Unkeyed(
-				_List_fromArray(
-					[child])));
-	});
-var $author$project$MaterialUI$Theme$Body1 = {$: 'Body1'};
 var $mdgriffith$elm_ui$Internal$Model$Fill = function (a) {
 	return {$: 'Fill', a: a};
 };
 var $mdgriffith$elm_ui$Element$fill = $mdgriffith$elm_ui$Internal$Model$Fill(1);
-var $elm$core$String$toUpper = _String_toUpper;
-var $author$project$MaterialUI$Theme$applyCase = F2(
-	function (fontcase, text) {
-		if (fontcase.$ === 'Sentence') {
-			return _Utils_ap(
-				$elm$core$String$toUpper(
-					A2($elm$core$String$left, 1, text)),
-				A2($elm$core$String$dropLeft, 1, text));
-		} else {
-			return $elm$core$String$toUpper(text);
-		}
-	});
-var $mdgriffith$elm_ui$Internal$Model$FontFamily = F2(
-	function (a, b) {
-		return {$: 'FontFamily', a: a, b: b};
-	});
-var $mdgriffith$elm_ui$Internal$Flag$fontFamily = $mdgriffith$elm_ui$Internal$Flag$flag(5);
-var $elm$core$String$toLower = _String_toLower;
-var $elm$core$String$words = _String_words;
-var $mdgriffith$elm_ui$Internal$Model$renderFontClassName = F2(
-	function (font, current) {
-		return _Utils_ap(
-			current,
-			function () {
-				switch (font.$) {
-					case 'Serif':
-						return 'serif';
-					case 'SansSerif':
-						return 'sans-serif';
-					case 'Monospace':
-						return 'monospace';
-					case 'Typeface':
-						var name = font.a;
-						return A2(
-							$elm$core$String$join,
-							'-',
-							$elm$core$String$words(
-								$elm$core$String$toLower(name)));
-					case 'ImportFont':
-						var name = font.a;
-						var url = font.b;
-						return A2(
-							$elm$core$String$join,
-							'-',
-							$elm$core$String$words(
-								$elm$core$String$toLower(name)));
-					default:
-						var name = font.a.name;
-						return A2(
-							$elm$core$String$join,
-							'-',
-							$elm$core$String$words(
-								$elm$core$String$toLower(name)));
-				}
-			}());
-	});
-var $mdgriffith$elm_ui$Element$Font$family = function (families) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$fontFamily,
-		A2(
-			$mdgriffith$elm_ui$Internal$Model$FontFamily,
-			A3($elm$core$List$foldl, $mdgriffith$elm_ui$Internal$Model$renderFontClassName, 'ff-', families),
-			families));
-};
-var $mdgriffith$elm_ui$Internal$Flag$fontWeight = $mdgriffith$elm_ui$Internal$Flag$flag(13);
-var $mdgriffith$elm_ui$Element$Font$bold = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontWeight, $mdgriffith$elm_ui$Internal$Style$classes.bold);
-var $mdgriffith$elm_ui$Element$Font$extraBold = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontWeight, $mdgriffith$elm_ui$Internal$Style$classes.textExtraBold);
-var $mdgriffith$elm_ui$Element$Font$extraLight = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontWeight, $mdgriffith$elm_ui$Internal$Style$classes.textExtraLight);
-var $mdgriffith$elm_ui$Element$Font$hairline = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontWeight, $mdgriffith$elm_ui$Internal$Style$classes.textThin);
-var $mdgriffith$elm_ui$Element$Font$heavy = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontWeight, $mdgriffith$elm_ui$Internal$Style$classes.textHeavy);
-var $mdgriffith$elm_ui$Element$Font$light = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontWeight, $mdgriffith$elm_ui$Internal$Style$classes.textLight);
-var $mdgriffith$elm_ui$Element$Font$medium = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontWeight, $mdgriffith$elm_ui$Internal$Style$classes.textMedium);
-var $mdgriffith$elm_ui$Element$Font$regular = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontWeight, $mdgriffith$elm_ui$Internal$Style$classes.textNormalWeight);
-var $mdgriffith$elm_ui$Element$Font$semiBold = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontWeight, $mdgriffith$elm_ui$Internal$Style$classes.textSemiBold);
-var $author$project$MaterialUI$Theme$fontWeightToAttribute = function (fw) {
-	switch (fw.$) {
-		case 'Heavy':
-			return $mdgriffith$elm_ui$Element$Font$heavy;
-		case 'ExtraBold':
-			return $mdgriffith$elm_ui$Element$Font$extraBold;
-		case 'Bold':
-			return $mdgriffith$elm_ui$Element$Font$bold;
-		case 'SemiBold':
-			return $mdgriffith$elm_ui$Element$Font$semiBold;
-		case 'Medium':
-			return $mdgriffith$elm_ui$Element$Font$medium;
-		case 'Regular':
-			return $mdgriffith$elm_ui$Element$Font$regular;
-		case 'Light':
-			return $mdgriffith$elm_ui$Element$Font$light;
-		case 'ExtraLight':
-			return $mdgriffith$elm_ui$Element$Font$extraLight;
-		default:
-			return $mdgriffith$elm_ui$Element$Font$hairline;
-	}
-};
-var $mdgriffith$elm_ui$Internal$Flag$letterSpacing = $mdgriffith$elm_ui$Internal$Flag$flag(16);
-var $mdgriffith$elm_ui$Element$Font$letterSpacing = function (offset) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$letterSpacing,
-		A3(
-			$mdgriffith$elm_ui$Internal$Model$Single,
-			'ls-' + $mdgriffith$elm_ui$Internal$Model$floatClass(offset),
-			'letter-spacing',
-			$elm$core$String$fromFloat(offset) + 'px'));
-};
-var $mdgriffith$elm_ui$Internal$Model$FontSize = function (a) {
-	return {$: 'FontSize', a: a};
-};
-var $mdgriffith$elm_ui$Internal$Flag$fontSize = $mdgriffith$elm_ui$Internal$Flag$flag(4);
-var $mdgriffith$elm_ui$Element$Font$size = function (i) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$fontSize,
-		$mdgriffith$elm_ui$Internal$Model$FontSize(i));
-};
-var $author$project$MaterialUI$Theme$fontToAttributes = function (font) {
-	return _List_fromArray(
-		[
-			$mdgriffith$elm_ui$Element$Font$family(font.typeface),
-			$author$project$MaterialUI$Theme$fontWeightToAttribute(font.weight),
-			$mdgriffith$elm_ui$Element$Font$size(font.size),
-			$mdgriffith$elm_ui$Element$Font$letterSpacing(font.letterSpacing)
-		]);
-};
-var $author$project$MaterialUI$Theme$getFont = F2(
-	function (fontScale, _v0) {
-		var typescale = _v0.typescale;
-		switch (fontScale.$) {
-			case 'H1':
-				return typescale.h1;
-			case 'H2':
-				return typescale.h2;
-			case 'H3':
-				return typescale.h3;
-			case 'H4':
-				return typescale.h4;
-			case 'H5':
-				return typescale.h5;
-			case 'H6':
-				return typescale.h6;
-			case 'Subtitle1':
-				return typescale.subtitle1;
-			case 'Subtitle2':
-				return typescale.subtitle2;
-			case 'Body1':
-				return typescale.body1;
-			case 'Body2':
-				return typescale.body2;
-			case 'Button':
-				return typescale.button;
-			case 'Caption':
-				return typescale.caption;
-			default:
-				return typescale.overline;
-		}
-	});
-var $mdgriffith$elm_ui$Internal$Model$Text = function (a) {
-	return {$: 'Text', a: a};
-};
-var $mdgriffith$elm_ui$Element$text = function (content) {
-	return $mdgriffith$elm_ui$Internal$Model$Text(content);
-};
-var $author$project$UIHelper$materialText = F4(
-	function (attr, displayStr, fontScale, theme) {
-		var font = A2($author$project$MaterialUI$Theme$getFont, fontScale, theme);
-		return A2(
-			$mdgriffith$elm_ui$Element$el,
-			_Utils_ap(
-				attr,
-				$author$project$MaterialUI$Theme$fontToAttributes(font)),
-			$mdgriffith$elm_ui$Element$text(
-				A2($author$project$MaterialUI$Theme$applyCase, font.fontcase, displayStr)));
-	});
-var $mdgriffith$elm_ui$Internal$Model$PaddingStyle = F5(
-	function (a, b, c, d, e) {
-		return {$: 'PaddingStyle', a: a, b: b, c: c, d: d, e: e};
-	});
-var $mdgriffith$elm_ui$Internal$Flag$padding = $mdgriffith$elm_ui$Internal$Flag$flag(2);
-var $mdgriffith$elm_ui$Element$padding = function (x) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$padding,
-		A5(
-			$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
-			'p-' + $elm$core$String$fromInt(x),
-			x,
-			x,
-			x,
-			x));
-};
-var $mdgriffith$elm_ui$Internal$Model$Describe = function (a) {
-	return {$: 'Describe', a: a};
-};
-var $mdgriffith$elm_ui$Internal$Model$Paragraph = {$: 'Paragraph'};
-var $mdgriffith$elm_ui$Internal$Model$SpacingStyle = F3(
-	function (a, b, c) {
-		return {$: 'SpacingStyle', a: a, b: b, c: c};
-	});
-var $mdgriffith$elm_ui$Internal$Flag$spacing = $mdgriffith$elm_ui$Internal$Flag$flag(3);
-var $mdgriffith$elm_ui$Internal$Model$spacingName = F2(
-	function (x, y) {
-		return 'spacing-' + ($elm$core$String$fromInt(x) + ('-' + $elm$core$String$fromInt(y)));
-	});
-var $mdgriffith$elm_ui$Element$spacing = function (x) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$spacing,
-		A3(
-			$mdgriffith$elm_ui$Internal$Model$SpacingStyle,
-			A2($mdgriffith$elm_ui$Internal$Model$spacingName, x, x),
-			x,
-			x));
-};
-var $mdgriffith$elm_ui$Element$paragraph = F2(
-	function (attrs, children) {
-		return A4(
-			$mdgriffith$elm_ui$Internal$Model$element,
-			$mdgriffith$elm_ui$Internal$Model$asParagraph,
-			$mdgriffith$elm_ui$Internal$Model$div,
-			A2(
-				$elm$core$List$cons,
-				$mdgriffith$elm_ui$Internal$Model$Describe($mdgriffith$elm_ui$Internal$Model$Paragraph),
-				A2(
-					$elm$core$List$cons,
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-					A2(
-						$elm$core$List$cons,
-						$mdgriffith$elm_ui$Element$spacing(5),
-						attrs))),
-			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
-	});
-var $mdgriffith$elm_ui$Internal$Flag$borderRound = $mdgriffith$elm_ui$Internal$Flag$flag(17);
-var $mdgriffith$elm_ui$Element$Border$rounded = function (radius) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$borderRound,
-		A3(
-			$mdgriffith$elm_ui$Internal$Model$Single,
-			'br-' + $elm$core$String$fromInt(radius),
-			'border-radius',
-			$elm$core$String$fromInt(radius) + 'px'));
-};
-var $mdgriffith$elm_ui$Internal$Model$AsRow = {$: 'AsRow'};
-var $mdgriffith$elm_ui$Internal$Model$asRow = $mdgriffith$elm_ui$Internal$Model$AsRow;
-var $mdgriffith$elm_ui$Element$row = F2(
-	function (attrs, children) {
-		return A4(
-			$mdgriffith$elm_ui$Internal$Model$element,
-			$mdgriffith$elm_ui$Internal$Model$asRow,
-			$mdgriffith$elm_ui$Internal$Model$div,
-			A2(
-				$elm$core$List$cons,
-				$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.contentCenterY)),
-				A2(
-					$elm$core$List$cons,
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-					A2(
-						$elm$core$List$cons,
-						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-						attrs))),
-			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
-	});
-var $author$project$Page$Home$errorCard = F2(
-	function (errorMsg, theme) {
-		return A2(
-			$mdgriffith$elm_ui$Element$row,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-					$mdgriffith$elm_ui$Element$spacing(10)
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$mdgriffith$elm_ui$Element$el,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$Background$color(theme.color.error),
-							$mdgriffith$elm_ui$Element$Border$rounded(6),
-							$mdgriffith$elm_ui$Element$padding(16),
-							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-						]),
-					A2(
-						$mdgriffith$elm_ui$Element$paragraph,
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$Font$color(theme.color.onError),
-								$mdgriffith$elm_ui$Element$centerX
-							]),
-						_List_fromArray(
-							[
-								A4(
-								$author$project$UIHelper$materialText,
-								_List_fromArray(
-									[$mdgriffith$elm_ui$Element$centerX]),
-								errorMsg,
-								$author$project$MaterialUI$Theme$Body1,
-								theme)
-							])))
-				]));
-	});
 var $mdgriffith$elm_ui$Element$fillPortion = $mdgriffith$elm_ui$Internal$Model$Fill;
 var $mdgriffith$elm_ui$Internal$Model$OnlyDynamic = F2(
 	function (a, b) {
@@ -14114,7 +13807,55 @@ var $mdgriffith$elm_ui$Internal$Model$renderRoot = F3(
 					_List_fromArray(
 						[child]))));
 	});
+var $mdgriffith$elm_ui$Internal$Model$FontFamily = F2(
+	function (a, b) {
+		return {$: 'FontFamily', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Model$FontSize = function (a) {
+	return {$: 'FontSize', a: a};
+};
 var $mdgriffith$elm_ui$Internal$Model$SansSerif = {$: 'SansSerif'};
+var $mdgriffith$elm_ui$Internal$Flag$fontFamily = $mdgriffith$elm_ui$Internal$Flag$flag(5);
+var $mdgriffith$elm_ui$Internal$Flag$fontSize = $mdgriffith$elm_ui$Internal$Flag$flag(4);
+var $elm$core$String$toLower = _String_toLower;
+var $elm$core$String$words = _String_words;
+var $mdgriffith$elm_ui$Internal$Model$renderFontClassName = F2(
+	function (font, current) {
+		return _Utils_ap(
+			current,
+			function () {
+				switch (font.$) {
+					case 'Serif':
+						return 'serif';
+					case 'SansSerif':
+						return 'sans-serif';
+					case 'Monospace':
+						return 'monospace';
+					case 'Typeface':
+						var name = font.a;
+						return A2(
+							$elm$core$String$join,
+							'-',
+							$elm$core$String$words(
+								$elm$core$String$toLower(name)));
+					case 'ImportFont':
+						var name = font.a;
+						var url = font.b;
+						return A2(
+							$elm$core$String$join,
+							'-',
+							$elm$core$String$words(
+								$elm$core$String$toLower(name)));
+					default:
+						var name = font.a.name;
+						return A2(
+							$elm$core$String$join,
+							'-',
+							$elm$core$String$words(
+								$elm$core$String$toLower(name)));
+				}
+			}());
+	});
 var $mdgriffith$elm_ui$Internal$Model$rootStyle = function () {
 	var families = _List_fromArray(
 		[
@@ -14175,6 +13916,151 @@ var $mdgriffith$elm_ui$Element$layoutWith = F3(
 	});
 var $mdgriffith$elm_ui$Element$layout = $mdgriffith$elm_ui$Element$layoutWith(
 	{options: _List_Nil});
+var $elm$core$String$toUpper = _String_toUpper;
+var $author$project$MaterialUI$Theme$applyCase = F2(
+	function (fontcase, text) {
+		if (fontcase.$ === 'Sentence') {
+			return _Utils_ap(
+				$elm$core$String$toUpper(
+					A2($elm$core$String$left, 1, text)),
+				A2($elm$core$String$dropLeft, 1, text));
+		} else {
+			return $elm$core$String$toUpper(text);
+		}
+	});
+var $mdgriffith$elm_ui$Element$el = F2(
+	function (attrs, child) {
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asEl,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+					attrs)),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+				_List_fromArray(
+					[child])));
+	});
+var $mdgriffith$elm_ui$Element$Font$family = function (families) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$fontFamily,
+		A2(
+			$mdgriffith$elm_ui$Internal$Model$FontFamily,
+			A3($elm$core$List$foldl, $mdgriffith$elm_ui$Internal$Model$renderFontClassName, 'ff-', families),
+			families));
+};
+var $mdgriffith$elm_ui$Internal$Flag$fontWeight = $mdgriffith$elm_ui$Internal$Flag$flag(13);
+var $mdgriffith$elm_ui$Element$Font$bold = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontWeight, $mdgriffith$elm_ui$Internal$Style$classes.bold);
+var $mdgriffith$elm_ui$Element$Font$extraBold = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontWeight, $mdgriffith$elm_ui$Internal$Style$classes.textExtraBold);
+var $mdgriffith$elm_ui$Element$Font$extraLight = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontWeight, $mdgriffith$elm_ui$Internal$Style$classes.textExtraLight);
+var $mdgriffith$elm_ui$Element$Font$hairline = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontWeight, $mdgriffith$elm_ui$Internal$Style$classes.textThin);
+var $mdgriffith$elm_ui$Element$Font$heavy = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontWeight, $mdgriffith$elm_ui$Internal$Style$classes.textHeavy);
+var $mdgriffith$elm_ui$Element$Font$light = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontWeight, $mdgriffith$elm_ui$Internal$Style$classes.textLight);
+var $mdgriffith$elm_ui$Element$Font$medium = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontWeight, $mdgriffith$elm_ui$Internal$Style$classes.textMedium);
+var $mdgriffith$elm_ui$Element$Font$regular = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontWeight, $mdgriffith$elm_ui$Internal$Style$classes.textNormalWeight);
+var $mdgriffith$elm_ui$Element$Font$semiBold = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontWeight, $mdgriffith$elm_ui$Internal$Style$classes.textSemiBold);
+var $author$project$MaterialUI$Theme$fontWeightToAttribute = function (fw) {
+	switch (fw.$) {
+		case 'Heavy':
+			return $mdgriffith$elm_ui$Element$Font$heavy;
+		case 'ExtraBold':
+			return $mdgriffith$elm_ui$Element$Font$extraBold;
+		case 'Bold':
+			return $mdgriffith$elm_ui$Element$Font$bold;
+		case 'SemiBold':
+			return $mdgriffith$elm_ui$Element$Font$semiBold;
+		case 'Medium':
+			return $mdgriffith$elm_ui$Element$Font$medium;
+		case 'Regular':
+			return $mdgriffith$elm_ui$Element$Font$regular;
+		case 'Light':
+			return $mdgriffith$elm_ui$Element$Font$light;
+		case 'ExtraLight':
+			return $mdgriffith$elm_ui$Element$Font$extraLight;
+		default:
+			return $mdgriffith$elm_ui$Element$Font$hairline;
+	}
+};
+var $mdgriffith$elm_ui$Internal$Flag$letterSpacing = $mdgriffith$elm_ui$Internal$Flag$flag(16);
+var $mdgriffith$elm_ui$Element$Font$letterSpacing = function (offset) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$letterSpacing,
+		A3(
+			$mdgriffith$elm_ui$Internal$Model$Single,
+			'ls-' + $mdgriffith$elm_ui$Internal$Model$floatClass(offset),
+			'letter-spacing',
+			$elm$core$String$fromFloat(offset) + 'px'));
+};
+var $mdgriffith$elm_ui$Element$Font$size = function (i) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$fontSize,
+		$mdgriffith$elm_ui$Internal$Model$FontSize(i));
+};
+var $author$project$MaterialUI$Theme$fontToAttributes = function (font) {
+	return _List_fromArray(
+		[
+			$mdgriffith$elm_ui$Element$Font$family(font.typeface),
+			$author$project$MaterialUI$Theme$fontWeightToAttribute(font.weight),
+			$mdgriffith$elm_ui$Element$Font$size(font.size),
+			$mdgriffith$elm_ui$Element$Font$letterSpacing(font.letterSpacing)
+		]);
+};
+var $author$project$MaterialUI$Theme$getFont = F2(
+	function (fontScale, _v0) {
+		var typescale = _v0.typescale;
+		switch (fontScale.$) {
+			case 'H1':
+				return typescale.h1;
+			case 'H2':
+				return typescale.h2;
+			case 'H3':
+				return typescale.h3;
+			case 'H4':
+				return typescale.h4;
+			case 'H5':
+				return typescale.h5;
+			case 'H6':
+				return typescale.h6;
+			case 'Subtitle1':
+				return typescale.subtitle1;
+			case 'Subtitle2':
+				return typescale.subtitle2;
+			case 'Body1':
+				return typescale.body1;
+			case 'Body2':
+				return typescale.body2;
+			case 'Button':
+				return typescale.button;
+			case 'Caption':
+				return typescale.caption;
+			default:
+				return typescale.overline;
+		}
+	});
+var $mdgriffith$elm_ui$Internal$Model$Text = function (a) {
+	return {$: 'Text', a: a};
+};
+var $mdgriffith$elm_ui$Element$text = function (content) {
+	return $mdgriffith$elm_ui$Internal$Model$Text(content);
+};
+var $author$project$UIHelper$materialText = F4(
+	function (attr, displayStr, fontScale, theme) {
+		var font = A2($author$project$MaterialUI$Theme$getFont, fontScale, theme);
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			_Utils_ap(
+				attr,
+				$author$project$MaterialUI$Theme$fontToAttributes(font)),
+			$mdgriffith$elm_ui$Element$text(
+				A2($author$project$MaterialUI$Theme$applyCase, font.fontcase, displayStr)));
+	});
 var $mdgriffith$elm_ui$Internal$Model$Max = F2(
 	function (a, b) {
 		return {$: 'Max', a: a, b: b};
@@ -14188,6 +14074,190 @@ var $mdgriffith$elm_ui$Element$none = $mdgriffith$elm_ui$Internal$Model$Empty;
 var $author$project$UIHelper$nonEl = function (attributes) {
 	return A2($mdgriffith$elm_ui$Element$el, attributes, $mdgriffith$elm_ui$Element$none);
 };
+var $mdgriffith$elm_ui$Internal$Model$PaddingStyle = F5(
+	function (a, b, c, d, e) {
+		return {$: 'PaddingStyle', a: a, b: b, c: c, d: d, e: e};
+	});
+var $mdgriffith$elm_ui$Internal$Flag$padding = $mdgriffith$elm_ui$Internal$Flag$flag(2);
+var $mdgriffith$elm_ui$Element$padding = function (x) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$padding,
+		A5(
+			$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
+			'p-' + $elm$core$String$fromInt(x),
+			x,
+			x,
+			x,
+			x));
+};
+var $mdgriffith$elm_ui$Internal$Model$AsRow = {$: 'AsRow'};
+var $mdgriffith$elm_ui$Internal$Model$asRow = $mdgriffith$elm_ui$Internal$Model$AsRow;
+var $mdgriffith$elm_ui$Element$row = F2(
+	function (attrs, children) {
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asRow,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.contentCenterY)),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+						attrs))),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+	});
+var $mdgriffith$elm_ui$Internal$Model$SpacingStyle = F3(
+	function (a, b, c) {
+		return {$: 'SpacingStyle', a: a, b: b, c: c};
+	});
+var $mdgriffith$elm_ui$Internal$Flag$spacing = $mdgriffith$elm_ui$Internal$Flag$flag(3);
+var $mdgriffith$elm_ui$Internal$Model$spacingName = F2(
+	function (x, y) {
+		return 'spacing-' + ($elm$core$String$fromInt(x) + ('-' + $elm$core$String$fromInt(y)));
+	});
+var $mdgriffith$elm_ui$Element$spacing = function (x) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$spacing,
+		A3(
+			$mdgriffith$elm_ui$Internal$Model$SpacingStyle,
+			A2($mdgriffith$elm_ui$Internal$Model$spacingName, x, x),
+			x,
+			x));
+};
+var $author$project$UIHelper$defaultTopColumn = F3(
+	function (title, theme, rows) {
+		return A2(
+			$mdgriffith$elm_ui$Element$layout,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$Background$color(theme.color.background),
+					$mdgriffith$elm_ui$Element$Font$color(theme.color.onBackground)
+				]),
+			A2(
+				$mdgriffith$elm_ui$Element$column,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$centerX,
+						$mdgriffith$elm_ui$Element$width(
+						A2($mdgriffith$elm_ui$Element$maximum, 900, $mdgriffith$elm_ui$Element$fill)),
+						$mdgriffith$elm_ui$Element$padding(16),
+						$mdgriffith$elm_ui$Element$spacing(16)
+					]),
+				_Utils_ap(
+					_List_fromArray(
+						[
+							A2(
+							$mdgriffith$elm_ui$Element$row,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+									$mdgriffith$elm_ui$Element$spacing(10)
+								]),
+							_List_fromArray(
+								[
+									A4(
+									$author$project$UIHelper$materialText,
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$Font$alignRight,
+											$mdgriffith$elm_ui$Element$alignRight,
+											$mdgriffith$elm_ui$Element$width(
+											$mdgriffith$elm_ui$Element$fillPortion(2)),
+											$mdgriffith$elm_ui$Element$padding(16)
+										]),
+									title,
+									$author$project$MaterialUI$Theme$H5,
+									theme),
+									$author$project$UIHelper$nonEl(
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$width(
+											$mdgriffith$elm_ui$Element$fillPortion(1)),
+											$mdgriffith$elm_ui$Element$padding(16)
+										]))
+								]))
+						]),
+					rows)));
+	});
+var $author$project$MaterialUI$Theme$Body1 = {$: 'Body1'};
+var $mdgriffith$elm_ui$Internal$Model$Describe = function (a) {
+	return {$: 'Describe', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$Paragraph = {$: 'Paragraph'};
+var $mdgriffith$elm_ui$Element$paragraph = F2(
+	function (attrs, children) {
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asParagraph,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Internal$Model$Describe($mdgriffith$elm_ui$Internal$Model$Paragraph),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$spacing(5),
+						attrs))),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+	});
+var $mdgriffith$elm_ui$Internal$Flag$borderRound = $mdgriffith$elm_ui$Internal$Flag$flag(17);
+var $mdgriffith$elm_ui$Element$Border$rounded = function (radius) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$borderRound,
+		A3(
+			$mdgriffith$elm_ui$Internal$Model$Single,
+			'br-' + $elm$core$String$fromInt(radius),
+			'border-radius',
+			$elm$core$String$fromInt(radius) + 'px'));
+};
+var $author$project$Page$Home$errorCard = F2(
+	function (errorMsg, theme) {
+		return A2(
+			$mdgriffith$elm_ui$Element$row,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$spacing(10)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$Background$color(theme.color.error),
+							$mdgriffith$elm_ui$Element$Border$rounded(6),
+							$mdgriffith$elm_ui$Element$padding(16),
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+						]),
+					A2(
+						$mdgriffith$elm_ui$Element$paragraph,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$Font$color(theme.color.onError),
+								$mdgriffith$elm_ui$Element$centerX
+							]),
+						_List_fromArray(
+							[
+								A4(
+								$author$project$UIHelper$materialText,
+								_List_fromArray(
+									[$mdgriffith$elm_ui$Element$centerX]),
+								errorMsg,
+								$author$project$MaterialUI$Theme$Body1,
+								theme)
+							])))
+				]));
+	});
 var $author$project$MaterialUI$Theme$Custom = function (a) {
 	return {$: 'Custom', a: a};
 };
@@ -16112,144 +16182,102 @@ var $author$project$Page$Home$view = function (model) {
 	var theme = $author$project$Session$theme(
 		$author$project$Page$Home$toSession(model));
 	return {
-		body: A2(
-			$mdgriffith$elm_ui$Element$layout,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$Background$color(theme.color.background),
-					$mdgriffith$elm_ui$Element$Font$color(theme.color.onBackground)
-				]),
-			A2(
-				$mdgriffith$elm_ui$Element$column,
+		body: A3(
+			$author$project$UIHelper$defaultTopColumn,
+			'Join/Create Game',
+			theme,
+			_Utils_ap(
 				_List_fromArray(
 					[
-						$mdgriffith$elm_ui$Element$centerX,
-						$mdgriffith$elm_ui$Element$width(
-						A2($mdgriffith$elm_ui$Element$maximum, 900, $mdgriffith$elm_ui$Element$fill)),
-						$mdgriffith$elm_ui$Element$padding(16),
-						$mdgriffith$elm_ui$Element$spacing(16)
+						A2(
+						$mdgriffith$elm_ui$Element$row,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+								$mdgriffith$elm_ui$Element$spacing(10)
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$mdgriffith$elm_ui$Element$el,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$width(
+										$mdgriffith$elm_ui$Element$fillPortion(2))
+									]),
+								A3(
+									$author$project$MaterialUI$TextField$text,
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+										]),
+									{color: $author$project$MaterialUI$Theme$Primary, errorText: $elm$core$Maybe$Nothing, helperText: $elm$core$Maybe$Nothing, hideLabel: false, label: 'Game id', onChange: $author$project$Page$Home$GameId, state: $author$project$MaterialUI$TextField$Idle, text: model.gameId, type_: $author$project$MaterialUI$TextField$Outlined},
+									theme)),
+								A3(
+								$author$project$MaterialUI$Button$outlined,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$alignLeft,
+										$mdgriffith$elm_ui$Element$width(
+										$mdgriffith$elm_ui$Element$fillPortion(1))
+									]),
+								{
+									color: $author$project$MaterialUI$Theme$Primary,
+									disabled: false,
+									icon: $elm$core$Maybe$Nothing,
+									onPress: $elm$core$Maybe$Just($author$project$Page$Home$JoinGame),
+									text: 'Join Game'
+								},
+								theme)
+							])),
+						A2(
+						$mdgriffith$elm_ui$Element$row,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+								$mdgriffith$elm_ui$Element$spacing(10)
+							]),
+						_List_fromArray(
+							[
+								$author$project$UIHelper$nonEl(
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$width(
+										$mdgriffith$elm_ui$Element$fillPortion(2))
+									])),
+								A3(
+								$author$project$MaterialUI$Button$outlined,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$alignLeft,
+										$mdgriffith$elm_ui$Element$width(
+										$mdgriffith$elm_ui$Element$fillPortion(1))
+									]),
+								{
+									color: $author$project$MaterialUI$Theme$Primary,
+									disabled: false,
+									icon: $elm$core$Maybe$Nothing,
+									onPress: $elm$core$Maybe$Just($author$project$Page$Home$NewTTTGame),
+									text: 'Create Game'
+								},
+								theme)
+							]))
 					]),
-				_Utils_ap(
-					_List_fromArray(
-						[
-							A2(
-							$mdgriffith$elm_ui$Element$row,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-									$mdgriffith$elm_ui$Element$spacing(10)
-								]),
-							_List_fromArray(
-								[
-									A4(
-									$author$project$UIHelper$materialText,
-									_List_fromArray(
-										[
-											$mdgriffith$elm_ui$Element$width(
-											$mdgriffith$elm_ui$Element$fillPortion(2)),
-											$mdgriffith$elm_ui$Element$Font$alignRight,
-											$mdgriffith$elm_ui$Element$padding(16)
-										]),
-									'Join/Create Game',
-									$author$project$MaterialUI$Theme$H5,
-									theme),
-									$author$project$UIHelper$nonEl(
-									_List_fromArray(
-										[
-											$mdgriffith$elm_ui$Element$width(
-											$mdgriffith$elm_ui$Element$fillPortion(1)),
-											$mdgriffith$elm_ui$Element$padding(16)
-										]))
-								])),
-							A2(
-							$mdgriffith$elm_ui$Element$row,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-									$mdgriffith$elm_ui$Element$spacing(10)
-								]),
-							_List_fromArray(
-								[
-									A2(
-									$mdgriffith$elm_ui$Element$el,
-									_List_fromArray(
-										[
-											$mdgriffith$elm_ui$Element$width(
-											$mdgriffith$elm_ui$Element$fillPortion(2))
-										]),
-									A3(
-										$author$project$MaterialUI$TextField$text,
-										_List_fromArray(
-											[
-												$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-											]),
-										{color: $author$project$MaterialUI$Theme$Primary, errorText: $elm$core$Maybe$Nothing, helperText: $elm$core$Maybe$Nothing, hideLabel: false, label: 'Game id', onChange: $author$project$Page$Home$GameId, state: $author$project$MaterialUI$TextField$Idle, text: model.gameId, type_: $author$project$MaterialUI$TextField$Outlined},
-										theme)),
-									A3(
-									$author$project$MaterialUI$Button$outlined,
-									_List_fromArray(
-										[
-											$mdgriffith$elm_ui$Element$alignLeft,
-											$mdgriffith$elm_ui$Element$width(
-											$mdgriffith$elm_ui$Element$fillPortion(1))
-										]),
-									{
-										color: $author$project$MaterialUI$Theme$Primary,
-										disabled: false,
-										icon: $elm$core$Maybe$Nothing,
-										onPress: $elm$core$Maybe$Just($author$project$Page$Home$JoinGame),
-										text: 'Join Game'
-									},
-									theme)
-								])),
-							A2(
-							$mdgriffith$elm_ui$Element$row,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-									$mdgriffith$elm_ui$Element$spacing(10)
-								]),
-							_List_fromArray(
-								[
-									$author$project$UIHelper$nonEl(
-									_List_fromArray(
-										[
-											$mdgriffith$elm_ui$Element$width(
-											$mdgriffith$elm_ui$Element$fillPortion(2))
-										])),
-									A3(
-									$author$project$MaterialUI$Button$outlined,
-									_List_fromArray(
-										[
-											$mdgriffith$elm_ui$Element$alignLeft,
-											$mdgriffith$elm_ui$Element$width(
-											$mdgriffith$elm_ui$Element$fillPortion(1))
-										]),
-									{
-										color: $author$project$MaterialUI$Theme$Primary,
-										disabled: false,
-										icon: $elm$core$Maybe$Nothing,
-										onPress: $elm$core$Maybe$Just($author$project$Page$Home$NewTTTGame),
-										text: 'Create Game'
-									},
-									theme)
-								]))
-						]),
-					function () {
-						var _v0 = model.error;
-						if (_v0.$ === 'Just') {
-							var error = _v0.a;
-							return _List_fromArray(
-								[
-									A2(
-									$author$project$Page$Home$errorCard,
-									$author$project$Page$Home$toErrorMsg(error),
-									theme)
-								]);
-						} else {
-							return _List_Nil;
-						}
-					}()))),
+				function () {
+					var _v0 = model.error;
+					if (_v0.$ === 'Just') {
+						var error = _v0.a;
+						return _List_fromArray(
+							[
+								A2(
+								$author$project$Page$Home$errorCard,
+								$author$project$Page$Home$toErrorMsg(error),
+								theme)
+							]);
+					} else {
+						return _List_Nil;
+					}
+				}())),
 		title: 'Home'
 	};
 };
@@ -16698,8 +16726,6 @@ var $author$project$Page$TTT$InGame$headerButtonColumn = function (theme) {
 				theme)
 			]));
 };
-var $mdgriffith$elm_ui$Internal$Model$Right = {$: 'Right'};
-var $mdgriffith$elm_ui$Element$alignRight = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Right);
 var $elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
 var $elm$svg$Svg$g = $elm$svg$Svg$trustedNode('g');
 var $elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
@@ -16999,6 +17025,7 @@ var $author$project$Page$TTT$InGame$view = function (model) {
 		title: 'TTTGame'
 	};
 };
+var $author$project$Page$TTT$Lobby$AddBot = {$: 'AddBot'};
 var $author$project$Page$TTT$Lobby$CopyGameId = {$: 'CopyGameId'};
 var $author$project$Page$TTT$Lobby$Name = function (a) {
 	return {$: 'Name', a: a};
@@ -17122,155 +17149,40 @@ var $author$project$Page$TTT$Lobby$view = function (model) {
 	var theme = $author$project$Session$theme(
 		$author$project$Page$TTT$Lobby$toSession(model));
 	return {
-		body: A2(
-			$mdgriffith$elm_ui$Element$layout,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$Background$color(theme.color.background),
-					$mdgriffith$elm_ui$Element$Font$color(theme.color.onBackground)
-				]),
-			A2(
-				$mdgriffith$elm_ui$Element$column,
+		body: A3(
+			$author$project$UIHelper$defaultTopColumn,
+			'Lobby',
+			theme,
+			_Utils_ap(
 				_List_fromArray(
 					[
-						$mdgriffith$elm_ui$Element$centerX,
-						$mdgriffith$elm_ui$Element$width(
-						A2($mdgriffith$elm_ui$Element$maximum, 900, $mdgriffith$elm_ui$Element$fill)),
-						$mdgriffith$elm_ui$Element$padding(16),
-						$mdgriffith$elm_ui$Element$spacing(16)
-					]),
-				_Utils_ap(
-					_List_fromArray(
-						[
-							A2(
-							$mdgriffith$elm_ui$Element$row,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-									$mdgriffith$elm_ui$Element$spacing(10)
-								]),
-							_List_fromArray(
-								[
-									A4(
-									$author$project$UIHelper$materialText,
+						A2(
+						$mdgriffith$elm_ui$Element$row,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+								$mdgriffith$elm_ui$Element$spacing(10)
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$mdgriffith$elm_ui$Element$el,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$width(
+										$mdgriffith$elm_ui$Element$fillPortion(2))
+									]),
+								A3(
+									$author$project$MaterialUI$TextField$text,
 									_List_fromArray(
 										[
-											$mdgriffith$elm_ui$Element$Font$alignRight,
-											$mdgriffith$elm_ui$Element$alignRight,
-											$mdgriffith$elm_ui$Element$width(
-											$mdgriffith$elm_ui$Element$fillPortion(2)),
-											$mdgriffith$elm_ui$Element$padding(16)
+											$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
 										]),
-									'Lobby',
-									$author$project$MaterialUI$Theme$H5,
-									theme),
-									$author$project$UIHelper$nonEl(
-									_List_fromArray(
-										[
-											$mdgriffith$elm_ui$Element$width(
-											$mdgriffith$elm_ui$Element$fillPortion(1)),
-											$mdgriffith$elm_ui$Element$padding(16)
-										]))
-								])),
-							A2(
-							$mdgriffith$elm_ui$Element$row,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-									$mdgriffith$elm_ui$Element$spacing(10)
-								]),
-							_List_fromArray(
-								[
-									A2(
-									$mdgriffith$elm_ui$Element$el,
-									_List_fromArray(
-										[
-											$mdgriffith$elm_ui$Element$width(
-											$mdgriffith$elm_ui$Element$fillPortion(2))
-										]),
-									A3(
-										$author$project$MaterialUI$TextField$text,
-										_List_fromArray(
-											[
-												$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-											]),
-										{color: $author$project$MaterialUI$Theme$Primary, errorText: $elm$core$Maybe$Nothing, helperText: $elm$core$Maybe$Nothing, hideLabel: false, label: 'Name', onChange: $author$project$Page$TTT$Lobby$Name, state: $author$project$MaterialUI$TextField$Idle, text: model.lobby.playerMe.name, type_: $author$project$MaterialUI$TextField$Outlined},
-										theme)),
-									function () {
-									var bText = model.lobby.playerMe.isReady ? 'Not Ready' : 'Ready';
-									return A3(
-										$author$project$MaterialUI$Button$outlined,
-										_List_fromArray(
-											[
-												$mdgriffith$elm_ui$Element$alignLeft,
-												$mdgriffith$elm_ui$Element$width(
-												$mdgriffith$elm_ui$Element$fillPortion(1))
-											]),
-										{
-											color: $author$project$MaterialUI$Theme$Primary,
-											disabled: false,
-											icon: $elm$core$Maybe$Nothing,
-											onPress: $elm$core$Maybe$Just($author$project$Page$TTT$Lobby$Ready),
-											text: bText
-										},
-										theme);
-								}()
-								])),
-							A2(
-							$mdgriffith$elm_ui$Element$row,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-									$mdgriffith$elm_ui$Element$spacing(10)
-								]),
-							_List_fromArray(
-								[
-									A2(
-									$mdgriffith$elm_ui$Element$row,
-									_List_fromArray(
-										[
-											$mdgriffith$elm_ui$Element$width(
-											$mdgriffith$elm_ui$Element$fillPortion(2)),
-											$mdgriffith$elm_ui$Element$padding(4)
-										]),
-									_List_fromArray(
-										[
-											A2(
-											$mdgriffith$elm_ui$Element$column,
-											_List_fromArray(
-												[
-													$mdgriffith$elm_ui$Element$spacing(4),
-													$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-												]),
-											_List_fromArray(
-												[
-													A4(
-													$author$project$UIHelper$materialText,
-													_List_fromArray(
-														[$mdgriffith$elm_ui$Element$Font$alignLeft, $mdgriffith$elm_ui$Element$alignLeft]),
-													'Game Id',
-													$author$project$MaterialUI$Theme$Overline,
-													theme),
-													A4(
-													$author$project$UIHelper$materialText,
-													_List_fromArray(
-														[$mdgriffith$elm_ui$Element$Font$alignLeft, $mdgriffith$elm_ui$Element$alignLeft]),
-													model.lobby.gameId,
-													$author$project$MaterialUI$Theme$Body1,
-													theme)
-												])),
-											A5(
-											$author$project$MaterialUI$Icon$button,
-											_List_fromArray(
-												[
-													$mdgriffith$elm_ui$Element$Events$onClick($author$project$Page$TTT$Lobby$CopyGameId)
-												]),
-											theme,
-											$author$project$MaterialUI$Theme$OnBackground,
-											24,
-											$author$project$MaterialUI$Icons$Content$content_copy)
-										])),
-									A3(
+									{color: $author$project$MaterialUI$Theme$Primary, errorText: $elm$core$Maybe$Nothing, helperText: $elm$core$Maybe$Nothing, hideLabel: false, label: 'Name', onChange: $author$project$Page$TTT$Lobby$Name, state: $author$project$MaterialUI$TextField$Idle, text: model.lobby.playerMe.name, type_: $author$project$MaterialUI$TextField$Outlined},
+									theme)),
+								function () {
+								var bText = model.lobby.playerMe.isReady ? 'Not Ready' : 'Ready';
+								return A3(
 									$author$project$MaterialUI$Button$outlined,
 									_List_fromArray(
 										[
@@ -17278,14 +17190,92 @@ var $author$project$Page$TTT$Lobby$view = function (model) {
 											$mdgriffith$elm_ui$Element$width(
 											$mdgriffith$elm_ui$Element$fillPortion(1))
 										]),
-									{color: $author$project$MaterialUI$Theme$Primary, disabled: false, icon: $elm$core$Maybe$Nothing, onPress: $elm$core$Maybe$Nothing, text: 'Add Bot'},
-									theme)
-								]))
-						]),
-					A2(
-						$elm$core$List$map,
-						$author$project$Page$TTT$Lobby$playerRow(theme),
-						$author$project$Game$Lobby$allPlayers(model.lobby))))),
+									{
+										color: $author$project$MaterialUI$Theme$Primary,
+										disabled: false,
+										icon: $elm$core$Maybe$Nothing,
+										onPress: $elm$core$Maybe$Just($author$project$Page$TTT$Lobby$Ready),
+										text: bText
+									},
+									theme);
+							}()
+							])),
+						A2(
+						$mdgriffith$elm_ui$Element$row,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+								$mdgriffith$elm_ui$Element$spacing(10)
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$mdgriffith$elm_ui$Element$row,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$width(
+										$mdgriffith$elm_ui$Element$fillPortion(2)),
+										$mdgriffith$elm_ui$Element$padding(4)
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$mdgriffith$elm_ui$Element$column,
+										_List_fromArray(
+											[
+												$mdgriffith$elm_ui$Element$spacing(4),
+												$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+											]),
+										_List_fromArray(
+											[
+												A4(
+												$author$project$UIHelper$materialText,
+												_List_fromArray(
+													[$mdgriffith$elm_ui$Element$Font$alignLeft, $mdgriffith$elm_ui$Element$alignLeft]),
+												'Game Id',
+												$author$project$MaterialUI$Theme$Overline,
+												theme),
+												A4(
+												$author$project$UIHelper$materialText,
+												_List_fromArray(
+													[$mdgriffith$elm_ui$Element$Font$alignLeft, $mdgriffith$elm_ui$Element$alignLeft]),
+												model.lobby.gameId,
+												$author$project$MaterialUI$Theme$Body1,
+												theme)
+											])),
+										A5(
+										$author$project$MaterialUI$Icon$button,
+										_List_fromArray(
+											[
+												$mdgriffith$elm_ui$Element$Events$onClick($author$project$Page$TTT$Lobby$CopyGameId)
+											]),
+										theme,
+										$author$project$MaterialUI$Theme$OnBackground,
+										24,
+										$author$project$MaterialUI$Icons$Content$content_copy)
+									])),
+								A3(
+								$author$project$MaterialUI$Button$outlined,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$alignLeft,
+										$mdgriffith$elm_ui$Element$width(
+										$mdgriffith$elm_ui$Element$fillPortion(1))
+									]),
+								{
+									color: $author$project$MaterialUI$Theme$Primary,
+									disabled: false,
+									icon: $elm$core$Maybe$Nothing,
+									onPress: $elm$core$Maybe$Just($author$project$Page$TTT$Lobby$AddBot),
+									text: 'Add Bot'
+								},
+								theme)
+							]))
+					]),
+				A2(
+					$elm$core$List$map,
+					$author$project$Page$TTT$Lobby$playerRow(theme),
+					$author$project$Game$Lobby$allPlayers(model.lobby)))),
 		title: 'Home'
 	};
 };

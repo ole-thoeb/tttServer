@@ -56,6 +56,7 @@ toSession model =
 type Msg
     = Name String
     | Ready
+    | AddBot
     | CopyGameId
 
 
@@ -77,6 +78,9 @@ update msg model =
                 newLobby = Lens.modify Lobby.playerReadyOfLobby not lobby
             in
             ( { model | lobby = newLobby }, InLobbyRequest.readyChangedMsg newLobby.gameId newLobby.playerMe |> Websocket.send )
+
+        AddBot ->
+            ( model, InLobbyRequest.addBotMsg lobby.gameId lobby.playerMe |> Websocket.send )
 
         CopyGameId ->
             let
@@ -178,8 +182,8 @@ view model =
                 { icon = Nothing
                 , color = Theme.Primary
                 , text = "Add Bot"
-                , onPress = Nothing
-                , disabled = True
+                , onPress = Just AddBot
+                , disabled = False
                 }
                 theme
             ]

@@ -18,11 +18,11 @@ sealed class TTTGame {
         private val minPlayer = 2
         private val maxPlayer = 2
 
-        fun addPlayer(player: Player.Human): Either<LobbyError.Full, Lobby> {
+        fun addPlayer(player: Player): Either<LobbyError.Full, Lobby> {
             return if (players.size < maxPlayer) {
                 Either.right(copy(players = (players + player).k()))
             } else {
-                Either.left(LobbyError.Full(player.technical, maxPlayer))
+                Either.left(LobbyError.Full(maxPlayer))
             }
         }
 

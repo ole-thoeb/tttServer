@@ -50,9 +50,26 @@ sealed class LobbyRequest {
             override val contentDeserializer: DeserializationStrategy<Content> = Content.serializer()
         }
     }
+
+    @Serializable
+    data class AddBot(val content: Content) : LobbyRequest() {
+        val type: String = TYPE
+
+        @Transient override val gameId = GameId(content.gameId)
+        @Transient override val playerId = PlayerId(content.playerId)
+
+        @Serializable
+        data class Content(val playerId: String, val gameId: String)
+
+        companion object : JsonTypeDeserializer<AddBot, Content> {
+            override val typeConstructor = LobbyRequest::AddBot
+            override val TYPE: String = "addBot"
+            override val contentDeserializer: DeserializationStrategy<Content> = Content.serializer()
+        }
+    }
     
     companion object {
-        val deserializers = listOf(Ready, Name).k()
+        val deserializers = listOf(Ready, Name, AddBot).k()
         
         fun <F> fromJson(type: String, jsonObj: JsonObject, ME: MonadError<F, JsonError>): Kind<F, LobbyRequest> = when {
             type.equals("ready", true) -> Ready.fromContentJson(jsonObj, ME)

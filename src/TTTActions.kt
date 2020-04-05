@@ -1,10 +1,14 @@
 import TTTGame.InGame.PlayerRef
 import arrow.core.*
-import kotlinx.coroutines.Job
+import json.JsonSerializable
+import kotlinx.coroutines.*
 import messages.requests.GameRequest
 import messages.requests.LobbyRequest
 import messages.responses.InGameResponse
 import messages.responses.LobbyResponse
+import skynet.TTTBoard
+import skynet.bestMove
+import kotlin.random.Random
 
 suspend fun TTTGameServer.addNewPlayer(sessionId: SessionId, gameId: GameId): Messages = updateGame(gameId) { game ->
     val technical = TechnicalPlayer(PlayerId.create(), sessionId, ListK.empty(), emptyMap<String, Job>().k())
@@ -62,7 +66,7 @@ suspend fun TTTGameServer.handleLobbyRequest(lobbyRequest: LobbyRequest): Messag
                             }
                     if (modifiedLobby.players.size == 2 && modifiedLobby.players.all { it.isReady }) {
                         val (p1, p2) = modifiedLobby.players.shuffled()
-                        val toInGamePlayer = { player: TTTGame.Lobby.Player, ref: PlayerRef  ->
+                        val toInGamePlayer = { player: TTTGame.Lobby.Player, ref: PlayerRef ->
                             val (name, color) = when (ref) {
                                 PlayerRef.P1 -> "Player 1" to "#FF0000"
                                 PlayerRef.P2 -> "Player 2" to "#00FF00"
@@ -83,6 +87,12 @@ suspend fun TTTGameServer.handleLobbyRequest(lobbyRequest: LobbyRequest): Messag
                                 PlayerRef.P1,
                                 TTTGame.InGame.Status.OnGoing
                         )
+
+                        val nextRoundPlayer = inGame[inGame.turn]
+                        if (nextRoundPlayer is TTTGame.InGame.Player.Bot) {
+                            launchBotSetPieceAction(inGame.id)
+                        }
+
                         return@updateGame inGame toT inGameStateMsgs(inGame)
                     } else {
                         modifiedLobby
@@ -92,6 +102,11 @@ suspend fun TTTGameServer.handleLobbyRequest(lobbyRequest: LobbyRequest): Messag
                     TTTGame.Lobby.player { it.technical.playerId == lobbyRequest.playerId }.modify(game) {
                         it.copy(name = lobbyRequest.content.name.limit(20))
                     }
+                }
+                is LobbyRequest.AddBot -> {
+                    val botNames = listOf("Skynet", "Terminator", "Wall-e", "RoboCop", "\uD83E\uDD16")
+                    val bot = TTTGame.Lobby.Player.Bot(botNames.random(), PlayerId.create())
+                    game.addPlayer(bot).getOrElse { game }
                 }
             }
             updatedGame toT lobbyStateMsgs(updatedGame)
@@ -105,9 +120,56 @@ suspend fun TTTGameServer.handleGameRequest(gameRequest: GameRequest): Messages 
         is TTTGame.InGame -> {
             val updatedGame = when (gameRequest) {
                 is GameRequest.SetPiece -> game.setPiece(gameRequest.content.index, gameRequest.playerId)
-                        .getOrElse { game }
+                        .fold(constant(game), { updatedGame ->
+                            val nextRoundPlayer = updatedGame[updatedGame.turn]
+                            if (updatedGame.status == TTTGame.InGame.Status.OnGoing &&
+                                    nextRoundPlayer is TTTGame.InGame.Player.Bot) {
+                                launchBotSetPieceAction(updatedGame.id)
+                            }
+                            updatedGame
+                        })
             }
             updatedGame toT inGameStateMsgs(updatedGame)
+        }
+    }
+}
+
+fun TTTGameServer.launchBotSetPieceAction(gameId: GameId): Job = launchAsyncAction {
+    delay(Random.nextLong(1000, 3000))
+    asyncUpdateGame(gameId) { game ->
+        when (game) {
+            is TTTGame.Lobby -> {
+                log.error("bot failed to set piece because the game was a lobby")
+                game toT noMessages()
+            }
+            is TTTGame.InGame -> {
+                val turnPlayer = game[game.turn]
+                if (turnPlayer !is TTTGame.InGame.Player.Bot) {
+                    log.warn("BotSetPiecAction but current palyer is not a bot")
+                    game toT noMessages()
+                } else {
+                    val turnPlayerMappedRef = when (turnPlayer.ref) {
+                        PlayerRef.P1 -> TTTBoard.Player.P1
+                        PlayerRef.P2 -> TTTBoard.Player.P2
+                    }
+                    val bestMoveIndex = bestMove(TTTBoard(game.board.map { state ->
+                        when (state) {
+                            TTTGame.InGame.CellState.P1 -> TTTBoard.CellState.P1
+                            TTTGame.InGame.CellState.P2 -> TTTBoard.CellState.P2
+                            TTTGame.InGame.CellState.EMPTY -> TTTBoard.CellState.EMPTY
+                        }
+                    }), turnPlayerMappedRef).index
+
+                    val updatedGame: TTTGame.InGame = game.setPiece(bestMoveIndex, turnPlayer.playerId).fold(
+                            { e ->
+                                log.error("bot failed to set piece with error $e")
+                                game
+                            },
+                            ::identity
+                    )
+                    updatedGame toT inGameStateMsgs(updatedGame)
+                }
+            }
         }
     }
 }

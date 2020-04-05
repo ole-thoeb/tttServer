@@ -1,4 +1,4 @@
 sealed class LobbyError {
     
-    data class Full(val affectedPlayer: TechnicalPlayer, val maxPlayers: Int) : LobbyError()
+    data class Full(val maxPlayers: Int) : LobbyError()
 }
