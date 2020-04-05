@@ -8,6 +8,7 @@ import io.ktor.http.cio.websocket.*
 import io.ktor.http.content.defaultResource
 import io.ktor.http.content.resource
 import io.ktor.http.content.static
+import io.ktor.locations.KtorExperimentalLocationsAPI
 import io.ktor.locations.Location
 import io.ktor.locations.Locations
 import io.ktor.locations.get
@@ -26,6 +27,7 @@ import java.time.Duration
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
+@KtorExperimentalLocationsAPI
 @Suppress("unused") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
@@ -152,9 +154,11 @@ fun Route.defaultIndexHtml() {
 }
 
 
+@KtorExperimentalLocationsAPI
 @Location("/joinGame/{gameId}")
 data class JoinGame(val gameId: String)
 
+@KtorExperimentalLocationsAPI
 @Location("/rematch/{oldGameId}")
 data class Rematch(val oldGameId: String)
 
