@@ -17,6 +17,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import messages.requests.GameRequest
 import messages.requests.LobbyRequest
+import messages.responses.InGameResponse
+import messages.responses.LobbyResponse
 import messages.responses.TTTResponse
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
@@ -78,8 +80,6 @@ class TTTGameServer(
     suspend fun clientJoined(sessionId: SessionId, gameId: GameId, websocket: WebSocketSession): JsonSerializable {
         return updateGame(gameId) { game ->
             log.info("session ${sessionId.asString()}, game ${gameId.asString()}: client joined")
-            val player = game.technicalPlayers.firstOrNull { it.sessionId == sessionId }
-                    ?: return@updateGame game toT noSuchGame(game.id)
 
             val addWebSocket = { technical: TechnicalPlayer ->
                 technical.copy(sockets = (technical.sockets + websocket).k(), jobs = technical.jobs.filter { (key, job) ->
@@ -92,14 +92,26 @@ class TTTGameServer(
                 }.k())
             }
 
-            val updatedGame = when (game) {
-                is TTTGame.Lobby -> TTTGame.Lobby.technical { it.technical.sessionId == sessionId }
-                        .modify(game, addWebSocket)
-                is TTTGame.InGame -> TTTGame.InGame.technical { it.technical.sessionId == sessionId }
-                        .modify(game, addWebSocket)
-            }
+            when (game) {
+                is TTTGame.Lobby -> {
+                    val player = game.players.firstOrNull {
+                        it is TTTGame.Lobby.Player.Human && it.technical.sessionId == sessionId
+                    } as? TTTGame.Lobby.Player.Human ?: return@updateGame game toT noSuchGame(game.id)
 
-            return@updateGame updatedGame toT mapOf(player to TTTResponse.State.forPlayer(updatedGame, player))
+                    val updatedGame = TTTGame.Lobby.technical { it.technical.sessionId == sessionId }
+                            .modify(game, addWebSocket)
+                    return@updateGame updatedGame toT mapOf(player.technical to LobbyResponse.State.forPlayer(game, player))
+                }
+                is TTTGame.InGame -> {
+                    val player = game.players.firstOrNull {
+                        it is TTTGame.InGame.Player.Human && it.technical.sessionId == sessionId
+                    } as? TTTGame.InGame.Player.Human ?: return@updateGame game toT noSuchGame(game.id)
+
+                    val updatedGame = TTTGame.InGame.technical { it.technical.sessionId == sessionId }
+                            .modify(game, addWebSocket)
+                    return@updateGame updatedGame toT mapOf(player.technical to InGameResponse.State.forPlayer(game, player))
+                }
+            }
         }.entries.first().value
     }
 
@@ -162,17 +174,17 @@ class TTTGameServer(
             when (game) {
                 is TTTGame.Lobby -> {
                     val updatedGame = TTTGame.Lobby.players().modify(game) { players ->
-                        players.filter { it.technical.playerId != playerId || it.technical.sockets.isNotEmpty() }.k()
+                        players.filter { it is TTTGame.Lobby.Player.Human && it.technical.playerId != playerId }.k()
                     }
 
-                    if (updatedGame.technicalPlayers.isEmpty()) {
+                    if (updatedGame.players.all { it is TTTGame.Lobby.Player.Bot }) {
                         removeGame()
                     } else {
                         games[game.id] = gameWithLock.copy(game = updatedGame)
                         messageChannel.send(lobbyStateMsgs(updatedGame))
                     }
                 }
-                is TTTGame.InGame -> {
+                is TTTGame.InGame -> if (game.player1 is TTTGame.InGame.Player.Human && game.player2 is TTTGame.InGame.Player.Human) {
                     val t1 = game.player1.technical
                     val t2 = game.player2.technical
                     when {
@@ -181,11 +193,10 @@ class TTTGameServer(
                             messageChannel.send(mapOf(t2 to TTTResponse.PlayerDisconnected(game.player1.name)))
                         t2.playerId == playerId && t2.sockets.isEmpty() ->
                             messageChannel.send(mapOf(t1 to TTTResponse.PlayerDisconnected(game.player2.name)))
-                        else -> {
-                        }
                     }
                 }
             }
+            return@withLock
         }
     }
 

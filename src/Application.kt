@@ -116,18 +116,19 @@ fun Application.module(testing: Boolean = false) {
             val oldPlayerName: String? = tttGameServer.withGame(GameId(rematch.oldGameId)) { game ->
                 when (game) {
                     null -> null
-                    is TTTGame.Lobby -> game.players
-                            .firstOrNull { it.technical.sessionId == sessionId }
-                            ?.name
-                    is TTTGame.InGame -> game.playersWithRef
-                            .map { it.a }
-                            .firstOrNull { it.technical.sessionId == sessionId }
-                            ?.name
+
+                    is TTTGame.Lobby -> game.players.mapNotNull {
+                        if (it is TTTGame.Lobby.Player.Human && it.technical.sessionId == sessionId) it.name else null
+                    }.firstOrNull()
+
+                    is TTTGame.InGame -> game.players.mapNotNull { p ->
+                        if (p is TTTGame.InGame.Player.Human && p.technical.sessionId == sessionId) p.name else null
+                    }.firstOrNull()
                 }
             }
             if (oldPlayerName != null) {
                 val technical = TechnicalPlayer(PlayerId.create(), sessionId, ListK.empty(), emptyMap<String, Job>().k())
-                val player = TTTGame.Lobby.Player(oldPlayerName, false, technical)
+                val player = TTTGame.Lobby.Player.Human(oldPlayerName, false, technical)
                 handleAddPlayerMsgs(rematchId, sessionId, tttGameServer.addNewPlayer(player, rematchId))
             } else {
                 addPlayerToGame(rematchId, tttGameServer, sessionId)

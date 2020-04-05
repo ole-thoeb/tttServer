@@ -5,6 +5,7 @@ import arrow.typeclasses.ApplicativeError
 import arrow.typeclasses.MonadError
 import json.JsonSerializable
 import messages.responses.TTTResponse
+import kotlin.reflect.KClass
 
 inline fun <F, A, E> MonadError<F, E>.tryCatch(fe: (Throwable) -> E, f: () -> A): Kind<F, A> = try {
     just(f())
@@ -17,6 +18,9 @@ fun <F, T, E> T?.fromNull(ME: ApplicativeError<F, E>, fe: () -> E): Kind<F, T> =
 
 inline fun <T> List<T>.update(predicate: Predicate<T>, update: (T) -> T): List<T> =
     this.map { if (predicate(it)) update(it) else it }
+
+inline fun <T: Any, reified SUB: T> List<T>.filter(type: KClass<SUB>): List<SUB> =
+        this.mapNotNull { if (it is SUB) it else null }
 
 inline fun <T> List<T>.updateIndexed(predicate: (Int, T) -> Boolean, update: (Int, T) -> T): List<T> =
         this.mapIndexed { i, t -> if (predicate(i, t)) update(i, t) else t }

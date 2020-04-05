@@ -1,3 +1,4 @@
+import TTTGame.InGame.PlayerRef
 import arrow.core.*
 import kotlinx.coroutines.Job
 import messages.requests.GameRequest
@@ -8,20 +9,20 @@ import messages.responses.LobbyResponse
 suspend fun TTTGameServer.addNewPlayer(sessionId: SessionId, gameId: GameId): Messages = updateGame(gameId) { game ->
     val technical = TechnicalPlayer(PlayerId.create(), sessionId, ListK.empty(), emptyMap<String, Job>().k())
     game.joinLobby(technical) { lobby ->
-        val player = TTTGame.Lobby.Player("Player ${lobby.players.size + 1}", false, technical)
+        val player = TTTGame.Lobby.Player.Human("Player ${lobby.players.size + 1}", false, technical)
         addNewPlayer(player, lobby)
     }
 }
 
-suspend fun TTTGameServer.addNewPlayer(player: TTTGame.Lobby.Player, gameId: GameId): Messages = updateGame(gameId) { game ->
+suspend fun TTTGameServer.addNewPlayer(player: TTTGame.Lobby.Player.Human, gameId: GameId): Messages = updateGame(gameId) { game ->
     game.joinLobby(player.technical) { lobby ->
         addNewPlayer(player, lobby)
     }
 }
 
-private fun addNewPlayer(player: TTTGame.Lobby.Player, lobby: TTTGame.Lobby): Tuple2<TTTGame, Messages> {
+private fun addNewPlayer(player: TTTGame.Lobby.Player.Human, lobby: TTTGame.Lobby): Tuple2<TTTGame, Messages> {
     val technical = player.technical
-    return lobby.players.firstOrNone { it.technical.sessionId == technical.sessionId }.fold(
+    return lobby[player.technical.sessionId].toOption().fold(
             {
                 lobby.addPlayer(player).fold(
                         { lobbyError ->
@@ -42,11 +43,12 @@ private inline fun TTTGame.joinLobby(
 ): Tuple2<TTTGame, Messages> = when (this) {
 
     is TTTGame.Lobby -> addPlayer(this)
-    is TTTGame.InGame -> when (player.sessionId) {
-        player1.technical.sessionId, player2.technical.sessionId -> this toT inGameStateMsgs(this)
+    is TTTGame.InGame -> when {
+        this[player.sessionId] != null -> this toT inGameStateMsgs(this)
         else -> this toT mapOf(player to LobbyResponse.GameAlreadyStarted(id.asString()))
     }
 }
+
 
 suspend fun TTTGameServer.handleLobbyRequest(lobbyRequest: LobbyRequest): Messages = updateGame(lobbyRequest.gameId) { game ->
     when (game) {
@@ -60,12 +62,25 @@ suspend fun TTTGameServer.handleLobbyRequest(lobbyRequest: LobbyRequest): Messag
                             }
                     if (modifiedLobby.players.size == 2 && modifiedLobby.players.all { it.isReady }) {
                         val (p1, p2) = modifiedLobby.players.shuffled()
+                        val toInGamePlayer = { player: TTTGame.Lobby.Player, ref: PlayerRef  ->
+                            val (name, color) = when (ref) {
+                                PlayerRef.P1 -> "Player 1" to "#FF0000"
+                                PlayerRef.P2 -> "Player 2" to "#00FF00"
+                            }
+                            when (player) {
+                                is TTTGame.Lobby.Player.Human ->
+                                    TTTGame.InGame.Player.Human(player.name.ifBlank { name }, color, ref, player.technical)
+
+                                is TTTGame.Lobby.Player.Bot ->
+                                    TTTGame.InGame.Player.Bot(player.name, PlayerId.create(), color, ref)
+                            }
+                        }
                         val inGame = TTTGame.InGame(
                                 modifiedLobby.id,
-                                TTTGame.InGame.Player(p1.name.ifBlank { "Player 1" }, "#FF0000", p1.technical),
-                                TTTGame.InGame.Player(p2.name.ifBlank { "Player 2" }, "#00FF00", p2.technical),
+                                toInGamePlayer(p1, PlayerRef.P1),
+                                toInGamePlayer(p2, PlayerRef.P2),
                                 List(9) { TTTGame.InGame.CellState.EMPTY }.k(),
-                                TTTGame.InGame.PlayerRef.P1,
+                                PlayerRef.P1,
                                 TTTGame.InGame.Status.OnGoing
                         )
                         return@updateGame inGame toT inGameStateMsgs(inGame)
@@ -97,10 +112,10 @@ suspend fun TTTGameServer.handleGameRequest(gameRequest: GameRequest): Messages 
     }
 }
 
-fun lobbyStateMsgs(lobby: TTTGame.Lobby): MessagesOf<LobbyResponse.State> = lobby.players.associate {
-    it.technical to LobbyResponse.State.forPlayer(lobby, it)
-}
+fun lobbyStateMsgs(lobby: TTTGame.Lobby): MessagesOf<LobbyResponse.State> = lobby.players
+        .filter(TTTGame.Lobby.Player.Human::class)
+        .associate { it.technical to LobbyResponse.State.forPlayer(lobby, it) }
 
-fun inGameStateMsgs(inGame: TTTGame.InGame): MessagesOf<InGameResponse.State> = inGame.playersWithRef.associate { (player, ref) ->
-    player.technical to InGameResponse.State.forPlayer(inGame, ref)
-}
+fun inGameStateMsgs(inGame: TTTGame.InGame): MessagesOf<InGameResponse.State> = inGame.players
+        .filter(TTTGame.InGame.Player.Human::class)
+        .associate { player -> player.technical to InGameResponse.State.forPlayer(inGame, player) }

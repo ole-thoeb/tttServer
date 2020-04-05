@@ -1,16 +1,14 @@
 import arrow.core.*
 import arrow.optics.Lens
 import arrow.optics.Setter
-import arrow.optics.extensions.list.cons.firstOption
-import arrow.optics.none
 import io.ktor.http.cio.websocket.WebSocketSession
 import kotlinx.coroutines.Job
-import kotlinx.serialization.*
-import kotlinx.serialization.internal.PrimitiveDescriptor
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 
 sealed class TTTGame {
     abstract val id: GameId
-    abstract val technicalPlayers: ListK<TechnicalPlayer>
+    abstract operator fun get(sessionId: SessionId): TechnicalPlayer?
 
     data class Lobby(
             override val id: GameId,
@@ -20,10 +18,7 @@ sealed class TTTGame {
         private val minPlayer = 2
         private val maxPlayer = 2
 
-        override val technicalPlayers: ListK<TechnicalPlayer>
-            get() = players.map(Player::technical)
-
-        fun addPlayer(player: Player): Either<LobbyError.Full, Lobby> {
+        fun addPlayer(player: Player.Human): Either<LobbyError.Full, Lobby> {
             return if (players.size < maxPlayer) {
                 Either.right(copy(players = (players + player).k()))
             } else {
@@ -31,12 +26,26 @@ sealed class TTTGame {
             }
         }
 
-        data class Player(val name: String, val isReady: Boolean, val technical: TechnicalPlayer) {
-            companion object {
-                val technical: Lens<Player, TechnicalPlayer> = Lens(
-                        get = { it.technical },
-                        set = { player, technical -> player.copy(technical = technical) }
-                )
+        override fun get(sessionId: SessionId): TechnicalPlayer? =
+                players.filter(Player.Human::class)
+                .firstOrNull { player -> player.technical.sessionId == sessionId }
+                ?.technical
+
+        sealed class Player {
+            abstract val name: String
+            abstract val isReady: Boolean
+
+            data class Human(override val name: String, override val isReady: Boolean, val technical: TechnicalPlayer) : Player() {
+                companion object {
+                    val technical: Lens<Human, TechnicalPlayer> = Lens(
+                            get = { it.technical },
+                            set = { player, technical -> player.copy(technical = technical) }
+                    )
+                }
+            }
+
+            data class Bot(override val name: String, val playerId: PlayerId) : Player() {
+                    override val isReady: Boolean = true
             }
         }
 
@@ -46,11 +55,13 @@ sealed class TTTGame {
                     set = { lobby, players -> lobby.copy(players = players) }
             )
 
-            fun player(predicate: Predicate<Player>): Setter<Lobby, Player> = Setter { lobby, playerUpdate ->
-                lobby.copy(players = lobby.players.update(predicate, playerUpdate).k())
+            fun player(predicate: Predicate<Player.Human>): Setter<Lobby, Player.Human> = Setter { lobby, playerUpdate ->
+                lobby.copy(players = lobby.players.map {
+                    if(it is Player.Human && predicate(it)) playerUpdate(it) else it
+                }.k())
             }
 
-            fun technical(predicate: Predicate<Player>): Setter<Lobby, TechnicalPlayer> = player(predicate) + Player.technical
+            fun technical(predicate: Predicate<Player.Human>): Setter<Lobby, TechnicalPlayer> = player(predicate) + Player.Human.technical
         }
     }
 
@@ -63,11 +74,14 @@ sealed class TTTGame {
             val status: Status
     ) : TTTGame() {
 
-        override val technicalPlayers: ListK<TechnicalPlayer>
-            get() = listOf(player1.technical, player2.technical).k()
+        val players: ListK<Player>
+            get() = listOf(player1, player2).k()
 
-        val playersWithRef: ListK<Tuple2<Player, PlayerRef>>
-            get() = listOf(player1 toT PlayerRef.P1, player2 toT PlayerRef.P2).k()
+        override fun get(sessionId: SessionId): TechnicalPlayer? = when {
+            player1 is Player.Human && player1.technical.sessionId == sessionId -> player1.technical
+            player2 is Player.Human && player2.technical.sessionId == sessionId -> player2.technical
+            else -> null
+        }
 
         enum class PlayerRef(val cellState: CellState) {
             P1(CellState.P1), P2(CellState.P2);
@@ -102,8 +116,8 @@ sealed class TTTGame {
 
         private val PlayerId.playerRef: PlayerRef?
             get() = when (this) {
-                player1.technical.playerId -> PlayerRef.P1
-                player2.technical.playerId -> PlayerRef.P2
+                player1.playerId -> PlayerRef.P1
+                player2.playerId -> PlayerRef.P2
                 else -> null
             }
 
@@ -123,13 +137,36 @@ sealed class TTTGame {
             }
         }
 
-        data class Player(val name: String, val color: String, val technical: TechnicalPlayer) {
-            companion object {
-                val technical: Lens<Player, TechnicalPlayer> = Lens(
-                        get = { it.technical },
-                        set = { player, technical -> player.copy(technical = technical) }
-                )
+        sealed class Player {
+            abstract val name: String
+            abstract val playerId: PlayerId
+            abstract val ref: PlayerRef
+            abstract val color: String
+
+            data class Human(
+                    override val name: String,
+                    override val color: String,
+                    override val ref: PlayerRef,
+                    val technical: TechnicalPlayer
+            ) : Player() {
+
+                override val playerId: PlayerId
+                    get() = technical.playerId
+
+                companion object {
+                    val technical: Lens<Human, TechnicalPlayer> = Lens(
+                            get = { it.technical },
+                            set = { player, technical -> player.copy(technical = technical) }
+                    )
+                }
             }
+
+            data class Bot(
+                    override val name: String,
+                    override val playerId: PlayerId,
+                    override val color: String,
+                    override val ref: PlayerRef
+            ) : Player()
         }
 
         sealed class Status {
@@ -146,20 +183,38 @@ sealed class TTTGame {
                     set = { inGame, (player1, player2) -> inGame.copy(player1 = player1, player2 = player2) }
             )
 
-            fun player(predicate: Predicate<Player>): Setter<InGame, Player> = Setter { inGame, playerUpdate ->
+            fun humanPlayer(predicate: Predicate<Player.Human>): Setter<InGame, Player.Human> = Setter { inGame, playerUpdate ->
                 inGame.copy(
-                        player1 = if (predicate(inGame.player1)) playerUpdate(inGame.player1) else inGame.player1,
-                        player2 = if (predicate(inGame.player2)) playerUpdate(inGame.player2) else inGame.player2
+                        player1 = if (inGame.player1 is Player.Human && predicate(inGame.player1))
+                            playerUpdate(inGame.player1)
+                        else
+                            inGame.player1,
+                        player2 = if (inGame.player2 is Player.Human && predicate(inGame.player2))
+                            playerUpdate(inGame.player2)
+                        else
+                            inGame.player2
                 )
             }
 
-            fun technical(predicate: Predicate<Player>): Setter<InGame, TechnicalPlayer> = player(predicate) + Player.technical
+            fun technical(predicate: Predicate<Player.Human>): Setter<InGame, TechnicalPlayer> = humanPlayer(predicate) + Player.Human.technical
         }
     }
 }
 
-fun TTTGame.Lobby.addPlayer(technicalPlayer: TechnicalPlayer): Either<LobbyError.Full, TTTGame.Lobby> {
-    return addPlayer(TTTGame.Lobby.Player("Player ${players.size + 1}", false, technicalPlayer))
+@ExperimentalContracts
+fun TTTGame.InGame.Player.isHuman(): Boolean {
+    contract {
+        returns(true) implies (this@isHuman is TTTGame.InGame.Player.Human)
+    }
+    return this is TTTGame.InGame.Player.Human
+}
+
+@ExperimentalContracts
+fun TTTGame.Lobby.Player.isHuman(): Boolean {
+    contract {
+        returns(true) implies (this@isHuman is TTTGame.Lobby.Player.Human)
+    }
+    return this is TTTGame.Lobby.Player.Human
 }
 
 data class TechnicalPlayer(

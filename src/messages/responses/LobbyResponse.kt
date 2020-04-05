@@ -30,7 +30,7 @@ sealed class LobbyResponse : JsonSerializable {
             override val contentDeserializer: DeserializationStrategy<Content> = Content.serializer()
             override val TYPE: String = "lobbyState"
             
-            fun forPlayer(lobby: TTTGame.Lobby, player: TTTGame.Lobby.Player): State {
+            fun forPlayer(lobby: TTTGame.Lobby, player: TTTGame.Lobby.Player.Human): State {
                 return Content(lobby.id.asString(),
                         lobby.players.filter { it != player }.map { Player(it.name, it.isReady) },
                         PlayerMe(player.technical.playerId.asString(), player.name, player.isReady)

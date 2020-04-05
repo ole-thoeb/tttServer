@@ -10,17 +10,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 
 sealed class TTTResponse : JsonSerializable {
-    object State {
-        fun forPlayer(game: TTTGame, technical: TechnicalPlayer): JsonSerializable = when (game) {
-            is TTTGame.Lobby -> LobbyResponse.State.forPlayer(game, game.players.first {
-                it.technical.playerId == technical.playerId //comparing ids, because the sockets might have changed
-            })
-            is TTTGame.InGame -> InGameResponse.State.forPlayer(game, game.playersWithRef.first { (player, _) ->
-                player.technical.playerId == technical.playerId
-            }.b)
-        }
-    }
-
     @Serializable
     data class NoSuchGame(val content: Content) : TTTResponse() {
         val type = TYPE

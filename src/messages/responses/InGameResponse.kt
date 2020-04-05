@@ -35,8 +35,8 @@ sealed class InGameResponse : JsonSerializable {
             override val contentDeserializer: DeserializationStrategy<Content> = Content.serializer()
             override val TYPE: String = "inGameState"
 
-            fun forPlayer(inGame: TTTGame.InGame, playerRef: TTTGame.InGame.PlayerRef): State {
-                val playerMe = inGame[playerRef]
+            fun forPlayer(inGame: TTTGame.InGame, playerMe: TTTGame.InGame.Player.Human): State {
+                val playerRef = playerMe.ref
                 val opponent = inGame[!playerRef]
 
                 val meSymbol = Symbol.fromCellState(playerRef.cellState)
