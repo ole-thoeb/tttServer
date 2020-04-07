@@ -1,6 +1,5 @@
 import TTTGame.InGame.PlayerRef
 import arrow.core.*
-import json.JsonSerializable
 import kotlinx.coroutines.*
 import messages.requests.GameRequest
 import messages.requests.LobbyRequest
@@ -88,8 +87,8 @@ suspend fun TTTGameServer.handleLobbyRequest(lobbyRequest: LobbyRequest): Messag
                                 TTTGame.InGame.Status.OnGoing
                         )
 
-                        val nextRoundPlayer = inGame[inGame.turn]
-                        if (nextRoundPlayer is TTTGame.InGame.Player.Bot) {
+                        val turnPlayer = inGame[inGame.turn]
+                        if (turnPlayer is TTTGame.InGame.Player.Bot) {
                             launchBotSetPieceAction(inGame.id)
                         }
 
@@ -135,7 +134,7 @@ suspend fun TTTGameServer.handleGameRequest(gameRequest: GameRequest): Messages 
 }
 
 fun TTTGameServer.launchBotSetPieceAction(gameId: GameId): Job = launchAsyncAction {
-    delay(Random.nextLong(1000, 3000))
+    //delay(Random.nextLong(500, 2000))
     asyncUpdateGame(gameId) { game ->
         when (game) {
             is TTTGame.Lobby -> {
