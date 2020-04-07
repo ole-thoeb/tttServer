@@ -35,7 +35,7 @@ class TTTGameServer(
     private val rematchMap: ConcurrentHashMap<GameId, GameId> = ConcurrentHashMap()
 
     private val jsonParser = JsonParser(Either.monadError())
-    private val log get() = application.log
+    val log get() = application.log
 
     private val messageChannel = Channel<Messages>(Channel.UNLIMITED)
     val asyncMessages: ReceiveChannel<Messages> get() = messageChannel
@@ -67,14 +67,9 @@ class TTTGameServer(
 
     private suspend inline fun <R> lockGame(gameId: GameId, default: () -> R, block: (TTTGame) -> R): R {
         val mutex = locks[gameId] ?: return default()
-        try {
-            mutex.lock()
-            log.info("Mutex ${System.identityHashCode(mutex)} locked")
+        mutex.withLock {
             val game = games[gameId] ?: return default()
             return block(game)
-        } finally {
-            mutex.unlock()
-            log.info("Mutex ${System.identityHashCode(mutex)} unlocked")
         }
     }
 

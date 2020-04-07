@@ -59,7 +59,6 @@ fun Application.module(testing: Boolean = false) {
 
     launch {
         for (messages in tttGameServer.asyncMessages) {
-            log.info("now going to send $messages")
             sendViaWebsocket(messages)
         }
     }
