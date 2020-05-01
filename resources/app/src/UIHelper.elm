@@ -3,12 +3,13 @@ module UIHelper exposing (..)
 import Element exposing (..)
 import Element.Font as Font
 import Html exposing (Html)
+import MaterialUI.MaterilaUI as MaterialUI
 import MaterialUI.Theme as Theme exposing (Theme)
 import Element.Background as Background
 
 
 
-materialText : List (Element.Attribute msg) -> String -> Theme.FontScale -> Theme.Theme a ->  Element msg
+materialText : List (Element.Attribute msg) -> String -> Theme.Fontscale -> Theme.Theme a ->  Element msg
 materialText attr displayStr fontScale theme =
     let
         font = Theme.getFont fontScale theme
@@ -70,3 +71,9 @@ defaultTopColumn title theme rows =
                     ]
                 ]
             ] ++ rows
+
+
+materialUpdate : MaterialUI.Msg -> { m | mui : MaterialUI.Model a msg } -> ( { m | mui : MaterialUI.Model a msg }, Cmd msg )
+materialUpdate msg model =
+    MaterialUI.update msg model.mui
+        |> Tuple.mapFirst (\upMui -> { model | mui = upMui })

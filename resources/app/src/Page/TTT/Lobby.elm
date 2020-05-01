@@ -1,11 +1,15 @@
-module Page.TTT.Lobby exposing (Model, init, toSession, Msg, update, view, updateFromWebsocket)
+module Page.TTT.Lobby exposing (Model, init, toSession, Msg, update, view, updateFromWebsocket, subscriptions)
 
 import ClipBoard
 import Element.Events as Events
 import Game.Lobby as Lobby exposing (Lobby)
 import Game.LobbyPlayer exposing (Player)
+import MaterialUI.ColorStateList as ColorStateList
 import MaterialUI.Icons.Content as Content
 import MaterialUI.Icon as Icon
+import MaterialUI.Internal.TextField.Model as TextField
+import MaterialUI.MaterilaUI as MaterialUI
+import MaterialUI.TextFieldM as TextField
 import Monocle.Lens as Lens exposing (Lens)
 import ServerRequest.InLobby as InLobbyRequest
 import ServerResponse.InLobby as InLobbyResponse
@@ -18,7 +22,6 @@ import Element.Background as Background
 import Element.Border as Border
 
 import MaterialUI.Button as Button
-import MaterialUI.TextField as TextField
 import MaterialUI.Theme as Theme exposing (Theme)
 
 import Html
@@ -33,6 +36,7 @@ import Websocket
 type alias Model =
     { session: Session
     , lobby: Lobby
+    , mui : MaterialUI.Model Session.CustomColor Msg
     }
 
 
@@ -40,6 +44,7 @@ init : Session -> Lobby -> ( Model, Cmd Msg )
 init session lobby =
     ( { session = session
     , lobby = lobby
+    , mui = MaterialUI.defaultModel Mui (Session.theme session)
     }
     , Websocket.connect lobby.gameId
     )
@@ -58,6 +63,7 @@ type Msg
     | Ready
     | AddBot
     | CopyGameId
+    | Mui MaterialUI.Msg
 
 
 update: Msg -> Model -> ( Model, Cmd Msg )
@@ -88,6 +94,9 @@ update msg model =
             in
             ( model, ClipBoard.copyToClipBoard <| Url.Builder.absolute [ "game", model.lobby.gameId ] [] )
 
+        Mui subMsg ->
+            materialUpdate subMsg model
+
 
 updateFromWebsocket : InLobbyResponse.Response -> Model -> ( Model, Cmd Msg )
 updateFromWebsocket response model =
@@ -115,20 +124,19 @@ view model =
             ]
             [ el
                 [ width <| fillPortion 2 ]
-                <| TextField.text
+                <| TextField.managed model.mui
                     [ width fill
                     ]
-                    { label = "Name"
+                    { index = "nameTf"
+                    , label = "Name"
                     , hideLabel = False
                     , type_ = TextField.Outlined
                     , color = Theme.Primary
                     , text = model.lobby.playerMe.name
                     , onChange = Name
-                    , state = TextField.Idle
                     , errorText = Nothing
                     , helperText = Nothing
                    }
-                   theme
             , let
                 bText = if model.lobby.playerMe.isReady then "Not Ready" else "Ready"
             in
@@ -172,8 +180,22 @@ view model =
                         theme
                     ]
                 , Icon.button
-                    [ Events.onClick CopyGameId ]
-                    theme Theme.OnBackground 24 Content.content_copy
+                    model.mui
+                    []
+                    { index = "iconCopy"
+                    , icon = Content.content_copy
+                    , onClick = CopyGameId
+                    , color =
+                        { idle = ColorStateList.Color 0.9 Theme.OnBackground
+                        , focused = ColorStateList.Color 0.5 Theme.Primary
+                        , hovered = ColorStateList.Color 0.9 Theme.Primary
+                        , mouseDown = ColorStateList.Color 1 Theme.Primary
+                        , disabled = ColorStateList.Color 0.5 Theme.OnBackground
+                        }
+                    , background = ColorStateList.defaultBackgroundOnBackground
+                    , tooltip = "Copy Id"
+                    , size = 24
+                    }
                 ]
             , Button.outlined
                 [ alignLeft
@@ -220,3 +242,11 @@ playerRow theme player =
             Theme.Body1
             theme
         ]
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    MaterialUI.subscriptions model.mui

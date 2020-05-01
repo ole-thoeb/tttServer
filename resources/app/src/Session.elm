@@ -2,8 +2,9 @@ module Session exposing (Session, navKey, fromKey, theme, CustomColor(..))
 
 import Browser.Navigation as Nav
 import Element
-import MaterialUI.Theme as Theme exposing (Theme)
-import MaterialUI.Themes.Dark as Dark
+import MaterialUI.MaterilaUI as MaterialUI
+import MaterialUI.Theme exposing (Theme)
+import MaterialUI.Themes.Default as DefaultTheme
 
 type CustomColor
     = Player1Color
@@ -36,7 +37,7 @@ fromKey key =
 defaultDarkTheme : Theme CustomColor
 defaultDarkTheme =
     let
-        baseTheme = Dark.theme
+        baseTheme = DefaultTheme.dark
         baseColor = baseTheme.color
     in
     { baseTheme

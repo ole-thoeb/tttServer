@@ -7,7 +7,6 @@ module MaterialUI.Theme exposing
     , Theme
     , addLightness
     , applyCase
-    , defaultTheme
     , fontToAttributes
     , getColor
     , getOnColor
@@ -16,16 +15,24 @@ module MaterialUI.Theme exposing
     , shapeToAttributes
     , toElementColor
     , transparent
-    , FontScale(..)
     , getFont
+    , Fontscale(..)
+    , shapeRoundedDpEach
+    , shapeRoundedDp
+    , FontCase(..)
+    , FontWeight(..)
+    , Font
+    , Typescale
+    , Variant(..)
+    , inverted
+    , isDark
+    , isLight
     )
 
 import Color
 import Element exposing (Attribute, Element)
-import Element.Background
 import Element.Border
 import Element.Font
-import MaterialColor
 
 
 transparent : Element.Color
@@ -65,7 +72,34 @@ type alias Theme a =
     { color : ColorTheme a
     , shape : ShapeSchema
     , typescale : Typescale
+    , variant : Variant a
     }
+
+
+type Variant a
+    = LightVariant (() -> Theme a)
+    | DarkVariant (() -> Theme a)
+
+
+inverted : Theme a -> Theme a
+inverted theme =
+    case theme.variant of
+        LightVariant inverted_ -> inverted_ ()
+        DarkVariant inverted_ -> inverted_ ()
+
+
+isDark : Theme a -> Bool
+isDark theme =
+    case theme.variant of
+        DarkVariant _ -> True
+        LightVariant _ -> False
+
+
+isLight : Theme a -> Bool
+isLight theme =
+    case theme.variant of
+        DarkVariant _ -> False
+        LightVariant _ -> True
 
 
 type Color a
@@ -81,6 +115,8 @@ type Color a
     | OnBackground
     | Surface
     | OnSurface
+    | Tooltip
+    | OnTooltip
     | Error
     | OnError
     | Custom Element.Color
@@ -88,13 +124,13 @@ type Color a
 
 
 type alias ColorTheme a =
-    { isDark : Bool
-    , primary : Element.Color
+    { primary : Element.Color
     , primaryVariant : Element.Color
     , secondary : Element.Color
     , secondaryVariant : Element.Color
     , background : Element.Color
     , surface : Element.Color
+    , tooltip : Element.Color
     , error : Element.Color
     , onPrimary : Element.Color
     , onPrimaryVariant : Element.Color
@@ -102,6 +138,7 @@ type alias ColorTheme a =
     , onSecondaryVariant : Element.Color
     , onBackground : Element.Color
     , onSurface : Element.Color
+    , onTooltip : Element.Color
     , onError : Element.Color
     , alternative : List ( a, Element.Color )
     }
@@ -145,6 +182,12 @@ onColor key =
 
         OnSurface ->
             Surface
+
+        Tooltip ->
+            OnTooltip
+
+        OnTooltip ->
+            Tooltip
 
         Error ->
             OnError
@@ -201,6 +244,12 @@ getColor key { color } =
 
         OnSurface ->
             color.onSurface
+
+        Tooltip ->
+            color.tooltip
+
+        OnTooltip ->
+            color.onTooltip
 
         Error ->
             color.error
@@ -275,6 +324,7 @@ type alias ShapeSchema =
         { filled : Shape
         , outlined : Shape
         }
+    , tooltip : Shape
     }
 
 
@@ -365,8 +415,7 @@ applyCase fontcase text =
             String.toUpper text
 
 
-
-type FontScale
+type Fontscale
     = H1
     | H2
     | H3
@@ -382,7 +431,7 @@ type FontScale
     | Overline
 
 
-getFont : FontScale -> Theme a -> Font
+getFont : Fontscale -> Theme a -> Font
 getFont fontScale { typescale } =
     case fontScale of
         H1 ->
@@ -439,132 +488,4 @@ type alias Typescale =
     , button : Font
     , caption : Font
     , overline : Font
-    }
-
-
-defaultTheme : Theme a
-defaultTheme =
-    { color =
-        { isDark = False
-        , primary = Element.rgb255 98 0 238 -- #6200EE
-        , primaryVariant = Element.rgb255 54 0 179
-        , secondary = Element.rgb255 3 218 198 -- #03DAC6
-        , secondaryVariant = Element.rgb255 1 135 134 -- #018786
-        , background = toElementColor Color.white
-        , surface = toElementColor Color.white
-        , error = Element.rgb255 176 0 32 -- #B00020
-        , onPrimary = toElementColor Color.white
-        , onPrimaryVariant = toElementColor Color.white
-        , onSecondary = toElementColor Color.black
-        , onSecondaryVariant = toElementColor Color.white
-        , onBackground = toElementColor Color.black
-        , onSurface = toElementColor Color.black
-        , onError = toElementColor Color.white
-        , alternative = []
-        }
-    , shape =
-        { button = shapeRoundedDp 4
-        , card = shapeRoundedDp 4
-        , textField =
-            { filled = shapeRoundedDpEach 4 4 0 0
-            , outlined = shapeRoundedDp 4
-            }
-        }
-    , typescale = defaultTypescale
-    }
-
-
-defaultTypescale : Typescale
-defaultTypescale =
-    { h1 =
-        { typeface = [ Element.Font.typeface "Roboto" ]
-        , weight = Light
-        , size = 96
-        , fontcase = Sentence
-        , letterSpacing = -1.5
-        }
-    , h2 =
-        { typeface = [ Element.Font.typeface "Roboto" ]
-        , weight = Light
-        , size = 60
-        , fontcase = Sentence
-        , letterSpacing = -0.5
-        }
-    , h3 =
-        { typeface = [ Element.Font.typeface "Roboto" ]
-        , weight = Regular
-        , size = 48
-        , fontcase = Sentence
-        , letterSpacing = 0
-        }
-    , h4 =
-        { typeface = [ Element.Font.typeface "Roboto" ]
-        , weight = Regular
-        , size = 34
-        , fontcase = Sentence
-        , letterSpacing = 0.25
-        }
-    , h5 =
-        { typeface = [ Element.Font.typeface "Roboto" ]
-        , weight = Regular
-        , size = 24
-        , fontcase = Sentence
-        , letterSpacing = 0
-        }
-    , h6 =
-        { typeface = [ Element.Font.typeface "Roboto" ]
-        , weight = Medium
-        , size = 20
-        , fontcase = Sentence
-        , letterSpacing = 0.15
-        }
-    , subtitle1 =
-        { typeface = [ Element.Font.typeface "Roboto" ]
-        , weight = Regular
-        , size = 16
-        , fontcase = Sentence
-        , letterSpacing = 0.15
-        }
-    , subtitle2 =
-        { typeface = [ Element.Font.typeface "Roboto" ]
-        , weight = Medium
-        , size = 14
-        , fontcase = Sentence
-        , letterSpacing = 0.1
-        }
-    , body1 =
-        { typeface = [ Element.Font.typeface "Roboto" ]
-        , weight = Regular
-        , size = 16
-        , fontcase = Sentence
-        , letterSpacing = 0.5
-        }
-    , body2 =
-        { typeface = [ Element.Font.typeface "Roboto" ]
-        , weight = Regular
-        , size = 14
-        , fontcase = Sentence
-        , letterSpacing = 0.25
-        }
-    , button =
-        { typeface = [ Element.Font.typeface "Roboto" ]
-        , weight = Medium
-        , size = 14
-        , fontcase = AllCaps
-        , letterSpacing = 1.25
-        }
-    , caption =
-        { typeface = [ Element.Font.typeface "Roboto" ]
-        , weight = Regular
-        , size = 12
-        , fontcase = Sentence
-        , letterSpacing = 0.4
-        }
-    , overline =
-        { typeface = [ Element.Font.typeface "Roboto" ]
-        , weight = Regular
-        , size = 10
-        , fontcase = AllCaps
-        , letterSpacing = 1.5
-        }
     }

@@ -3,6 +3,9 @@ module Page.Home exposing (Msg, view, update, subscriptions, toSession, init, Mo
 import Browser.Navigation as Nav
 import Game.Lobby exposing (Lobby)
 import Http
+import MaterialUI.Internal.TextField.Model as TextField
+import MaterialUI.MaterilaUI as MaterialUI
+import MaterialUI.TextFieldM as TextField
 import ServerResponse.EnterLobby as EnterLobbyResponse exposing (Error(..))
 import ServerResponse.InGame as InGameResponse
 import ServerResponse.InLobby as InLobbyResponse
@@ -16,7 +19,6 @@ import Element.Background as Background
 import Element.Border as Border
 
 import MaterialUI.Button as Button
-import MaterialUI.TextField as TextField
 import MaterialUI.Theme as Theme
 
 import Html
@@ -33,6 +35,7 @@ type alias Model =
     , gameId: String
     , error: Maybe JoinError
     , lobby: Maybe Lobby
+    , mui : MaterialUI.Model Session.CustomColor Msg
     }
 
 
@@ -47,6 +50,7 @@ init session maybeError =
     , gameId = ""
     , error = maybeError
     , lobby = Nothing
+    , mui = MaterialUI.defaultModel Mui (Session.theme session)
     }
     , Websocket.disconnect
     )
@@ -65,6 +69,7 @@ type Msg
     | JoinGame
     | GameId String
     | ServerResponse (Result Http.Error TTTResponse.Response)
+    | Mui MaterialUI.Msg
 
 
 update: Msg -> Model -> ( Model, Cmd Msg )
@@ -132,6 +137,9 @@ update msg model =
                     in
                     ( { model | error = Just <| ConnectionError (Just httpError) }, Cmd.none )
 
+        Mui subMsg ->
+            materialUpdate subMsg model
+
 
 -- VIEW
 
@@ -149,20 +157,19 @@ view model =
             ]
             [ el
                 [ width <| fillPortion 2 ]
-                <| TextField.text
+                <| TextField.managed model.mui
                     [ width fill
                     ]
-                    { label = "Game id"
+                    { index = "gameIdTf"
+                    , label = "Game id"
                     , hideLabel = False
                     , type_ = TextField.Outlined
                     , color = Theme.Primary
                     , text = model.gameId
                     , onChange = GameId
-                    , state = TextField.Idle
                     , errorText = Nothing
                     , helperText = Nothing
                     }
-                    theme
             , Button.outlined
                 [ alignLeft
                 , width <| fillPortion 1
@@ -247,7 +254,7 @@ errorCard errorMsg theme =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    MaterialUI.subscriptions model.mui
 
 
 -- QUERY HELPER

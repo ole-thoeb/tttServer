@@ -6484,6 +6484,9 @@ var $elm$http$Http$get = function (r) {
 	return $elm$http$Http$request(
 		{body: $elm$http$Http$emptyBody, expect: r.expect, headers: _List_Nil, method: 'GET', timeout: $elm$core$Maybe$Nothing, tracker: $elm$core$Maybe$Nothing, url: r.url});
 };
+var $author$project$Page$TTT$Lobby$Mui = function (a) {
+	return {$: 'Mui', a: a};
+};
 var $author$project$Websocket$connect_ = _Platform_outgoingPort('connect_', $elm$core$Basics$identity);
 var $elm$json$Json$Encode$object = function (pairs) {
 	return _Json_wrap(
@@ -6514,10 +6517,26 @@ var $author$project$Websocket$connect = function (gameId) {
 							_List_Nil)))
 				])));
 };
+var $author$project$MaterialUI$Internal$Model$defaultModel = F2(
+	function (lift, theme) {
+		return {icon: $elm$core$Dict$empty, lift: lift, snackbar: $elm$core$Dict$empty, textfield: $elm$core$Dict$empty, theme: theme, tooltip: $elm$core$Dict$empty};
+	});
+var $author$project$MaterialUI$MaterilaUI$defaultModel = $author$project$MaterialUI$Internal$Model$defaultModel;
+var $author$project$Session$theme = function (session) {
+	var t = session.b;
+	return t;
+};
 var $author$project$Page$TTT$Lobby$init = F2(
 	function (session, lobby) {
 		return _Utils_Tuple2(
-			{lobby: lobby, session: session},
+			{
+				lobby: lobby,
+				mui: A2(
+					$author$project$MaterialUI$MaterilaUI$defaultModel,
+					$author$project$Page$TTT$Lobby$Mui,
+					$author$project$Session$theme(session)),
+				session: session
+			},
 			$author$project$Websocket$connect(lobby.gameId));
 	});
 var $elm$core$Platform$Cmd$map = _Platform_map;
@@ -6552,6 +6571,9 @@ var $author$project$Page$TTT$Game$fromLobby = F3(
 					}));
 		}
 	});
+var $author$project$Page$Home$Mui = function (a) {
+	return {$: 'Mui', a: a};
+};
 var $elm$json$Json$Encode$null = _Json_encodeNull;
 var $author$project$Websocket$disconnect_ = _Platform_outgoingPort(
 	'disconnect_',
@@ -6562,7 +6584,16 @@ var $author$project$Websocket$disconnect = $author$project$Websocket$disconnect_
 var $author$project$Page$Home$init = F2(
 	function (session, maybeError) {
 		return _Utils_Tuple2(
-			{error: maybeError, gameId: '', lobby: $elm$core$Maybe$Nothing, session: session},
+			{
+				error: maybeError,
+				gameId: '',
+				lobby: $elm$core$Maybe$Nothing,
+				mui: A2(
+					$author$project$MaterialUI$MaterilaUI$defaultModel,
+					$author$project$Page$Home$Mui,
+					$author$project$Session$theme(session)),
+				session: session
+			},
 			$author$project$Websocket$disconnect);
 	});
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
@@ -6692,6 +6723,17 @@ var $author$project$Session$Guest = F2(
 	});
 var $author$project$Session$Player1Color = {$: 'Player1Color'};
 var $author$project$Session$Player2Color = {$: 'Player2Color'};
+var $author$project$MaterialUI$Theme$DarkVariant = function (a) {
+	return {$: 'DarkVariant', a: a};
+};
+var $author$project$MaterialUI$Theme$LightVariant = function (a) {
+	return {$: 'LightVariant', a: a};
+};
+var $avh4$elm_color$Color$RgbaSpace = F4(
+	function (a, b, c, d) {
+		return {$: 'RgbaSpace', a: a, b: b, c: c, d: d};
+	});
+var $avh4$elm_color$Color$black = A4($avh4$elm_color$Color$RgbaSpace, 0 / 255, 0 / 255, 0 / 255, 1.0);
 var $mdgriffith$elm_ui$Internal$Model$Rgba = F4(
 	function (a, b, c, d) {
 		return {$: 'Rgba', a: a, b: b, c: c, d: d};
@@ -6700,11 +6742,39 @@ var $mdgriffith$elm_ui$Element$rgb255 = F3(
 	function (red, green, blue) {
 		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, red / 255, green / 255, blue / 255, 1);
 	});
-var $avh4$elm_color$Color$RgbaSpace = F4(
+var $author$project$MaterialUI$Theme$Dp = function (a) {
+	return {$: 'Dp', a: a};
+};
+var $author$project$MaterialUI$Theme$Rounded = F4(
 	function (a, b, c, d) {
-		return {$: 'RgbaSpace', a: a, b: b, c: c, d: d};
+		return {$: 'Rounded', a: a, b: b, c: c, d: d};
 	});
-var $avh4$elm_color$Color$black = A4($avh4$elm_color$Color$RgbaSpace, 0 / 255, 0 / 255, 0 / 255, 1.0);
+var $author$project$MaterialUI$Theme$shapeRoundedDpEach = F4(
+	function (topLeft, topRight, bottomRight, bottomLeft) {
+		return A4(
+			$author$project$MaterialUI$Theme$Rounded,
+			$author$project$MaterialUI$Theme$Dp(topLeft),
+			$author$project$MaterialUI$Theme$Dp(topRight),
+			$author$project$MaterialUI$Theme$Dp(bottomRight),
+			$author$project$MaterialUI$Theme$Dp(bottomLeft));
+	});
+var $author$project$MaterialUI$Theme$shapeRoundedDp = function (size) {
+	return A4($author$project$MaterialUI$Theme$shapeRoundedDpEach, size, size, size, size);
+};
+var $mdgriffith$elm_ui$Element$fromRgb = function (clr) {
+	return A4($mdgriffith$elm_ui$Internal$Model$Rgba, clr.red, clr.green, clr.blue, clr.alpha);
+};
+var $avh4$elm_color$Color$toRgba = function (_v0) {
+	var r = _v0.a;
+	var g = _v0.b;
+	var b = _v0.c;
+	var a = _v0.d;
+	return {alpha: a, blue: b, green: g, red: r};
+};
+var $author$project$MaterialUI$Theme$toElementColor = function (color) {
+	return $mdgriffith$elm_ui$Element$fromRgb(
+		$avh4$elm_color$Color$toRgba(color));
+};
 var $author$project$MaterialUI$Theme$AllCaps = {$: 'AllCaps'};
 var $author$project$MaterialUI$Theme$Light = {$: 'Light'};
 var $author$project$MaterialUI$Theme$Medium = {$: 'Medium'};
@@ -6717,7 +6787,7 @@ var $mdgriffith$elm_ui$Internal$Model$Typeface = function (a) {
 	return {$: 'Typeface', a: a};
 };
 var $mdgriffith$elm_ui$Element$Font$typeface = $mdgriffith$elm_ui$Internal$Model$Typeface;
-var $author$project$MaterialUI$Theme$defaultTypescale = {
+var $author$project$MaterialUI$Themes$Default$typescale = {
 	body1: {
 		fontcase: $author$project$MaterialUI$Theme$Sentence,
 		letterSpacing: 0.5,
@@ -6849,73 +6919,11 @@ var $author$project$MaterialUI$Theme$defaultTypescale = {
 		weight: $author$project$MaterialUI$Theme$Medium
 	}
 };
-var $author$project$MaterialUI$Theme$Dp = function (a) {
-	return {$: 'Dp', a: a};
-};
-var $author$project$MaterialUI$Theme$Rounded = F4(
-	function (a, b, c, d) {
-		return {$: 'Rounded', a: a, b: b, c: c, d: d};
-	});
-var $author$project$MaterialUI$Theme$shapeRoundedDpEach = F4(
-	function (topLeft, topRight, bottomRight, bottomLeft) {
-		return A4(
-			$author$project$MaterialUI$Theme$Rounded,
-			$author$project$MaterialUI$Theme$Dp(topLeft),
-			$author$project$MaterialUI$Theme$Dp(topRight),
-			$author$project$MaterialUI$Theme$Dp(bottomRight),
-			$author$project$MaterialUI$Theme$Dp(bottomLeft));
-	});
-var $author$project$MaterialUI$Theme$shapeRoundedDp = function (size) {
-	return A4($author$project$MaterialUI$Theme$shapeRoundedDpEach, size, size, size, size);
-};
-var $mdgriffith$elm_ui$Element$fromRgb = function (clr) {
-	return A4($mdgriffith$elm_ui$Internal$Model$Rgba, clr.red, clr.green, clr.blue, clr.alpha);
-};
-var $avh4$elm_color$Color$toRgba = function (_v0) {
-	var r = _v0.a;
-	var g = _v0.b;
-	var b = _v0.c;
-	var a = _v0.d;
-	return {alpha: a, blue: b, green: g, red: r};
-};
-var $author$project$MaterialUI$Theme$toElementColor = function (color) {
-	return $mdgriffith$elm_ui$Element$fromRgb(
-		$avh4$elm_color$Color$toRgba(color));
-};
 var $avh4$elm_color$Color$white = A4($avh4$elm_color$Color$RgbaSpace, 255 / 255, 255 / 255, 255 / 255, 1.0);
-var $author$project$MaterialUI$Theme$defaultTheme = {
-	color: {
-		alternative: _List_Nil,
-		background: $author$project$MaterialUI$Theme$toElementColor($avh4$elm_color$Color$white),
-		error: A3($mdgriffith$elm_ui$Element$rgb255, 176, 0, 32),
-		isDark: false,
-		onBackground: $author$project$MaterialUI$Theme$toElementColor($avh4$elm_color$Color$black),
-		onError: $author$project$MaterialUI$Theme$toElementColor($avh4$elm_color$Color$white),
-		onPrimary: $author$project$MaterialUI$Theme$toElementColor($avh4$elm_color$Color$white),
-		onPrimaryVariant: $author$project$MaterialUI$Theme$toElementColor($avh4$elm_color$Color$white),
-		onSecondary: $author$project$MaterialUI$Theme$toElementColor($avh4$elm_color$Color$black),
-		onSecondaryVariant: $author$project$MaterialUI$Theme$toElementColor($avh4$elm_color$Color$white),
-		onSurface: $author$project$MaterialUI$Theme$toElementColor($avh4$elm_color$Color$black),
-		primary: A3($mdgriffith$elm_ui$Element$rgb255, 98, 0, 238),
-		primaryVariant: A3($mdgriffith$elm_ui$Element$rgb255, 54, 0, 179),
-		secondary: A3($mdgriffith$elm_ui$Element$rgb255, 3, 218, 198),
-		secondaryVariant: A3($mdgriffith$elm_ui$Element$rgb255, 1, 135, 134),
-		surface: $author$project$MaterialUI$Theme$toElementColor($avh4$elm_color$Color$white)
-	},
-	shape: {
-		button: $author$project$MaterialUI$Theme$shapeRoundedDp(4),
-		card: $author$project$MaterialUI$Theme$shapeRoundedDp(4),
-		textField: {
-			filled: A4($author$project$MaterialUI$Theme$shapeRoundedDpEach, 4, 4, 0, 0),
-			outlined: $author$project$MaterialUI$Theme$shapeRoundedDp(4)
-		}
-	},
-	typescale: $author$project$MaterialUI$Theme$defaultTypescale
-};
-var $author$project$MaterialUI$Themes$Dark$theme = function () {
-	var color = $author$project$MaterialUI$Theme$defaultTheme.color;
+function $author$project$MaterialUI$Themes$Default$cyclic$dark() {
+	var color = $author$project$MaterialUI$Themes$Default$cyclic$light().color;
 	return _Utils_update(
-		$author$project$MaterialUI$Theme$defaultTheme,
+		$author$project$MaterialUI$Themes$Default$cyclic$light(),
 		{
 			color: _Utils_update(
 				color,
@@ -6923,20 +6931,73 @@ var $author$project$MaterialUI$Themes$Dark$theme = function () {
 					alternative: _List_Nil,
 					background: A3($mdgriffith$elm_ui$Element$rgb255, 18, 18, 18),
 					error: A3($mdgriffith$elm_ui$Element$rgb255, 207, 102, 121),
-					isDark: true,
 					onBackground: $author$project$MaterialUI$Theme$toElementColor($avh4$elm_color$Color$white),
 					onError: $author$project$MaterialUI$Theme$toElementColor($avh4$elm_color$Color$black),
 					onPrimary: $author$project$MaterialUI$Theme$toElementColor($avh4$elm_color$Color$black),
 					onSecondaryVariant: $author$project$MaterialUI$Theme$toElementColor($avh4$elm_color$Color$black),
 					onSurface: $author$project$MaterialUI$Theme$toElementColor($avh4$elm_color$Color$white),
+					onTooltip: $author$project$MaterialUI$Theme$toElementColor($avh4$elm_color$Color$black),
 					primary: A3($mdgriffith$elm_ui$Element$rgb255, 187, 134, 252),
 					secondaryVariant: A3($mdgriffith$elm_ui$Element$rgb255, 3, 218, 198),
-					surface: A3($mdgriffith$elm_ui$Element$rgb255, 18, 18, 18)
+					surface: A3($mdgriffith$elm_ui$Element$rgb255, 18, 18, 18),
+					tooltip: A3($mdgriffith$elm_ui$Element$rgb255, 227, 227, 227)
+				}),
+			variant: $author$project$MaterialUI$Theme$DarkVariant(
+				function (_v1) {
+					return $author$project$MaterialUI$Themes$Default$cyclic$light();
 				})
 		});
-}();
+}
+function $author$project$MaterialUI$Themes$Default$cyclic$light() {
+	return {
+		color: {
+			alternative: _List_Nil,
+			background: $author$project$MaterialUI$Theme$toElementColor($avh4$elm_color$Color$white),
+			error: A3($mdgriffith$elm_ui$Element$rgb255, 176, 0, 32),
+			onBackground: $author$project$MaterialUI$Theme$toElementColor($avh4$elm_color$Color$black),
+			onError: $author$project$MaterialUI$Theme$toElementColor($avh4$elm_color$Color$white),
+			onPrimary: $author$project$MaterialUI$Theme$toElementColor($avh4$elm_color$Color$white),
+			onPrimaryVariant: $author$project$MaterialUI$Theme$toElementColor($avh4$elm_color$Color$white),
+			onSecondary: $author$project$MaterialUI$Theme$toElementColor($avh4$elm_color$Color$black),
+			onSecondaryVariant: $author$project$MaterialUI$Theme$toElementColor($avh4$elm_color$Color$white),
+			onSurface: $author$project$MaterialUI$Theme$toElementColor($avh4$elm_color$Color$black),
+			onTooltip: $author$project$MaterialUI$Theme$toElementColor($avh4$elm_color$Color$white),
+			primary: A3($mdgriffith$elm_ui$Element$rgb255, 98, 0, 238),
+			primaryVariant: A3($mdgriffith$elm_ui$Element$rgb255, 54, 0, 179),
+			secondary: A3($mdgriffith$elm_ui$Element$rgb255, 3, 218, 198),
+			secondaryVariant: A3($mdgriffith$elm_ui$Element$rgb255, 1, 135, 134),
+			surface: $author$project$MaterialUI$Theme$toElementColor($avh4$elm_color$Color$white),
+			tooltip: A3($mdgriffith$elm_ui$Element$rgb255, 97, 97, 97)
+		},
+		shape: {
+			button: $author$project$MaterialUI$Theme$shapeRoundedDp(4),
+			card: $author$project$MaterialUI$Theme$shapeRoundedDp(4),
+			textField: {
+				filled: A4($author$project$MaterialUI$Theme$shapeRoundedDpEach, 4, 4, 0, 0),
+				outlined: $author$project$MaterialUI$Theme$shapeRoundedDp(4)
+			},
+			tooltip: $author$project$MaterialUI$Theme$shapeRoundedDp(4)
+		},
+		typescale: $author$project$MaterialUI$Themes$Default$typescale,
+		variant: $author$project$MaterialUI$Theme$LightVariant(
+			function (_v0) {
+				return $author$project$MaterialUI$Themes$Default$cyclic$dark();
+			})
+	};
+}
+try {
+	var $author$project$MaterialUI$Themes$Default$dark = $author$project$MaterialUI$Themes$Default$cyclic$dark();
+	$author$project$MaterialUI$Themes$Default$cyclic$dark = function () {
+		return $author$project$MaterialUI$Themes$Default$dark;
+	};
+	var $author$project$MaterialUI$Themes$Default$light = $author$project$MaterialUI$Themes$Default$cyclic$light();
+	$author$project$MaterialUI$Themes$Default$cyclic$light = function () {
+		return $author$project$MaterialUI$Themes$Default$light;
+	};
+} catch ($) {
+	throw 'Some top-level definitions from `MaterialUI.Themes.Default` are causing infinite recursion:\n\n  ┌─────┐\n  │    dark\n  │     ↓\n  │    light\n  └─────┘\n\nThese errors are very tricky, so read https://elm-lang.org/0.19.1/bad-recursion to learn how to fix it!';}
 var $author$project$Session$defaultDarkTheme = function () {
-	var baseTheme = $author$project$MaterialUI$Themes$Dark$theme;
+	var baseTheme = $author$project$MaterialUI$Themes$Default$dark;
 	var baseColor = baseTheme.color;
 	return _Utils_update(
 		baseTheme,
@@ -7397,8 +7458,504 @@ var $author$project$Main$init = F3(
 var $elm$core$Platform$Sub$map = _Platform_map;
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
+var $author$project$MaterialUI$Internal$Message$SnackbarMsg = F2(
+	function (a, b) {
+		return {$: 'SnackbarMsg', a: a, b: b};
+	});
+var $author$project$MaterialUI$Internal$Component$subscriptions = F4(
+	function (get, lift, store, sub) {
+		var lift_ = function (index) {
+			return A2(
+				$elm$core$Basics$composeL,
+				store.lift,
+				lift(index));
+		};
+		return $elm$core$Platform$Sub$batch(
+			A3(
+				$elm$core$Dict$foldr,
+				F3(
+					function (index, model, acc) {
+						return A2(
+							$elm$core$List$cons,
+							A2(
+								$elm$core$Platform$Sub$map,
+								lift_(index),
+								sub(model)),
+							acc);
+					}),
+				_List_Nil,
+				get(store)));
+	});
+var $author$project$MaterialUI$Internal$Snackbar$Model$AnimationFrame = function (a) {
+	return {$: 'AnimationFrame', a: a};
+};
+var $elm$browser$Browser$AnimationManager$Delta = function (a) {
+	return {$: 'Delta', a: a};
+};
+var $elm$browser$Browser$AnimationManager$State = F3(
+	function (subs, request, oldTime) {
+		return {oldTime: oldTime, request: request, subs: subs};
+	});
+var $elm$browser$Browser$AnimationManager$init = $elm$core$Task$succeed(
+	A3($elm$browser$Browser$AnimationManager$State, _List_Nil, $elm$core$Maybe$Nothing, 0));
+var $elm$browser$Browser$AnimationManager$now = _Browser_now(_Utils_Tuple0);
+var $elm$browser$Browser$AnimationManager$rAF = _Browser_rAF(_Utils_Tuple0);
+var $elm$browser$Browser$AnimationManager$onEffects = F3(
+	function (router, subs, _v0) {
+		var request = _v0.request;
+		var oldTime = _v0.oldTime;
+		var _v1 = _Utils_Tuple2(request, subs);
+		if (_v1.a.$ === 'Nothing') {
+			if (!_v1.b.b) {
+				var _v2 = _v1.a;
+				return $elm$browser$Browser$AnimationManager$init;
+			} else {
+				var _v4 = _v1.a;
+				return A2(
+					$elm$core$Task$andThen,
+					function (pid) {
+						return A2(
+							$elm$core$Task$andThen,
+							function (time) {
+								return $elm$core$Task$succeed(
+									A3(
+										$elm$browser$Browser$AnimationManager$State,
+										subs,
+										$elm$core$Maybe$Just(pid),
+										time));
+							},
+							$elm$browser$Browser$AnimationManager$now);
+					},
+					$elm$core$Process$spawn(
+						A2(
+							$elm$core$Task$andThen,
+							$elm$core$Platform$sendToSelf(router),
+							$elm$browser$Browser$AnimationManager$rAF)));
+			}
+		} else {
+			if (!_v1.b.b) {
+				var pid = _v1.a.a;
+				return A2(
+					$elm$core$Task$andThen,
+					function (_v3) {
+						return $elm$browser$Browser$AnimationManager$init;
+					},
+					$elm$core$Process$kill(pid));
+			} else {
+				return $elm$core$Task$succeed(
+					A3($elm$browser$Browser$AnimationManager$State, subs, request, oldTime));
+			}
+		}
+	});
+var $elm$time$Time$Posix = function (a) {
+	return {$: 'Posix', a: a};
+};
+var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
+var $elm$browser$Browser$AnimationManager$onSelfMsg = F3(
+	function (router, newTime, _v0) {
+		var subs = _v0.subs;
+		var oldTime = _v0.oldTime;
+		var send = function (sub) {
+			if (sub.$ === 'Time') {
+				var tagger = sub.a;
+				return A2(
+					$elm$core$Platform$sendToApp,
+					router,
+					tagger(
+						$elm$time$Time$millisToPosix(newTime)));
+			} else {
+				var tagger = sub.a;
+				return A2(
+					$elm$core$Platform$sendToApp,
+					router,
+					tagger(newTime - oldTime));
+			}
+		};
+		return A2(
+			$elm$core$Task$andThen,
+			function (pid) {
+				return A2(
+					$elm$core$Task$andThen,
+					function (_v1) {
+						return $elm$core$Task$succeed(
+							A3(
+								$elm$browser$Browser$AnimationManager$State,
+								subs,
+								$elm$core$Maybe$Just(pid),
+								newTime));
+					},
+					$elm$core$Task$sequence(
+						A2($elm$core$List$map, send, subs)));
+			},
+			$elm$core$Process$spawn(
+				A2(
+					$elm$core$Task$andThen,
+					$elm$core$Platform$sendToSelf(router),
+					$elm$browser$Browser$AnimationManager$rAF)));
+	});
+var $elm$browser$Browser$AnimationManager$Time = function (a) {
+	return {$: 'Time', a: a};
+};
+var $elm$browser$Browser$AnimationManager$subMap = F2(
+	function (func, sub) {
+		if (sub.$ === 'Time') {
+			var tagger = sub.a;
+			return $elm$browser$Browser$AnimationManager$Time(
+				A2($elm$core$Basics$composeL, func, tagger));
+		} else {
+			var tagger = sub.a;
+			return $elm$browser$Browser$AnimationManager$Delta(
+				A2($elm$core$Basics$composeL, func, tagger));
+		}
+	});
+_Platform_effectManagers['Browser.AnimationManager'] = _Platform_createManager($elm$browser$Browser$AnimationManager$init, $elm$browser$Browser$AnimationManager$onEffects, $elm$browser$Browser$AnimationManager$onSelfMsg, 0, $elm$browser$Browser$AnimationManager$subMap);
+var $elm$browser$Browser$AnimationManager$subscription = _Platform_leaf('Browser.AnimationManager');
+var $elm$browser$Browser$AnimationManager$onAnimationFrameDelta = function (tagger) {
+	return $elm$browser$Browser$AnimationManager$subscription(
+		$elm$browser$Browser$AnimationManager$Delta(tagger));
+};
+var $elm$browser$Browser$Events$onAnimationFrameDelta = $elm$browser$Browser$AnimationManager$onAnimationFrameDelta;
+var $author$project$MaterialUI$Internal$Snackbar$Implementation$subscriptions_ = function (model) {
+	var isAnimating = function () {
+		var _v0 = model.status;
+		_v0$2:
+		while (true) {
+			if (_v0.$ === 'Active') {
+				switch (_v0.b.$) {
+					case 'FadingIn':
+						return true;
+					case 'FadingOut':
+						return true;
+					default:
+						break _v0$2;
+				}
+			} else {
+				break _v0$2;
+			}
+		}
+		return false;
+	}();
+	return isAnimating ? $elm$browser$Browser$Events$onAnimationFrameDelta($author$project$MaterialUI$Internal$Snackbar$Model$AnimationFrame) : $elm$core$Platform$Sub$none;
+};
+var $author$project$MaterialUI$Internal$Snackbar$Implementation$subscriptions = function (model) {
+	return A4(
+		$author$project$MaterialUI$Internal$Component$subscriptions,
+		function ($) {
+			return $.snackbar;
+		},
+		$author$project$MaterialUI$Internal$Message$SnackbarMsg,
+		model,
+		$author$project$MaterialUI$Internal$Snackbar$Implementation$subscriptions_);
+};
+var $author$project$MaterialUI$Internal$Message$TooltipMsg = F2(
+	function (a, b) {
+		return {$: 'TooltipMsg', a: a, b: b};
+	});
+var $author$project$MaterialUI$Internal$Tooltip$Model$BrowserAction = {$: 'BrowserAction'};
+var $author$project$MaterialUI$Internal$Tooltip$Model$OnAnimationFrame = function (a) {
+	return {$: 'OnAnimationFrame', a: a};
+};
+var $elm$browser$Browser$Events$Document = {$: 'Document'};
+var $elm$browser$Browser$Events$MySub = F3(
+	function (a, b, c) {
+		return {$: 'MySub', a: a, b: b, c: c};
+	});
+var $elm$browser$Browser$Events$State = F2(
+	function (subs, pids) {
+		return {pids: pids, subs: subs};
+	});
+var $elm$browser$Browser$Events$init = $elm$core$Task$succeed(
+	A2($elm$browser$Browser$Events$State, _List_Nil, $elm$core$Dict$empty));
+var $elm$browser$Browser$Events$nodeToKey = function (node) {
+	if (node.$ === 'Document') {
+		return 'd_';
+	} else {
+		return 'w_';
+	}
+};
+var $elm$browser$Browser$Events$addKey = function (sub) {
+	var node = sub.a;
+	var name = sub.b;
+	return _Utils_Tuple2(
+		_Utils_ap(
+			$elm$browser$Browser$Events$nodeToKey(node),
+			name),
+		sub);
+};
+var $elm$core$Dict$fromList = function (assocs) {
+	return A3(
+		$elm$core$List$foldl,
+		F2(
+			function (_v0, dict) {
+				var key = _v0.a;
+				var value = _v0.b;
+				return A3($elm$core$Dict$insert, key, value, dict);
+			}),
+		$elm$core$Dict$empty,
+		assocs);
+};
+var $elm$core$Dict$foldl = F3(
+	function (func, acc, dict) {
+		foldl:
+		while (true) {
+			if (dict.$ === 'RBEmpty_elm_builtin') {
+				return acc;
+			} else {
+				var key = dict.b;
+				var value = dict.c;
+				var left = dict.d;
+				var right = dict.e;
+				var $temp$func = func,
+					$temp$acc = A3(
+					func,
+					key,
+					value,
+					A3($elm$core$Dict$foldl, func, acc, left)),
+					$temp$dict = right;
+				func = $temp$func;
+				acc = $temp$acc;
+				dict = $temp$dict;
+				continue foldl;
+			}
+		}
+	});
+var $elm$core$Dict$merge = F6(
+	function (leftStep, bothStep, rightStep, leftDict, rightDict, initialResult) {
+		var stepState = F3(
+			function (rKey, rValue, _v0) {
+				stepState:
+				while (true) {
+					var list = _v0.a;
+					var result = _v0.b;
+					if (!list.b) {
+						return _Utils_Tuple2(
+							list,
+							A3(rightStep, rKey, rValue, result));
+					} else {
+						var _v2 = list.a;
+						var lKey = _v2.a;
+						var lValue = _v2.b;
+						var rest = list.b;
+						if (_Utils_cmp(lKey, rKey) < 0) {
+							var $temp$rKey = rKey,
+								$temp$rValue = rValue,
+								$temp$_v0 = _Utils_Tuple2(
+								rest,
+								A3(leftStep, lKey, lValue, result));
+							rKey = $temp$rKey;
+							rValue = $temp$rValue;
+							_v0 = $temp$_v0;
+							continue stepState;
+						} else {
+							if (_Utils_cmp(lKey, rKey) > 0) {
+								return _Utils_Tuple2(
+									list,
+									A3(rightStep, rKey, rValue, result));
+							} else {
+								return _Utils_Tuple2(
+									rest,
+									A4(bothStep, lKey, lValue, rValue, result));
+							}
+						}
+					}
+				}
+			});
+		var _v3 = A3(
+			$elm$core$Dict$foldl,
+			stepState,
+			_Utils_Tuple2(
+				$elm$core$Dict$toList(leftDict),
+				initialResult),
+			rightDict);
+		var leftovers = _v3.a;
+		var intermediateResult = _v3.b;
+		return A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_v4, result) {
+					var k = _v4.a;
+					var v = _v4.b;
+					return A3(leftStep, k, v, result);
+				}),
+			intermediateResult,
+			leftovers);
+	});
+var $elm$browser$Browser$Events$Event = F2(
+	function (key, event) {
+		return {event: event, key: key};
+	});
+var $elm$browser$Browser$Events$spawn = F3(
+	function (router, key, _v0) {
+		var node = _v0.a;
+		var name = _v0.b;
+		var actualNode = function () {
+			if (node.$ === 'Document') {
+				return _Browser_doc;
+			} else {
+				return _Browser_window;
+			}
+		}();
+		return A2(
+			$elm$core$Task$map,
+			function (value) {
+				return _Utils_Tuple2(key, value);
+			},
+			A3(
+				_Browser_on,
+				actualNode,
+				name,
+				function (event) {
+					return A2(
+						$elm$core$Platform$sendToSelf,
+						router,
+						A2($elm$browser$Browser$Events$Event, key, event));
+				}));
+	});
+var $elm$core$Dict$union = F2(
+	function (t1, t2) {
+		return A3($elm$core$Dict$foldl, $elm$core$Dict$insert, t2, t1);
+	});
+var $elm$browser$Browser$Events$onEffects = F3(
+	function (router, subs, state) {
+		var stepRight = F3(
+			function (key, sub, _v6) {
+				var deads = _v6.a;
+				var lives = _v6.b;
+				var news = _v6.c;
+				return _Utils_Tuple3(
+					deads,
+					lives,
+					A2(
+						$elm$core$List$cons,
+						A3($elm$browser$Browser$Events$spawn, router, key, sub),
+						news));
+			});
+		var stepLeft = F3(
+			function (_v4, pid, _v5) {
+				var deads = _v5.a;
+				var lives = _v5.b;
+				var news = _v5.c;
+				return _Utils_Tuple3(
+					A2($elm$core$List$cons, pid, deads),
+					lives,
+					news);
+			});
+		var stepBoth = F4(
+			function (key, pid, _v2, _v3) {
+				var deads = _v3.a;
+				var lives = _v3.b;
+				var news = _v3.c;
+				return _Utils_Tuple3(
+					deads,
+					A3($elm$core$Dict$insert, key, pid, lives),
+					news);
+			});
+		var newSubs = A2($elm$core$List$map, $elm$browser$Browser$Events$addKey, subs);
+		var _v0 = A6(
+			$elm$core$Dict$merge,
+			stepLeft,
+			stepBoth,
+			stepRight,
+			state.pids,
+			$elm$core$Dict$fromList(newSubs),
+			_Utils_Tuple3(_List_Nil, $elm$core$Dict$empty, _List_Nil));
+		var deadPids = _v0.a;
+		var livePids = _v0.b;
+		var makeNewPids = _v0.c;
+		return A2(
+			$elm$core$Task$andThen,
+			function (pids) {
+				return $elm$core$Task$succeed(
+					A2(
+						$elm$browser$Browser$Events$State,
+						newSubs,
+						A2(
+							$elm$core$Dict$union,
+							livePids,
+							$elm$core$Dict$fromList(pids))));
+			},
+			A2(
+				$elm$core$Task$andThen,
+				function (_v1) {
+					return $elm$core$Task$sequence(makeNewPids);
+				},
+				$elm$core$Task$sequence(
+					A2($elm$core$List$map, $elm$core$Process$kill, deadPids))));
+	});
+var $elm$browser$Browser$Events$onSelfMsg = F3(
+	function (router, _v0, state) {
+		var key = _v0.key;
+		var event = _v0.event;
+		var toMessage = function (_v2) {
+			var subKey = _v2.a;
+			var _v3 = _v2.b;
+			var node = _v3.a;
+			var name = _v3.b;
+			var decoder = _v3.c;
+			return _Utils_eq(subKey, key) ? A2(_Browser_decodeEvent, decoder, event) : $elm$core$Maybe$Nothing;
+		};
+		var messages = A2($elm$core$List$filterMap, toMessage, state.subs);
+		return A2(
+			$elm$core$Task$andThen,
+			function (_v1) {
+				return $elm$core$Task$succeed(state);
+			},
+			$elm$core$Task$sequence(
+				A2(
+					$elm$core$List$map,
+					$elm$core$Platform$sendToApp(router),
+					messages)));
+	});
+var $elm$browser$Browser$Events$subMap = F2(
+	function (func, _v0) {
+		var node = _v0.a;
+		var name = _v0.b;
+		var decoder = _v0.c;
+		return A3(
+			$elm$browser$Browser$Events$MySub,
+			node,
+			name,
+			A2($elm$json$Json$Decode$map, func, decoder));
+	});
+_Platform_effectManagers['Browser.Events'] = _Platform_createManager($elm$browser$Browser$Events$init, $elm$browser$Browser$Events$onEffects, $elm$browser$Browser$Events$onSelfMsg, 0, $elm$browser$Browser$Events$subMap);
+var $elm$browser$Browser$Events$subscription = _Platform_leaf('Browser.Events');
+var $elm$browser$Browser$Events$on = F3(
+	function (node, name, decoder) {
+		return $elm$browser$Browser$Events$subscription(
+			A3($elm$browser$Browser$Events$MySub, node, name, decoder));
+	});
+var $elm$browser$Browser$Events$onKeyDown = A2($elm$browser$Browser$Events$on, $elm$browser$Browser$Events$Document, 'keydown');
+var $elm$browser$Browser$Events$onMouseDown = A2($elm$browser$Browser$Events$on, $elm$browser$Browser$Events$Document, 'mousedown');
+var $author$project$MaterialUI$Internal$Tooltip$Implementation$subscriptions_ = function (_v0) {
+	var browserAction = $elm$json$Json$Decode$succeed($author$project$MaterialUI$Internal$Tooltip$Model$BrowserAction);
+	return $elm$core$Platform$Sub$batch(
+		_List_fromArray(
+			[
+				$elm$browser$Browser$Events$onMouseDown(browserAction),
+				$elm$browser$Browser$Events$onKeyDown(browserAction),
+				$elm$browser$Browser$Events$onAnimationFrameDelta($author$project$MaterialUI$Internal$Tooltip$Model$OnAnimationFrame)
+			]));
+};
+var $author$project$MaterialUI$Internal$Tooltip$Implementation$subscriptions = function (mui) {
+	return A4(
+		$author$project$MaterialUI$Internal$Component$subscriptions,
+		function ($) {
+			return $.tooltip;
+		},
+		$author$project$MaterialUI$Internal$Message$TooltipMsg,
+		mui,
+		$author$project$MaterialUI$Internal$Tooltip$Implementation$subscriptions_);
+};
+var $author$project$MaterialUI$MaterilaUI$subscriptions = function (model) {
+	return $elm$core$Platform$Sub$batch(
+		_List_fromArray(
+			[
+				$author$project$MaterialUI$Internal$Tooltip$Implementation$subscriptions(model),
+				$author$project$MaterialUI$Internal$Snackbar$Implementation$subscriptions(model)
+			]));
+};
 var $author$project$Page$Home$subscriptions = function (model) {
-	return $elm$core$Platform$Sub$none;
+	return $author$project$MaterialUI$MaterilaUI$subscriptions(model.mui);
 };
 var $author$project$Page$Rematch$subscriptions = function (_v0) {
 	return $elm$core$Platform$Sub$none;
@@ -7407,11 +7964,22 @@ var $author$project$Page$TTT$Game$WebSocketIn = function (a) {
 	return {$: 'WebSocketIn', a: a};
 };
 var $author$project$Websocket$receive = _Platform_incomingPort('receive', $elm$json$Json$Decode$string);
+var $author$project$Page$TTT$Lobby$subscriptions = function (model) {
+	return $author$project$MaterialUI$MaterilaUI$subscriptions(model.mui);
+};
 var $author$project$Page$TTT$Game$subscriptions = function (model) {
 	switch (model.$) {
 		case 'Lobby':
 			var lobby = model.a;
-			return $author$project$Websocket$receive($author$project$Page$TTT$Game$WebSocketIn);
+			return $elm$core$Platform$Sub$batch(
+				_List_fromArray(
+					[
+						$author$project$Websocket$receive($author$project$Page$TTT$Game$WebSocketIn),
+						A2(
+						$elm$core$Platform$Sub$map,
+						$author$project$Page$TTT$Game$GotLobbyMsg,
+						$author$project$Page$TTT$Lobby$subscriptions(lobby))
+					]));
 		case 'InGame':
 			var session = model.a;
 			return $author$project$Websocket$receive($author$project$Page$TTT$Game$WebSocketIn);
@@ -7510,6 +8078,612 @@ var $elm$core$Result$map = F2(
 			return $elm$core$Result$Err(e);
 		}
 	});
+var $elm$core$Tuple$mapFirst = F2(
+	function (func, _v0) {
+		var x = _v0.a;
+		var y = _v0.b;
+		return _Utils_Tuple2(
+			func(x),
+			y);
+	});
+var $author$project$MaterialUI$Internal$Message$IconMsg = F2(
+	function (a, b) {
+		return {$: 'IconMsg', a: a, b: b};
+	});
+var $author$project$MaterialUI$Internal$State$defaultModel = {clicked: false, hovered: false};
+var $author$project$MaterialUI$Internal$Icon$Model$defaultModel = {state: $author$project$MaterialUI$Internal$State$defaultModel};
+var $author$project$MaterialUI$Internal$Component$getSet = F3(
+	function (getModel, setModel, _default) {
+		return {
+			get: F2(
+				function (index, store) {
+					return A2(
+						$elm$core$Maybe$withDefault,
+						_default,
+						A2(
+							$elm$core$Dict$get,
+							index,
+							getModel(store)));
+				}),
+			set: F3(
+				function (index, model, store) {
+					return A2(
+						setModel,
+						A3(
+							$elm$core$Dict$insert,
+							index,
+							model,
+							getModel(store)),
+						store);
+				})
+		};
+	});
+var $author$project$MaterialUI$Internal$Icon$Implementation$getSet = A3(
+	$author$project$MaterialUI$Internal$Component$getSet,
+	function ($) {
+		return $.icon;
+	},
+	F2(
+		function (model, store) {
+			return _Utils_update(
+				store,
+				{icon: model});
+		}),
+	$author$project$MaterialUI$Internal$Icon$Model$defaultModel);
+var $author$project$MaterialUI$Internal$Component$update = F6(
+	function (get_set, lift, update_, msg, index, store) {
+		var model = A2(get_set.get, index, store);
+		var _v0 = A2(update_, msg, model);
+		var updatedModel = _v0.a;
+		var effects = _v0.b;
+		return _Utils_Tuple2(
+			A3(get_set.set, index, updatedModel, store),
+			A2($elm$core$Platform$Cmd$map, lift, effects));
+	});
+var $author$project$MaterialUI$Internal$State$update = F2(
+	function (msg, componentModel) {
+		var state = componentModel.state;
+		var newState = function () {
+			switch (msg.$) {
+				case 'MouseEnter':
+					return _Utils_update(
+						state,
+						{hovered: true});
+				case 'MouseLeave':
+					return _Utils_update(
+						state,
+						{hovered: false});
+				case 'MouseDown':
+					return _Utils_update(
+						state,
+						{clicked: true});
+				default:
+					return _Utils_update(
+						state,
+						{clicked: false});
+			}
+		}();
+		return _Utils_update(
+			componentModel,
+			{state: newState});
+	});
+var $author$project$MaterialUI$Internal$Icon$Implementation$update_ = F2(
+	function (msg, model) {
+		if (msg.$ === 'State') {
+			var subMsg = msg.a;
+			return _Utils_Tuple2(
+				A2($author$project$MaterialUI$Internal$State$update, subMsg, model),
+				$elm$core$Platform$Cmd$none);
+		} else {
+			return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$MaterialUI$Internal$Icon$Implementation$update = F3(
+	function (msg, index, store) {
+		return A6(
+			$author$project$MaterialUI$Internal$Component$update,
+			$author$project$MaterialUI$Internal$Icon$Implementation$getSet,
+			A2(
+				$elm$core$Basics$composeL,
+				store.lift,
+				$author$project$MaterialUI$Internal$Message$IconMsg(index)),
+			$author$project$MaterialUI$Internal$Icon$Implementation$update_,
+			msg,
+			index,
+			store);
+	});
+var $author$project$MaterialUI$Internal$Snackbar$Model$Nil = {$: 'Nil'};
+var $author$project$MaterialUI$Internal$Snackbar$Model$defaultModel = {queue: _List_Nil, snackbarId: -1, status: $author$project$MaterialUI$Internal$Snackbar$Model$Nil};
+var $author$project$MaterialUI$Internal$Snackbar$Implementation$getSet = A3(
+	$author$project$MaterialUI$Internal$Component$getSet,
+	function ($) {
+		return $.snackbar;
+	},
+	F2(
+		function (model, store) {
+			return _Utils_update(
+				store,
+				{snackbar: model});
+		}),
+	$author$project$MaterialUI$Internal$Snackbar$Model$defaultModel);
+var $author$project$MaterialUI$Internal$Snackbar$Model$Active = F2(
+	function (a, b) {
+		return {$: 'Active', a: a, b: b};
+	});
+var $author$project$MaterialUI$Internal$Snackbar$Model$Dismiss = function (a) {
+	return {$: 'Dismiss', a: a};
+};
+var $author$project$MaterialUI$Internal$Snackbar$Model$FadingIn = function (a) {
+	return {$: 'FadingIn', a: a};
+};
+var $author$project$MaterialUI$Internal$Snackbar$Model$FadingOut = function (a) {
+	return {$: 'FadingOut', a: a};
+};
+var $author$project$MaterialUI$Internal$Snackbar$Model$Showing = {$: 'Showing'};
+var $author$project$MaterialUI$Internal$Component$cmd = function (msg) {
+	return A2(
+		$elm$core$Task$perform,
+		$elm$core$Basics$identity,
+		$elm$core$Task$succeed(msg));
+};
+var $author$project$MaterialUI$Internal$Snackbar$Implementation$fadeInDuration = 100;
+var $author$project$MaterialUI$Internal$Snackbar$Implementation$fadeOutDuration = 300;
+var $elm$core$Basics$ge = _Utils_ge;
+var $elm$core$Tuple$mapSecond = F2(
+	function (func, _v0) {
+		var x = _v0.a;
+		var y = _v0.b;
+		return _Utils_Tuple2(
+			x,
+			func(y));
+	});
+var $elm$core$Basics$always = F2(
+	function (a, _v0) {
+		return a;
+	});
+var $elm$core$Process$sleep = _Process_sleep;
+var $author$project$MaterialUI$Internal$Component$delayedCmd = F2(
+	function (delay, command) {
+		return A2(
+			$elm$core$Task$perform,
+			$elm$core$Basics$always(command),
+			$elm$core$Process$sleep(delay));
+	});
+var $author$project$MaterialUI$Internal$Snackbar$Implementation$setSnackbar = F2(
+	function (snackbar, model) {
+		var id = model.snackbarId + 1;
+		var duration = function () {
+			var _v0 = snackbar.duration;
+			if (_v0.$ === 'Short') {
+				return 4 * 1000;
+			} else {
+				return 10 * 1000;
+			}
+		}();
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{
+					snackbarId: id,
+					status: A2(
+						$author$project$MaterialUI$Internal$Snackbar$Model$Active,
+						snackbar,
+						$author$project$MaterialUI$Internal$Snackbar$Model$FadingIn(0))
+				}),
+			A2(
+				$author$project$MaterialUI$Internal$Component$delayedCmd,
+				duration,
+				$author$project$MaterialUI$Internal$Snackbar$Model$Dismiss(id)));
+	});
+var $author$project$MaterialUI$Internal$Snackbar$Implementation$tryDequeue = function (model) {
+	var _v0 = A2($elm$core$Debug$log, 'dequeueState', model.status);
+	if (_v0.$ === 'Nil') {
+		var _v1 = model.queue;
+		if (_v1.b) {
+			var head = _v1.a;
+			var rest = _v1.b;
+			return A2(
+				$author$project$MaterialUI$Internal$Snackbar$Implementation$setSnackbar,
+				head,
+				_Utils_update(
+					model,
+					{queue: rest}));
+		} else {
+			return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+		}
+	} else {
+		return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+	}
+};
+var $author$project$MaterialUI$Internal$Snackbar$Implementation$update_ = F3(
+	function (lift, msg, model) {
+		var _v0 = _Utils_Tuple2(msg, model.status);
+		_v0$4:
+		while (true) {
+			if (_v0.b.$ === 'Active') {
+				switch (_v0.a.$) {
+					case 'Dismiss':
+						var id = _v0.a.a;
+						var _v1 = _v0.b;
+						var content = _v1.a;
+						return _Utils_eq(id, model.snackbarId) ? _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									status: A2(
+										$author$project$MaterialUI$Internal$Snackbar$Model$Active,
+										content,
+										$author$project$MaterialUI$Internal$Snackbar$Model$FadingOut(1))
+								}),
+							$elm$core$Platform$Cmd$none) : _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					case 'Clicked':
+						if (_v0.b.b.$ === 'Showing') {
+							var _v2 = _v0.a;
+							var _v3 = _v0.b;
+							var content = _v3.a;
+							var _v4 = _v3.b;
+							var userAction = A2(
+								$elm$core$Maybe$withDefault,
+								_List_Nil,
+								A2(
+									$elm$core$Maybe$map,
+									function (action) {
+										return _List_fromArray(
+											[
+												$author$project$MaterialUI$Internal$Component$cmd(action.action)
+											]);
+									},
+									content.action));
+							var _v5 = A3(
+								$author$project$MaterialUI$Internal$Snackbar$Implementation$update_,
+								lift,
+								$author$project$MaterialUI$Internal$Snackbar$Model$Dismiss(model.snackbarId),
+								model);
+							var updatedModel = _v5.a;
+							var effects = _v5.b;
+							return _Utils_Tuple2(
+								updatedModel,
+								$elm$core$Platform$Cmd$batch(
+									A2($elm$core$List$cons, effects, userAction)));
+						} else {
+							break _v0$4;
+						}
+					case 'AnimationFrame':
+						switch (_v0.b.b.$) {
+							case 'FadingIn':
+								var delta = _v0.a.a;
+								var _v6 = _v0.b;
+								var content = _v6.a;
+								var progress = _v6.b.a;
+								var newProgress = progress + (delta / $author$project$MaterialUI$Internal$Snackbar$Implementation$fadeInDuration);
+								return (newProgress >= 1) ? _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{
+											status: A2($author$project$MaterialUI$Internal$Snackbar$Model$Active, content, $author$project$MaterialUI$Internal$Snackbar$Model$Showing)
+										}),
+									$elm$core$Platform$Cmd$none) : _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{
+											status: A2(
+												$author$project$MaterialUI$Internal$Snackbar$Model$Active,
+												content,
+												$author$project$MaterialUI$Internal$Snackbar$Model$FadingIn(newProgress))
+										}),
+									$elm$core$Platform$Cmd$none);
+							case 'FadingOut':
+								var delta = _v0.a.a;
+								var _v7 = _v0.b;
+								var content = _v7.a;
+								var progress = _v7.b.a;
+								var newProgress = progress - (delta / $author$project$MaterialUI$Internal$Snackbar$Implementation$fadeOutDuration);
+								return (newProgress <= 0) ? A2(
+									$elm$core$Tuple$mapSecond,
+									$elm$core$Platform$Cmd$map(lift),
+									$author$project$MaterialUI$Internal$Snackbar$Implementation$tryDequeue(
+										_Utils_update(
+											model,
+											{status: $author$project$MaterialUI$Internal$Snackbar$Model$Nil}))) : _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{
+											status: A2(
+												$author$project$MaterialUI$Internal$Snackbar$Model$Active,
+												content,
+												$author$project$MaterialUI$Internal$Snackbar$Model$FadingOut(newProgress))
+										}),
+									$elm$core$Platform$Cmd$none);
+							default:
+								break _v0$4;
+						}
+					default:
+						break _v0$4;
+				}
+			} else {
+				break _v0$4;
+			}
+		}
+		return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+	});
+var $author$project$MaterialUI$Internal$Snackbar$Implementation$update = F3(
+	function (msg, index, store) {
+		var model = A2($author$project$MaterialUI$Internal$Snackbar$Implementation$getSet.get, index, store);
+		var lift = A2(
+			$elm$core$Basics$composeL,
+			store.lift,
+			$author$project$MaterialUI$Internal$Message$SnackbarMsg(index));
+		var _v0 = A3($author$project$MaterialUI$Internal$Snackbar$Implementation$update_, lift, msg, model);
+		var updatedModel = _v0.a;
+		var effects = _v0.b;
+		return _Utils_Tuple2(
+			A3($author$project$MaterialUI$Internal$Snackbar$Implementation$getSet.set, index, updatedModel, store),
+			effects);
+	});
+var $author$project$MaterialUI$Internal$Message$TextFieldMsg = F2(
+	function (a, b) {
+		return {$: 'TextFieldMsg', a: a, b: b};
+	});
+var $author$project$MaterialUI$Internal$TextField$Model$defaultModel = {focused: false};
+var $author$project$MaterialUI$Internal$TextField$Implementation$getSet = A3(
+	$author$project$MaterialUI$Internal$Component$getSet,
+	function ($) {
+		return $.textfield;
+	},
+	F2(
+		function (model, store) {
+			return _Utils_update(
+				store,
+				{textfield: model});
+		}),
+	$author$project$MaterialUI$Internal$TextField$Model$defaultModel);
+var $author$project$MaterialUI$Internal$TextField$Implementation$update_ = F2(
+	function (msg, model) {
+		if (msg.$ === 'ComponentFocused') {
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{focused: true}),
+				$elm$core$Platform$Cmd$none);
+		} else {
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{focused: false}),
+				$elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$MaterialUI$Internal$TextField$Implementation$update = F3(
+	function (msg, index, store) {
+		return A6(
+			$author$project$MaterialUI$Internal$Component$update,
+			$author$project$MaterialUI$Internal$TextField$Implementation$getSet,
+			A2(
+				$elm$core$Basics$composeL,
+				store.lift,
+				$author$project$MaterialUI$Internal$Message$TextFieldMsg(index)),
+			$author$project$MaterialUI$Internal$TextField$Implementation$update_,
+			msg,
+			index,
+			store);
+	});
+var $author$project$MaterialUI$Internal$Tooltip$Model$Nil = {$: 'Nil'};
+var $author$project$MaterialUI$Internal$Tooltip$Model$defaultModel = {hovered: false, state: $author$project$MaterialUI$Internal$Tooltip$Model$Nil};
+var $author$project$MaterialUI$Internal$Tooltip$Implementation$getSet = A3(
+	$author$project$MaterialUI$Internal$Component$getSet,
+	function ($) {
+		return $.tooltip;
+	},
+	F2(
+		function (model, store) {
+			return _Utils_update(
+				store,
+				{tooltip: model});
+		}),
+	$author$project$MaterialUI$Internal$Tooltip$Model$defaultModel);
+var $author$project$MaterialUI$Internal$Tooltip$Model$Active = function (a) {
+	return {$: 'Active', a: a};
+};
+var $author$project$MaterialUI$Internal$Tooltip$Model$AnimatingIn = function (a) {
+	return {$: 'AnimatingIn', a: a};
+};
+var $author$project$MaterialUI$Internal$Tooltip$Model$AnimatingOut = function (a) {
+	return {$: 'AnimatingOut', a: a};
+};
+var $author$project$MaterialUI$Internal$Tooltip$Model$Delaying = function (a) {
+	return {$: 'Delaying', a: a};
+};
+var $author$project$MaterialUI$Internal$Tooltip$Model$Showing = {$: 'Showing'};
+var $author$project$MaterialUI$Internal$Tooltip$Implementation$animInDuration = 100;
+var $author$project$MaterialUI$Internal$Tooltip$Implementation$animOutDuration = 100;
+var $author$project$MaterialUI$Internal$Tooltip$Implementation$showDelay = 500;
+var $author$project$MaterialUI$Internal$Tooltip$Implementation$update_ = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'MouseEnter':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{hovered: true}),
+					$elm$core$Platform$Cmd$none);
+			case 'MouseLeave':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{hovered: false}),
+					$elm$core$Platform$Cmd$none);
+			case 'NoOp':
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			case 'BrowserAction':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{hovered: false}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				var delta = msg.a;
+				var _v1 = _Utils_Tuple2(model.hovered, model.state);
+				if (_v1.a) {
+					if (_v1.b.$ === 'Active') {
+						switch (_v1.b.a.$) {
+							case 'Showing':
+								var _v2 = _v1.b.a;
+								return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+							case 'AnimatingOut':
+								var progress = _v1.b.a.a;
+								return _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{
+											state: $author$project$MaterialUI$Internal$Tooltip$Model$Active(
+												$author$project$MaterialUI$Internal$Tooltip$Model$AnimatingIn(progress))
+										}),
+									$elm$core$Platform$Cmd$none);
+							case 'AnimatingIn':
+								var progress = _v1.b.a.a;
+								var newProgress = progress + (delta / $author$project$MaterialUI$Internal$Tooltip$Implementation$animInDuration);
+								return (newProgress >= 1) ? _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{
+											state: $author$project$MaterialUI$Internal$Tooltip$Model$Active($author$project$MaterialUI$Internal$Tooltip$Model$Showing)
+										}),
+									$elm$core$Platform$Cmd$none) : _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{
+											state: $author$project$MaterialUI$Internal$Tooltip$Model$Active(
+												$author$project$MaterialUI$Internal$Tooltip$Model$AnimatingIn(newProgress))
+										}),
+									$elm$core$Platform$Cmd$none);
+							default:
+								var progress = _v1.b.a.a;
+								var newProgress = progress + (delta / $author$project$MaterialUI$Internal$Tooltip$Implementation$showDelay);
+								return (newProgress >= 1) ? _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{
+											state: $author$project$MaterialUI$Internal$Tooltip$Model$Active(
+												$author$project$MaterialUI$Internal$Tooltip$Model$AnimatingIn(0))
+										}),
+									$elm$core$Platform$Cmd$none) : _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{
+											state: $author$project$MaterialUI$Internal$Tooltip$Model$Active(
+												$author$project$MaterialUI$Internal$Tooltip$Model$Delaying(newProgress))
+										}),
+									$elm$core$Platform$Cmd$none);
+						}
+					} else {
+						var _v3 = _v1.b;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{
+									state: $author$project$MaterialUI$Internal$Tooltip$Model$Active(
+										$author$project$MaterialUI$Internal$Tooltip$Model$Delaying(0))
+								}),
+							$elm$core$Platform$Cmd$none);
+					}
+				} else {
+					if (_v1.b.$ === 'Active') {
+						switch (_v1.b.a.$) {
+							case 'Showing':
+								var _v4 = _v1.b.a;
+								return _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{
+											state: $author$project$MaterialUI$Internal$Tooltip$Model$Active(
+												$author$project$MaterialUI$Internal$Tooltip$Model$AnimatingOut(1))
+										}),
+									$elm$core$Platform$Cmd$none);
+							case 'AnimatingOut':
+								var progress = _v1.b.a.a;
+								var newProgress = progress - (delta / $author$project$MaterialUI$Internal$Tooltip$Implementation$animOutDuration);
+								return (newProgress <= 0) ? _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{state: $author$project$MaterialUI$Internal$Tooltip$Model$Nil}),
+									$elm$core$Platform$Cmd$none) : _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{
+											state: $author$project$MaterialUI$Internal$Tooltip$Model$Active(
+												$author$project$MaterialUI$Internal$Tooltip$Model$AnimatingOut(newProgress))
+										}),
+									$elm$core$Platform$Cmd$none);
+							case 'AnimatingIn':
+								var progress = _v1.b.a.a;
+								return _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{
+											state: $author$project$MaterialUI$Internal$Tooltip$Model$Active(
+												$author$project$MaterialUI$Internal$Tooltip$Model$AnimatingOut(progress))
+										}),
+									$elm$core$Platform$Cmd$none);
+							default:
+								return _Utils_Tuple2(
+									_Utils_update(
+										model,
+										{state: $author$project$MaterialUI$Internal$Tooltip$Model$Nil}),
+									$elm$core$Platform$Cmd$none);
+						}
+					} else {
+						var _v5 = _v1.b;
+						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					}
+				}
+		}
+	});
+var $author$project$MaterialUI$Internal$Tooltip$Implementation$update = F3(
+	function (msg, index, store) {
+		return A6(
+			$author$project$MaterialUI$Internal$Component$update,
+			$author$project$MaterialUI$Internal$Tooltip$Implementation$getSet,
+			A2(
+				$elm$core$Basics$composeL,
+				store.lift,
+				$author$project$MaterialUI$Internal$Message$TooltipMsg(index)),
+			$author$project$MaterialUI$Internal$Tooltip$Implementation$update_,
+			msg,
+			index,
+			store);
+	});
+var $author$project$MaterialUI$MaterilaUI$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'TextFieldMsg':
+				var index = msg.a;
+				var subMsg = msg.b;
+				return A3($author$project$MaterialUI$Internal$TextField$Implementation$update, subMsg, index, model);
+			case 'IconMsg':
+				var index = msg.a;
+				var subMsg = msg.b;
+				return A3($author$project$MaterialUI$Internal$Icon$Implementation$update, subMsg, index, model);
+			case 'TooltipMsg':
+				var index = msg.a;
+				var subMsg = msg.b;
+				return A3($author$project$MaterialUI$Internal$Tooltip$Implementation$update, subMsg, index, model);
+			default:
+				var index = msg.a;
+				var subMsg = msg.b;
+				return A3($author$project$MaterialUI$Internal$Snackbar$Implementation$update, subMsg, index, model);
+		}
+	});
+var $author$project$UIHelper$materialUpdate = F2(
+	function (msg, model) {
+		return A2(
+			$elm$core$Tuple$mapFirst,
+			function (upMui) {
+				return _Utils_update(
+					model,
+					{mui: upMui});
+			},
+			A2($author$project$MaterialUI$MaterilaUI$update, msg, model.mui));
+	});
 var $author$project$Page$Home$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -7553,7 +8727,7 @@ var $author$project$Page$Home$update = F2(
 						model,
 						{gameId: gameId}),
 					$elm$core$Platform$Cmd$none);
-			default:
+			case 'ServerResponse':
 				var result = msg.a;
 				if (result.$ === 'Ok') {
 					var response = result.a;
@@ -7625,6 +8799,9 @@ var $author$project$Page$Home$update = F2(
 							}),
 						$elm$core$Platform$Cmd$none);
 				}
+			default:
+				var subMsg = msg.a;
+				return A2($author$project$UIHelper$materialUpdate, subMsg, model);
 		}
 	});
 var $author$project$Page$NotFound$update = F2(
@@ -7953,7 +9130,7 @@ var $author$project$Page$TTT$Lobby$update = F2(
 					model,
 					$author$project$Websocket$send(
 						A2($author$project$ServerRequest$InLobby$addBotMsg, lobby.gameId, lobby.playerMe)));
-			default:
+			case 'CopyGameId':
 				var a = A2($elm$core$Debug$log, 'copying gameId', '');
 				return _Utils_Tuple2(
 					model,
@@ -7963,6 +9140,9 @@ var $author$project$Page$TTT$Lobby$update = F2(
 							_List_fromArray(
 								['game', model.lobby.gameId]),
 							_List_Nil)));
+			default:
+				var subMsg = msg.a;
+				return A2($author$project$UIHelper$materialUpdate, subMsg, model);
 		}
 	});
 var $author$project$Page$TTT$InGame$updateFromWebsocket = F2(
@@ -8237,10 +9417,9 @@ var $author$project$Page$Blank$view = {
 var $author$project$Page$Home$GameId = function (a) {
 	return {$: 'GameId', a: a};
 };
-var $author$project$MaterialUI$TextField$Idle = {$: 'Idle'};
 var $author$project$Page$Home$JoinGame = {$: 'JoinGame'};
 var $author$project$Page$Home$NewTTTGame = {$: 'NewTTTGame'};
-var $author$project$MaterialUI$TextField$Outlined = {$: 'Outlined'};
+var $author$project$MaterialUI$Internal$TextField$Model$Outlined = {$: 'Outlined'};
 var $author$project$MaterialUI$Theme$Primary = {$: 'Primary'};
 var $mdgriffith$elm_ui$Internal$Model$AlignX = function (a) {
 	return {$: 'AlignX', a: a};
@@ -8653,22 +9832,6 @@ var $mdgriffith$elm_ui$Internal$Model$formatBoxShadow = function (shadow) {
 					$mdgriffith$elm_ui$Internal$Model$formatColor(shadow.color))
 				])));
 };
-var $elm$core$Tuple$mapFirst = F2(
-	function (func, _v0) {
-		var x = _v0.a;
-		var y = _v0.b;
-		return _Utils_Tuple2(
-			func(x),
-			y);
-	});
-var $elm$core$Tuple$mapSecond = F2(
-	function (func, _v0) {
-		var x = _v0.a;
-		var y = _v0.b;
-		return _Utils_Tuple2(
-			x,
-			func(y));
-	});
 var $mdgriffith$elm_ui$Internal$Model$renderFocusStyle = function (focus) {
 	return _List_fromArray(
 		[
@@ -12689,7 +13852,6 @@ var $mdgriffith$elm_ui$Internal$Model$renderWidth = function (w) {
 	}
 };
 var $mdgriffith$elm_ui$Internal$Flag$borderWidth = $mdgriffith$elm_ui$Internal$Flag$flag(27);
-var $elm$core$Basics$ge = _Utils_ge;
 var $mdgriffith$elm_ui$Internal$Model$skippable = F2(
 	function (flag, style) {
 		if (_Utils_eq(flag, $mdgriffith$elm_ui$Internal$Flag$borderWidth)) {
@@ -14258,31 +15420,10 @@ var $author$project$Page$Home$errorCard = F2(
 							])))
 				]));
 	});
-var $author$project$MaterialUI$Theme$Custom = function (a) {
-	return {$: 'Custom', a: a};
-};
-var $mdgriffith$elm_ui$Internal$Model$Button = {$: 'Button'};
-var $elm$html$Html$Attributes$boolProperty = F2(
-	function (key, bool) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$bool(bool));
-	});
-var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
-var $mdgriffith$elm_ui$Internal$Model$NoAttribute = {$: 'NoAttribute'};
-var $mdgriffith$elm_ui$Element$Input$hasFocusStyle = function (attr) {
-	if (((attr.$ === 'StyleClass') && (attr.b.$ === 'PseudoSelector')) && (attr.b.a.$ === 'Focus')) {
-		var _v1 = attr.b;
-		var _v2 = _v1.a;
-		return true;
-	} else {
-		return false;
-	}
-};
-var $mdgriffith$elm_ui$Element$Input$focusDefault = function (attrs) {
-	return A2($elm$core$List$any, $mdgriffith$elm_ui$Element$Input$hasFocusStyle, attrs) ? $mdgriffith$elm_ui$Internal$Model$NoAttribute : $mdgriffith$elm_ui$Internal$Model$htmlClass('focusable');
-};
+var $author$project$MaterialUI$Internal$TextField$Model$ComponentFocused = {$: 'ComponentFocused'};
+var $author$project$MaterialUI$Internal$TextField$Model$ComponentFocusedLost = {$: 'ComponentFocusedLost'};
+var $author$project$MaterialUI$Internal$TextField$Model$Focused = {$: 'Focused'};
+var $author$project$MaterialUI$Internal$TextField$Model$Idle = {$: 'Idle'};
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -14294,107 +15435,26 @@ var $elm$html$Html$Events$on = F2(
 			event,
 			$elm$virtual_dom$VirtualDom$Normal(decoder));
 	});
-var $elm$html$Html$Events$onClick = function (msg) {
+var $elm$html$Html$Events$onFocus = function (msg) {
 	return A2(
 		$elm$html$Html$Events$on,
-		'click',
+		'focus',
 		$elm$json$Json$Decode$succeed(msg));
 };
-var $mdgriffith$elm_ui$Element$Events$onClick = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onClick);
-var $mdgriffith$elm_ui$Element$Input$enter = 'Enter';
-var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
-	return {$: 'MayPreventDefault', a: a};
-};
-var $elm$html$Html$Events$preventDefaultOn = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$MayPreventDefault(decoder));
-	});
-var $mdgriffith$elm_ui$Element$Input$onKey = F2(
-	function (desiredCode, msg) {
-		var decode = function (code) {
-			return _Utils_eq(code, desiredCode) ? $elm$json$Json$Decode$succeed(msg) : $elm$json$Json$Decode$fail('Not the enter key');
-		};
-		var isKey = A2(
-			$elm$json$Json$Decode$andThen,
-			decode,
-			A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string));
-		return $mdgriffith$elm_ui$Internal$Model$Attr(
-			A2(
-				$elm$html$Html$Events$preventDefaultOn,
-				'keyup',
-				A2(
-					$elm$json$Json$Decode$map,
-					function (fired) {
-						return _Utils_Tuple2(fired, true);
-					},
-					isKey)));
-	});
-var $mdgriffith$elm_ui$Element$Input$onEnter = function (msg) {
-	return A2($mdgriffith$elm_ui$Element$Input$onKey, $mdgriffith$elm_ui$Element$Input$enter, msg);
-};
-var $mdgriffith$elm_ui$Internal$Flag$cursor = $mdgriffith$elm_ui$Internal$Flag$flag(21);
-var $mdgriffith$elm_ui$Element$pointer = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$cursor, $mdgriffith$elm_ui$Internal$Style$classes.cursorPointer);
-var $elm$html$Html$Attributes$tabindex = function (n) {
+var $mdgriffith$elm_ui$Element$Events$onFocus = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onFocus);
+var $elm$html$Html$Events$onBlur = function (msg) {
 	return A2(
-		_VirtualDom_attribute,
-		'tabIndex',
-		$elm$core$String$fromInt(n));
+		$elm$html$Html$Events$on,
+		'blur',
+		$elm$json$Json$Decode$succeed(msg));
 };
-var $mdgriffith$elm_ui$Element$Input$button = F2(
-	function (attrs, _v0) {
-		var onPress = _v0.onPress;
-		var label = _v0.label;
-		return A4(
-			$mdgriffith$elm_ui$Internal$Model$element,
-			$mdgriffith$elm_ui$Internal$Model$asEl,
-			$mdgriffith$elm_ui$Internal$Model$div,
-			A2(
-				$elm$core$List$cons,
-				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-				A2(
-					$elm$core$List$cons,
-					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-					A2(
-						$elm$core$List$cons,
-						$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentCenterX + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.seButton + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.noTextSelection)))))),
-						A2(
-							$elm$core$List$cons,
-							$mdgriffith$elm_ui$Element$pointer,
-							A2(
-								$elm$core$List$cons,
-								$mdgriffith$elm_ui$Element$Input$focusDefault(attrs),
-								A2(
-									$elm$core$List$cons,
-									$mdgriffith$elm_ui$Internal$Model$Describe($mdgriffith$elm_ui$Internal$Model$Button),
-									A2(
-										$elm$core$List$cons,
-										$mdgriffith$elm_ui$Internal$Model$Attr(
-											$elm$html$Html$Attributes$tabindex(0)),
-										function () {
-											if (onPress.$ === 'Nothing') {
-												return A2(
-													$elm$core$List$cons,
-													$mdgriffith$elm_ui$Internal$Model$Attr(
-														$elm$html$Html$Attributes$disabled(true)),
-													attrs);
-											} else {
-												var msg = onPress.a;
-												return A2(
-													$elm$core$List$cons,
-													$mdgriffith$elm_ui$Element$Events$onClick(msg),
-													A2(
-														$elm$core$List$cons,
-														$mdgriffith$elm_ui$Element$Input$onEnter(msg),
-														attrs));
-											}
-										}()))))))),
-			$mdgriffith$elm_ui$Internal$Model$Unkeyed(
-				_List_fromArray(
-					[label])));
-	});
+var $mdgriffith$elm_ui$Element$Events$onLoseFocus = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onBlur);
+var $author$project$MaterialUI$Internal$TextField$Model$Disabled = {$: 'Disabled'};
+var $mdgriffith$elm_ui$Internal$Model$AlignY = function (a) {
+	return {$: 'AlignY', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$Bottom = {$: 'Bottom'};
+var $mdgriffith$elm_ui$Element$alignBottom = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$Bottom);
 var $mdgriffith$elm_ui$Internal$Flag$borderColor = $mdgriffith$elm_ui$Internal$Flag$flag(28);
 var $mdgriffith$elm_ui$Element$Border$color = function (clr) {
 	return A2(
@@ -14406,6 +15466,14 @@ var $mdgriffith$elm_ui$Element$Border$color = function (clr) {
 			'border-color',
 			clr));
 };
+var $elm$html$Html$Attributes$boolProperty = F2(
+	function (key, bool) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$bool(bool));
+	});
+var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
 var $mdgriffith$elm_ui$Element$htmlAttribute = $mdgriffith$elm_ui$Internal$Model$Attr;
 var $author$project$MaterialUI$Internal$disabled = A2($elm$core$Basics$composeR, $elm$html$Html$Attributes$disabled, $mdgriffith$elm_ui$Element$htmlAttribute);
 var $mdgriffith$elm_ui$Internal$Model$Focus = {$: 'Focus'};
@@ -14414,13 +15482,11 @@ var $mdgriffith$elm_ui$Internal$Model$PseudoSelector = F2(
 		return {$: 'PseudoSelector', a: a, b: b};
 	});
 var $mdgriffith$elm_ui$Internal$Flag$focus = $mdgriffith$elm_ui$Internal$Flag$flag(31);
-var $mdgriffith$elm_ui$Internal$Model$AlignY = function (a) {
-	return {$: 'AlignY', a: a};
-};
 var $mdgriffith$elm_ui$Internal$Model$Nearby = F2(
 	function (a, b) {
 		return {$: 'Nearby', a: a, b: b};
 	});
+var $mdgriffith$elm_ui$Internal$Model$NoAttribute = {$: 'NoAttribute'};
 var $mdgriffith$elm_ui$Internal$Model$TransformComponent = F2(
 	function (a, b) {
 		return {$: 'TransformComponent', a: a, b: b};
@@ -14585,6 +15651,10 @@ var $author$project$MaterialUI$Theme$getColor = F2(
 				return color.surface;
 			case 'OnSurface':
 				return color.onSurface;
+			case 'Tooltip':
+				return color.tooltip;
+			case 'OnTooltip':
+				return color.onTooltip;
 			case 'Error':
 				return color.error;
 			case 'OnError':
@@ -14642,100 +15712,22 @@ var $mdgriffith$elm_ui$Element$Border$glow = F2(
 				size: size
 			});
 	});
-var $mdgriffith$elm_ui$Internal$Model$CenterY = {$: 'CenterY'};
-var $mdgriffith$elm_ui$Element$centerY = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$CenterY);
-var $avh4$elm_color$Color$fromRgba = function (components) {
-	return A4($avh4$elm_color$Color$RgbaSpace, components.red, components.green, components.blue, components.alpha);
+var $mdgriffith$elm_ui$Internal$Model$InFront = {$: 'InFront'};
+var $mdgriffith$elm_ui$Element$createNearby = F2(
+	function (loc, element) {
+		if (element.$ === 'Empty') {
+			return $mdgriffith$elm_ui$Internal$Model$NoAttribute;
+		} else {
+			return A2($mdgriffith$elm_ui$Internal$Model$Nearby, loc, element);
+		}
+	});
+var $mdgriffith$elm_ui$Element$inFront = function (element) {
+	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$InFront, element);
 };
-var $elm$core$Basics$always = F2(
-	function (a, _v0) {
-		return a;
-	});
-var $mdgriffith$elm_ui$Internal$Model$unstyled = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Unstyled, $elm$core$Basics$always);
-var $mdgriffith$elm_ui$Element$html = $mdgriffith$elm_ui$Internal$Model$unstyled;
-var $mdgriffith$elm_ui$Internal$Model$Px = function (a) {
-	return {$: 'Px', a: a};
+var $mdgriffith$elm_ui$Element$Input$HiddenLabel = function (a) {
+	return {$: 'HiddenLabel', a: a};
 };
-var $mdgriffith$elm_ui$Element$px = $mdgriffith$elm_ui$Internal$Model$Px;
-var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
-var $elm$svg$Svg$svg = $elm$svg$Svg$trustedNode('svg');
-var $mdgriffith$elm_ui$Element$toRgb = function (_v0) {
-	var r = _v0.a;
-	var g = _v0.b;
-	var b = _v0.c;
-	var a = _v0.d;
-	return {alpha: a, blue: b, green: g, red: r};
-};
-var $author$project$MaterialUI$Icon$view = F4(
-	function (theme, colorkey, size, _v0) {
-		var icon = _v0.a;
-		var color = $avh4$elm_color$Color$fromRgba(
-			$mdgriffith$elm_ui$Element$toRgb(
-				A2($author$project$MaterialUI$Theme$getColor, colorkey, theme)));
-		return A2(
-			$mdgriffith$elm_ui$Element$el,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$width(
-					$mdgriffith$elm_ui$Element$px(size)),
-					$mdgriffith$elm_ui$Element$height(
-					$mdgriffith$elm_ui$Element$px(size))
-				]),
-			$mdgriffith$elm_ui$Element$html(
-				A2(
-					$elm$svg$Svg$svg,
-					_List_Nil,
-					_List_fromArray(
-						[
-							A2(icon, color, size)
-						]))));
-	});
-var $author$project$MaterialUI$Button$makeLabel = F4(
-	function (theme, color, label, maybeIcon) {
-		var textEl = $mdgriffith$elm_ui$Element$text(
-			A2($author$project$MaterialUI$Theme$applyCase, theme.typescale.button.fontcase, label));
-		return A2(
-			$mdgriffith$elm_ui$Element$el,
-			_List_fromArray(
-				[$mdgriffith$elm_ui$Element$centerX, $mdgriffith$elm_ui$Element$centerY]),
-			function () {
-				if (maybeIcon.$ === 'Nothing') {
-					return textEl;
-				} else {
-					var icon = maybeIcon.a;
-					return A2(
-						$mdgriffith$elm_ui$Element$row,
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$spacing(8)
-							]),
-						_List_fromArray(
-							[
-								A4($author$project$MaterialUI$Icon$view, theme, color, 18, icon),
-								textEl
-							]));
-				}
-			}());
-	});
-var $mdgriffith$elm_ui$Internal$Model$Min = F2(
-	function (a, b) {
-		return {$: 'Min', a: a, b: b};
-	});
-var $mdgriffith$elm_ui$Element$minimum = F2(
-	function (i, l) {
-		return A2($mdgriffith$elm_ui$Internal$Model$Min, i, l);
-	});
-var $mdgriffith$elm_ui$Internal$Model$Active = {$: 'Active'};
-var $mdgriffith$elm_ui$Internal$Flag$active = $mdgriffith$elm_ui$Internal$Flag$flag(32);
-var $mdgriffith$elm_ui$Element$mouseDown = function (decs) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$active,
-		A2(
-			$mdgriffith$elm_ui$Internal$Model$PseudoSelector,
-			$mdgriffith$elm_ui$Internal$Model$Active,
-			$mdgriffith$elm_ui$Internal$Model$unwrapDecorations(decs)));
-};
+var $mdgriffith$elm_ui$Element$Input$labelHidden = $mdgriffith$elm_ui$Element$Input$HiddenLabel;
 var $mdgriffith$elm_ui$Internal$Model$Hover = {$: 'Hover'};
 var $mdgriffith$elm_ui$Internal$Flag$hover = $mdgriffith$elm_ui$Internal$Flag$flag(33);
 var $mdgriffith$elm_ui$Element$mouseOver = function (decs) {
@@ -14746,6 +15738,55 @@ var $mdgriffith$elm_ui$Element$mouseOver = function (decs) {
 			$mdgriffith$elm_ui$Internal$Model$PseudoSelector,
 			$mdgriffith$elm_ui$Internal$Model$Hover,
 			$mdgriffith$elm_ui$Internal$Model$unwrapDecorations(decs)));
+};
+var $mdgriffith$elm_ui$Internal$Model$MoveX = function (a) {
+	return {$: 'MoveX', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Flag$moveX = $mdgriffith$elm_ui$Internal$Flag$flag(25);
+var $mdgriffith$elm_ui$Element$moveRight = function (x) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$TransformComponent,
+		$mdgriffith$elm_ui$Internal$Flag$moveX,
+		$mdgriffith$elm_ui$Internal$Model$MoveX(x));
+};
+var $mdgriffith$elm_ui$Internal$Model$MoveY = function (a) {
+	return {$: 'MoveY', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Flag$moveY = $mdgriffith$elm_ui$Internal$Flag$flag(26);
+var $mdgriffith$elm_ui$Element$moveUp = function (y) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$TransformComponent,
+		$mdgriffith$elm_ui$Internal$Flag$moveY,
+		$mdgriffith$elm_ui$Internal$Model$MoveY(-y));
+};
+var $mdgriffith$elm_ui$Internal$Model$paddingName = F4(
+	function (top, right, bottom, left) {
+		return 'pad-' + ($elm$core$String$fromInt(top) + ('-' + ($elm$core$String$fromInt(right) + ('-' + ($elm$core$String$fromInt(bottom) + ('-' + $elm$core$String$fromInt(left)))))));
+	});
+var $mdgriffith$elm_ui$Element$paddingEach = function (_v0) {
+	var top = _v0.top;
+	var right = _v0.right;
+	var bottom = _v0.bottom;
+	var left = _v0.left;
+	return (_Utils_eq(top, right) && (_Utils_eq(top, bottom) && _Utils_eq(top, left))) ? A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$padding,
+		A5(
+			$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
+			'p-' + $elm$core$String$fromInt(top),
+			top,
+			top,
+			top,
+			top)) : A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$padding,
+		A5(
+			$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
+			A4($mdgriffith$elm_ui$Internal$Model$paddingName, top, right, bottom, left),
+			top,
+			right,
+			bottom,
+			left));
 };
 var $mdgriffith$elm_ui$Element$paddingXY = F2(
 	function (x, y) {
@@ -14769,6 +15810,17 @@ var $mdgriffith$elm_ui$Element$paddingXY = F2(
 				y,
 				x));
 	});
+var $mdgriffith$elm_ui$Internal$Model$Px = function (a) {
+	return {$: 'Px', a: a};
+};
+var $mdgriffith$elm_ui$Element$px = $mdgriffith$elm_ui$Internal$Model$Px;
+var $mdgriffith$elm_ui$Element$toRgb = function (_v0) {
+	var r = _v0.a;
+	var g = _v0.b;
+	var b = _v0.c;
+	var a = _v0.d;
+	return {alpha: a, blue: b, green: g, red: r};
+};
 var $author$project$MaterialUI$Theme$setAlpha = F2(
 	function (value, color) {
 		var rgb = $mdgriffith$elm_ui$Element$toRgb(color);
@@ -14820,173 +15872,6 @@ var $author$project$MaterialUI$Theme$shapeToAttributes = F3(
 				$mdgriffith$elm_ui$Element$Border$roundEach(corners)
 			]);
 	});
-var $mdgriffith$elm_ui$Internal$Model$BorderWidth = F5(
-	function (a, b, c, d, e) {
-		return {$: 'BorderWidth', a: a, b: b, c: c, d: d, e: e};
-	});
-var $mdgriffith$elm_ui$Element$Border$width = function (v) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$borderWidth,
-		A5(
-			$mdgriffith$elm_ui$Internal$Model$BorderWidth,
-			'b-' + $elm$core$String$fromInt(v),
-			v,
-			v,
-			v,
-			v));
-};
-var $author$project$MaterialUI$Button$outlined = F3(
-	function (attr, btn, theme) {
-		return A2(
-			$mdgriffith$elm_ui$Element$Input$button,
-			_Utils_ap(
-				$author$project$MaterialUI$Theme$fontToAttributes(theme.typescale.button),
-				_Utils_ap(
-					A3($author$project$MaterialUI$Theme$shapeToAttributes, 36, 36, theme.shape.button),
-					_Utils_ap(
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$height(
-								$mdgriffith$elm_ui$Element$px(36)),
-								$mdgriffith$elm_ui$Element$width(
-								A2($mdgriffith$elm_ui$Element$minimum, 64, $mdgriffith$elm_ui$Element$shrink)),
-								A2($mdgriffith$elm_ui$Element$paddingXY, 16, 0),
-								$mdgriffith$elm_ui$Element$Border$width(2),
-								$mdgriffith$elm_ui$Element$focused(
-								_List_fromArray(
-									[
-										A2($mdgriffith$elm_ui$Element$Border$glow, theme.color.surface, 0)
-									]))
-							]),
-						_Utils_ap(
-							attr,
-							btn.disabled ? _List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$Border$color(
-									A2($author$project$MaterialUI$Theme$setAlpha, 0.5, theme.color.onSurface)),
-									$mdgriffith$elm_ui$Element$Font$color(
-									A2($author$project$MaterialUI$Theme$setAlpha, 0.5, theme.color.onSurface)),
-									$author$project$MaterialUI$Internal$disabled(true)
-								]) : _List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$Border$color(
-									A2($author$project$MaterialUI$Theme$getColor, btn.color, theme)),
-									$mdgriffith$elm_ui$Element$Font$color(
-									A2($author$project$MaterialUI$Theme$getColor, btn.color, theme)),
-									$mdgriffith$elm_ui$Element$mouseDown(
-									_List_fromArray(
-										[
-											$mdgriffith$elm_ui$Element$Background$color(
-											A2(
-												$author$project$MaterialUI$Theme$setAlpha,
-												0.2,
-												A2($author$project$MaterialUI$Theme$getColor, btn.color, theme)))
-										])),
-									$mdgriffith$elm_ui$Element$focused(
-									_List_fromArray(
-										[
-											A2($mdgriffith$elm_ui$Element$Border$glow, theme.color.surface, 0),
-											$mdgriffith$elm_ui$Element$Background$color(
-											A2(
-												$author$project$MaterialUI$Theme$setAlpha,
-												0.15,
-												A2($author$project$MaterialUI$Theme$getColor, btn.color, theme)))
-										])),
-									$mdgriffith$elm_ui$Element$mouseOver(
-									_List_fromArray(
-										[
-											$mdgriffith$elm_ui$Element$Background$color(
-											A2(
-												$author$project$MaterialUI$Theme$setAlpha,
-												0.1,
-												A2($author$project$MaterialUI$Theme$getColor, btn.color, theme)))
-										]))
-								]))))),
-			{
-				label: A4(
-					$author$project$MaterialUI$Button$makeLabel,
-					theme,
-					btn.disabled ? $author$project$MaterialUI$Theme$Custom(
-						A2($author$project$MaterialUI$Theme$setAlpha, 0.5, theme.color.onSurface)) : btn.color,
-					btn.text,
-					btn.icon),
-				onPress: btn.disabled ? $elm$core$Maybe$Nothing : btn.onPress
-			});
-	});
-var $author$project$MaterialUI$TextField$Disabled = {$: 'Disabled'};
-var $author$project$MaterialUI$TextField$Focused = {$: 'Focused'};
-var $mdgriffith$elm_ui$Internal$Model$Bottom = {$: 'Bottom'};
-var $mdgriffith$elm_ui$Element$alignBottom = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$Bottom);
-var $mdgriffith$elm_ui$Internal$Model$Behind = {$: 'Behind'};
-var $mdgriffith$elm_ui$Element$createNearby = F2(
-	function (loc, element) {
-		if (element.$ === 'Empty') {
-			return $mdgriffith$elm_ui$Internal$Model$NoAttribute;
-		} else {
-			return A2($mdgriffith$elm_ui$Internal$Model$Nearby, loc, element);
-		}
-	});
-var $mdgriffith$elm_ui$Element$behindContent = function (element) {
-	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$Behind, element);
-};
-var $mdgriffith$elm_ui$Internal$Model$InFront = {$: 'InFront'};
-var $mdgriffith$elm_ui$Element$inFront = function (element) {
-	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$InFront, element);
-};
-var $mdgriffith$elm_ui$Element$Input$HiddenLabel = function (a) {
-	return {$: 'HiddenLabel', a: a};
-};
-var $mdgriffith$elm_ui$Element$Input$labelHidden = $mdgriffith$elm_ui$Element$Input$HiddenLabel;
-var $mdgriffith$elm_ui$Internal$Model$MoveX = function (a) {
-	return {$: 'MoveX', a: a};
-};
-var $mdgriffith$elm_ui$Internal$Flag$moveX = $mdgriffith$elm_ui$Internal$Flag$flag(25);
-var $mdgriffith$elm_ui$Element$moveRight = function (x) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$TransformComponent,
-		$mdgriffith$elm_ui$Internal$Flag$moveX,
-		$mdgriffith$elm_ui$Internal$Model$MoveX(x));
-};
-var $mdgriffith$elm_ui$Internal$Model$MoveY = function (a) {
-	return {$: 'MoveY', a: a};
-};
-var $mdgriffith$elm_ui$Internal$Flag$moveY = $mdgriffith$elm_ui$Internal$Flag$flag(26);
-var $mdgriffith$elm_ui$Element$moveUp = function (y) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$TransformComponent,
-		$mdgriffith$elm_ui$Internal$Flag$moveY,
-		$mdgriffith$elm_ui$Internal$Model$MoveY(-y));
-};
-var $mdgriffith$elm_ui$Internal$Model$paddingName = F4(
-	function (top, right, bottom, left) {
-		return 'pad-' + ($elm$core$String$fromInt(top) + ('-' + ($elm$core$String$fromInt(right) + ('-' + ($elm$core$String$fromInt(bottom) + ('-' + $elm$core$String$fromInt(left)))))));
-	});
-var $mdgriffith$elm_ui$Element$paddingEach = function (_v0) {
-	var top = _v0.top;
-	var right = _v0.right;
-	var bottom = _v0.bottom;
-	var left = _v0.left;
-	return (_Utils_eq(top, right) && (_Utils_eq(top, bottom) && _Utils_eq(top, left))) ? A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$padding,
-		A5(
-			$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
-			'p-' + $elm$core$String$fromInt(top),
-			top,
-			top,
-			top,
-			top)) : A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$padding,
-		A5(
-			$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
-			A4($mdgriffith$elm_ui$Internal$Model$paddingName, top, right, bottom, left),
-			top,
-			right,
-			bottom,
-			left));
-};
 var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $mdgriffith$elm_ui$Element$Input$TextInputNode = function (a) {
@@ -15064,6 +15949,10 @@ var $mdgriffith$elm_ui$Element$Input$autofill = A2(
 	$elm$core$Basics$composeL,
 	$mdgriffith$elm_ui$Internal$Model$Attr,
 	$elm$html$Html$Attributes$attribute('autocomplete'));
+var $mdgriffith$elm_ui$Internal$Model$Behind = {$: 'Behind'};
+var $mdgriffith$elm_ui$Element$behindContent = function (element) {
+	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$Behind, element);
+};
 var $mdgriffith$elm_ui$Element$Input$calcMoveToCompensateForPadding = function (attrs) {
 	var gatherSpacing = F2(
 		function (attr, found) {
@@ -15091,6 +15980,7 @@ var $mdgriffith$elm_ui$Element$Input$calcMoveToCompensateForPadding = function (
 };
 var $mdgriffith$elm_ui$Internal$Flag$overflow = $mdgriffith$elm_ui$Internal$Flag$flag(20);
 var $mdgriffith$elm_ui$Element$clip = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$overflow, $mdgriffith$elm_ui$Internal$Style$classes.clip);
+var $mdgriffith$elm_ui$Internal$Flag$cursor = $mdgriffith$elm_ui$Internal$Flag$flag(21);
 var $mdgriffith$elm_ui$Element$rgb = F3(
 	function (r, g, b) {
 		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, r, g, b, 1);
@@ -15098,6 +15988,22 @@ var $mdgriffith$elm_ui$Element$rgb = F3(
 var $mdgriffith$elm_ui$Element$Input$darkGrey = A3($mdgriffith$elm_ui$Element$rgb, 186 / 255, 189 / 255, 182 / 255);
 var $mdgriffith$elm_ui$Element$Input$defaultTextPadding = A2($mdgriffith$elm_ui$Element$paddingXY, 12, 12);
 var $mdgriffith$elm_ui$Element$Input$white = A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1);
+var $mdgriffith$elm_ui$Internal$Model$BorderWidth = F5(
+	function (a, b, c, d, e) {
+		return {$: 'BorderWidth', a: a, b: b, c: c, d: d, e: e};
+	});
+var $mdgriffith$elm_ui$Element$Border$width = function (v) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$borderWidth,
+		A5(
+			$mdgriffith$elm_ui$Internal$Model$BorderWidth,
+			'b-' + $elm$core$String$fromInt(v),
+			v,
+			v,
+			v,
+			v));
+};
 var $mdgriffith$elm_ui$Element$Input$defaultTextBoxStyle = _List_fromArray(
 	[
 		$mdgriffith$elm_ui$Element$Input$defaultTextPadding,
@@ -15115,6 +16021,15 @@ var $mdgriffith$elm_ui$Element$Input$getHeight = function (attr) {
 		return $elm$core$Maybe$Just(h);
 	} else {
 		return $elm$core$Maybe$Nothing;
+	}
+};
+var $mdgriffith$elm_ui$Element$Input$hasFocusStyle = function (attr) {
+	if (((attr.$ === 'StyleClass') && (attr.b.$ === 'PseudoSelector')) && (attr.b.a.$ === 'Focus')) {
+		var _v1 = attr.b;
+		var _v2 = _v1.a;
+		return true;
+	} else {
+		return false;
 	}
 };
 var $mdgriffith$elm_ui$Internal$Model$Label = function (a) {
@@ -15515,6 +16430,7 @@ var $elm$html$Html$span = _VirtualDom_node('span');
 var $elm$html$Html$Attributes$spellcheck = $elm$html$Html$Attributes$boolProperty('spellcheck');
 var $mdgriffith$elm_ui$Element$Input$spellcheck = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Attributes$spellcheck);
 var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
+var $mdgriffith$elm_ui$Internal$Model$unstyled = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Unstyled, $elm$core$Basics$always);
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $mdgriffith$elm_ui$Element$Input$value = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Attributes$value);
 var $mdgriffith$elm_ui$Element$Input$textHelper = F3(
@@ -15797,7 +16713,7 @@ var $mdgriffith$elm_ui$Element$Border$widthEach = function (_v0) {
 			bottom,
 			left));
 };
-var $author$project$MaterialUI$TextField$text = F3(
+var $author$project$MaterialUI$Internal$TextField$Implementation$text = F3(
 	function (attrs, field, theme) {
 		var padding = function () {
 			var _v17 = field.type_;
@@ -15806,7 +16722,7 @@ var $author$project$MaterialUI$TextField$text = F3(
 					[
 						$mdgriffith$elm_ui$Element$paddingEach(
 						{
-							bottom: _Utils_eq(field.state, $author$project$MaterialUI$TextField$Focused) ? 0 : 1,
+							bottom: _Utils_eq(field.state, $author$project$MaterialUI$Internal$TextField$Model$Focused) ? 0 : 1,
 							left: 12,
 							right: 12,
 							top: field.hideLabel ? 0 : 20
@@ -15819,7 +16735,7 @@ var $author$project$MaterialUI$TextField$text = F3(
 					]);
 			}
 		}();
-		var labelInFront = (!field.hideLabel) && ((!_Utils_eq(field.state, $author$project$MaterialUI$TextField$Focused)) && (field.text === ''));
+		var labelInFront = (!field.hideLabel) && ((!_Utils_eq(field.state, $author$project$MaterialUI$Internal$TextField$Model$Focused)) && (field.text === ''));
 		var labelPosition = A2(
 			$elm$core$List$cons,
 			$mdgriffith$elm_ui$Element$alignBottom,
@@ -15903,6 +16819,7 @@ var $author$project$MaterialUI$TextField$text = F3(
 								A2($mdgriffith$elm_ui$Element$paddingXY, 4, 0)
 							])))),
 			$mdgriffith$elm_ui$Element$text(labelText));
+		var borderWidth = _Utils_eq(field.state, $author$project$MaterialUI$Internal$TextField$Model$Focused) ? 2 : 1;
 		var borderColor = function () {
 			var _v6 = _Utils_Tuple2(hasError, field.state);
 			if (_v6.a) {
@@ -15942,84 +16859,51 @@ var $author$project$MaterialUI$TextField$text = F3(
 				}
 			}
 		}();
-		var borders = function () {
-			var _v4 = field.type_;
-			if (_v4.$ === 'Outlined') {
-				return _Utils_ap(
-					A3($author$project$MaterialUI$Theme$shapeToAttributes, 56, 56, theme.shape.textField.outlined),
-					_Utils_ap(
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$Border$width(1),
-								$mdgriffith$elm_ui$Element$focused(
-								_List_fromArray(
-									[
-										A2($mdgriffith$elm_ui$Element$Border$glow, theme.color.onSurface, 0)
-									])),
-								$mdgriffith$elm_ui$Element$behindContent(
-								A2(
-									$mdgriffith$elm_ui$Element$el,
-									_Utils_ap(
-										A3($author$project$MaterialUI$Theme$shapeToAttributes, 56, 56, theme.shape.textField.outlined),
-										_Utils_ap(
-											_List_fromArray(
-												[
-													$mdgriffith$elm_ui$Element$Border$width(
-													_Utils_eq(field.state, $author$project$MaterialUI$TextField$Focused) ? 2 : 1),
-													$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-													$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-													$mdgriffith$elm_ui$Element$htmlAttribute(
-													A2($elm$html$Html$Attributes$style, 'transition', 'border 0.15s')),
-													$mdgriffith$elm_ui$Element$Background$color(
-													A2($author$project$MaterialUI$Theme$setAlpha, 0.0, theme.color.onSurface))
-												]),
-											borderColor)),
-									$mdgriffith$elm_ui$Element$none))
-							]),
-						borderColor));
-			} else {
-				return _Utils_ap(
-					A3($author$project$MaterialUI$Theme$shapeToAttributes, 56, 56, theme.shape.textField.filled),
-					_Utils_ap(
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$Border$widthEach(
-								{
-									bottom: _Utils_eq(field.state, $author$project$MaterialUI$TextField$Focused) ? 2 : 1,
-									left: 0,
-									right: 0,
-									top: 0
-								}),
-								$mdgriffith$elm_ui$Element$Border$color(
-								A2($author$project$MaterialUI$Theme$setAlpha, 0.4, theme.color.onSurface)),
-								$mdgriffith$elm_ui$Element$focused(
-								_List_fromArray(
-									[
-										A2($mdgriffith$elm_ui$Element$Border$glow, theme.color.onSurface, 0),
-										$mdgriffith$elm_ui$Element$Border$color(
-										A2($author$project$MaterialUI$Theme$getColor, field.color, theme))
-									])),
-								function () {
-								var _v5 = field.state;
-								switch (_v5.$) {
-									case 'Idle':
-										return $mdgriffith$elm_ui$Element$mouseOver(
-											_List_fromArray(
-												[
-													$mdgriffith$elm_ui$Element$Border$color(
-													A2($author$project$MaterialUI$Theme$setAlpha, 0.8, theme.color.onSurface))
-												]));
-									case 'Focused':
-										return $mdgriffith$elm_ui$Element$Border$color(
-											A2($author$project$MaterialUI$Theme$getColor, field.color, theme));
-									default:
-										return $mdgriffith$elm_ui$Element$mouseOver(_List_Nil);
-								}
-							}()
-							]),
-						borderColor));
-			}
-		}();
+		var borders = _Utils_ap(
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$focused(
+					_List_fromArray(
+						[
+							A2($mdgriffith$elm_ui$Element$Border$glow, theme.color.background, 0)
+						]))
+				]),
+			_Utils_ap(
+				function () {
+					var _v4 = field.type_;
+					if (_v4.$ === 'Outlined') {
+						return A2(
+							$elm$core$List$cons,
+							$mdgriffith$elm_ui$Element$Border$width(borderWidth),
+							A3($author$project$MaterialUI$Theme$shapeToAttributes, 56, 56, theme.shape.textField.outlined));
+					} else {
+						return _Utils_ap(
+							A3($author$project$MaterialUI$Theme$shapeToAttributes, 56, 56, theme.shape.textField.filled),
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$Border$widthEach(
+									{bottom: borderWidth, left: 0, right: 0, top: 0})
+								]));
+					}
+				}(),
+				_Utils_ap(
+					function () {
+						var _v5 = field.state;
+						if (_v5.$ === 'Idle') {
+							return _List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$mouseOver(
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$Border$color(
+											A2($author$project$MaterialUI$Theme$setAlpha, 0.8, theme.color.onSurface))
+										]))
+								]);
+						} else {
+							return _List_Nil;
+						}
+					}(),
+					borderColor)));
 		var belowElementAttributes = _Utils_ap(
 			$author$project$MaterialUI$Theme$fontToAttributes(theme.typescale.caption),
 			_List_fromArray(
@@ -16098,9 +16982,9 @@ var $author$project$MaterialUI$TextField$text = F3(
 											$mdgriffith$elm_ui$Element$htmlAttribute(
 											A2($elm$html$Html$Attributes$style, 'flex', '1')),
 											$mdgriffith$elm_ui$Element$Font$color(
-											_Utils_eq(field.state, $author$project$MaterialUI$TextField$Disabled) ? A2($author$project$MaterialUI$Theme$setAlpha, 0.7, theme.color.onSurface) : theme.color.onSurface),
+											_Utils_eq(field.state, $author$project$MaterialUI$Internal$TextField$Model$Disabled) ? A2($author$project$MaterialUI$Theme$setAlpha, 0.7, theme.color.onSurface) : theme.color.onSurface),
 											$author$project$MaterialUI$Internal$disabled(
-											_Utils_eq(field.state, $author$project$MaterialUI$TextField$Disabled))
+											_Utils_eq(field.state, $author$project$MaterialUI$Internal$TextField$Model$Disabled))
 										]),
 									_Utils_ap(
 										padding,
@@ -16155,10 +17039,296 @@ var $author$project$MaterialUI$TextField$text = F3(
 					}
 				}()));
 	});
-var $author$project$Session$theme = function (session) {
-	var t = session.b;
-	return t;
+var $author$project$MaterialUI$Internal$TextField$Implementation$view = F3(
+	function (mui, attr, textField) {
+		var index = textField.index;
+		var lift = A2(
+			$elm$core$Basics$composeL,
+			mui.lift,
+			$author$project$MaterialUI$Internal$Message$TextFieldMsg(index));
+		var model = A2(
+			$elm$core$Maybe$withDefault,
+			$author$project$MaterialUI$Internal$TextField$Model$defaultModel,
+			A2($elm$core$Dict$get, index, mui.textfield));
+		var state = model.focused ? $author$project$MaterialUI$Internal$TextField$Model$Focused : $author$project$MaterialUI$Internal$TextField$Model$Idle;
+		return A3(
+			$author$project$MaterialUI$Internal$TextField$Implementation$text,
+			_Utils_ap(
+				attr,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$Events$onFocus(
+						lift($author$project$MaterialUI$Internal$TextField$Model$ComponentFocused)),
+						$mdgriffith$elm_ui$Element$Events$onLoseFocus(
+						lift($author$project$MaterialUI$Internal$TextField$Model$ComponentFocusedLost))
+					])),
+			{color: textField.color, errorText: textField.errorText, helperText: textField.helperText, hideLabel: textField.hideLabel, label: textField.label, onChange: textField.onChange, state: state, text: textField.text, type_: textField.type_},
+			mui.theme);
+	});
+var $author$project$MaterialUI$TextFieldM$managed = $author$project$MaterialUI$Internal$TextField$Implementation$view;
+var $author$project$MaterialUI$Theme$Custom = function (a) {
+	return {$: 'Custom', a: a};
 };
+var $mdgriffith$elm_ui$Internal$Model$Button = {$: 'Button'};
+var $mdgriffith$elm_ui$Element$Input$focusDefault = function (attrs) {
+	return A2($elm$core$List$any, $mdgriffith$elm_ui$Element$Input$hasFocusStyle, attrs) ? $mdgriffith$elm_ui$Internal$Model$NoAttribute : $mdgriffith$elm_ui$Internal$Model$htmlClass('focusable');
+};
+var $elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'click',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $mdgriffith$elm_ui$Element$Events$onClick = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onClick);
+var $mdgriffith$elm_ui$Element$Input$enter = 'Enter';
+var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
+	return {$: 'MayPreventDefault', a: a};
+};
+var $elm$html$Html$Events$preventDefaultOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayPreventDefault(decoder));
+	});
+var $mdgriffith$elm_ui$Element$Input$onKey = F2(
+	function (desiredCode, msg) {
+		var decode = function (code) {
+			return _Utils_eq(code, desiredCode) ? $elm$json$Json$Decode$succeed(msg) : $elm$json$Json$Decode$fail('Not the enter key');
+		};
+		var isKey = A2(
+			$elm$json$Json$Decode$andThen,
+			decode,
+			A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string));
+		return $mdgriffith$elm_ui$Internal$Model$Attr(
+			A2(
+				$elm$html$Html$Events$preventDefaultOn,
+				'keyup',
+				A2(
+					$elm$json$Json$Decode$map,
+					function (fired) {
+						return _Utils_Tuple2(fired, true);
+					},
+					isKey)));
+	});
+var $mdgriffith$elm_ui$Element$Input$onEnter = function (msg) {
+	return A2($mdgriffith$elm_ui$Element$Input$onKey, $mdgriffith$elm_ui$Element$Input$enter, msg);
+};
+var $mdgriffith$elm_ui$Element$pointer = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$cursor, $mdgriffith$elm_ui$Internal$Style$classes.cursorPointer);
+var $elm$html$Html$Attributes$tabindex = function (n) {
+	return A2(
+		_VirtualDom_attribute,
+		'tabIndex',
+		$elm$core$String$fromInt(n));
+};
+var $mdgriffith$elm_ui$Element$Input$button = F2(
+	function (attrs, _v0) {
+		var onPress = _v0.onPress;
+		var label = _v0.label;
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asEl,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentCenterX + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.seButton + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.noTextSelection)))))),
+						A2(
+							$elm$core$List$cons,
+							$mdgriffith$elm_ui$Element$pointer,
+							A2(
+								$elm$core$List$cons,
+								$mdgriffith$elm_ui$Element$Input$focusDefault(attrs),
+								A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_ui$Internal$Model$Describe($mdgriffith$elm_ui$Internal$Model$Button),
+									A2(
+										$elm$core$List$cons,
+										$mdgriffith$elm_ui$Internal$Model$Attr(
+											$elm$html$Html$Attributes$tabindex(0)),
+										function () {
+											if (onPress.$ === 'Nothing') {
+												return A2(
+													$elm$core$List$cons,
+													$mdgriffith$elm_ui$Internal$Model$Attr(
+														$elm$html$Html$Attributes$disabled(true)),
+													attrs);
+											} else {
+												var msg = onPress.a;
+												return A2(
+													$elm$core$List$cons,
+													$mdgriffith$elm_ui$Element$Events$onClick(msg),
+													A2(
+														$elm$core$List$cons,
+														$mdgriffith$elm_ui$Element$Input$onEnter(msg),
+														attrs));
+											}
+										}()))))))),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+				_List_fromArray(
+					[label])));
+	});
+var $mdgriffith$elm_ui$Internal$Model$CenterY = {$: 'CenterY'};
+var $mdgriffith$elm_ui$Element$centerY = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$CenterY);
+var $avh4$elm_color$Color$fromRgba = function (components) {
+	return A4($avh4$elm_color$Color$RgbaSpace, components.red, components.green, components.blue, components.alpha);
+};
+var $mdgriffith$elm_ui$Element$html = $mdgriffith$elm_ui$Internal$Model$unstyled;
+var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
+var $elm$svg$Svg$svg = $elm$svg$Svg$trustedNode('svg');
+var $author$project$MaterialUI$Internal$Icon$Implementation$view = F4(
+	function (theme, colorkey, size, _v0) {
+		var icon = _v0.a;
+		var color = $avh4$elm_color$Color$fromRgba(
+			$mdgriffith$elm_ui$Element$toRgb(
+				A2($author$project$MaterialUI$Theme$getColor, colorkey, theme)));
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width(
+					$mdgriffith$elm_ui$Element$px(size)),
+					$mdgriffith$elm_ui$Element$height(
+					$mdgriffith$elm_ui$Element$px(size))
+				]),
+			$mdgriffith$elm_ui$Element$html(
+				A2(
+					$elm$svg$Svg$svg,
+					_List_Nil,
+					_List_fromArray(
+						[
+							A2(icon, color, size)
+						]))));
+	});
+var $author$project$MaterialUI$Button$makeLabel = F4(
+	function (theme, color, label, maybeIcon) {
+		var textEl = $mdgriffith$elm_ui$Element$text(
+			A2($author$project$MaterialUI$Theme$applyCase, theme.typescale.button.fontcase, label));
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[$mdgriffith$elm_ui$Element$centerX, $mdgriffith$elm_ui$Element$centerY]),
+			function () {
+				if (maybeIcon.$ === 'Nothing') {
+					return textEl;
+				} else {
+					var icon = maybeIcon.a;
+					return A2(
+						$mdgriffith$elm_ui$Element$row,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$spacing(8)
+							]),
+						_List_fromArray(
+							[
+								A4($author$project$MaterialUI$Internal$Icon$Implementation$view, theme, color, 18, icon),
+								textEl
+							]));
+				}
+			}());
+	});
+var $mdgriffith$elm_ui$Internal$Model$Min = F2(
+	function (a, b) {
+		return {$: 'Min', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Element$minimum = F2(
+	function (i, l) {
+		return A2($mdgriffith$elm_ui$Internal$Model$Min, i, l);
+	});
+var $mdgriffith$elm_ui$Internal$Model$Active = {$: 'Active'};
+var $mdgriffith$elm_ui$Internal$Flag$active = $mdgriffith$elm_ui$Internal$Flag$flag(32);
+var $mdgriffith$elm_ui$Element$mouseDown = function (decs) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$active,
+		A2(
+			$mdgriffith$elm_ui$Internal$Model$PseudoSelector,
+			$mdgriffith$elm_ui$Internal$Model$Active,
+			$mdgriffith$elm_ui$Internal$Model$unwrapDecorations(decs)));
+};
+var $author$project$MaterialUI$Button$outlined = F3(
+	function (attr, btn, theme) {
+		return A2(
+			$mdgriffith$elm_ui$Element$Input$button,
+			_Utils_ap(
+				$author$project$MaterialUI$Theme$fontToAttributes(theme.typescale.button),
+				_Utils_ap(
+					A3($author$project$MaterialUI$Theme$shapeToAttributes, 36, 36, theme.shape.button),
+					_Utils_ap(
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$height(
+								$mdgriffith$elm_ui$Element$px(36)),
+								$mdgriffith$elm_ui$Element$width(
+								A2($mdgriffith$elm_ui$Element$minimum, 64, $mdgriffith$elm_ui$Element$shrink)),
+								A2($mdgriffith$elm_ui$Element$paddingXY, 16, 0),
+								$mdgriffith$elm_ui$Element$Border$width(1),
+								$mdgriffith$elm_ui$Element$focused(
+								_List_fromArray(
+									[
+										A2($mdgriffith$elm_ui$Element$Border$glow, theme.color.surface, 0)
+									]))
+							]),
+						_Utils_ap(
+							attr,
+							btn.disabled ? _List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$Border$color(
+									A2($author$project$MaterialUI$Theme$setAlpha, 0.5, theme.color.onSurface)),
+									$mdgriffith$elm_ui$Element$Font$color(
+									A2($author$project$MaterialUI$Theme$setAlpha, 0.5, theme.color.onSurface)),
+									$author$project$MaterialUI$Internal$disabled(true)
+								]) : _List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$Border$color(
+									A2($author$project$MaterialUI$Theme$getColor, btn.color, theme)),
+									$mdgriffith$elm_ui$Element$Font$color(
+									A2($author$project$MaterialUI$Theme$getColor, btn.color, theme)),
+									$mdgriffith$elm_ui$Element$mouseDown(
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$Background$color(
+											A2(
+												$author$project$MaterialUI$Theme$setAlpha,
+												0.2,
+												A2($author$project$MaterialUI$Theme$getColor, btn.color, theme)))
+										])),
+									$mdgriffith$elm_ui$Element$focused(
+									_List_fromArray(
+										[
+											A2($mdgriffith$elm_ui$Element$Border$glow, theme.color.surface, 0),
+											$mdgriffith$elm_ui$Element$Background$color(
+											A2(
+												$author$project$MaterialUI$Theme$setAlpha,
+												0.15,
+												A2($author$project$MaterialUI$Theme$getColor, btn.color, theme)))
+										])),
+									$mdgriffith$elm_ui$Element$mouseOver(
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$Background$color(
+											A2(
+												$author$project$MaterialUI$Theme$setAlpha,
+												0.1,
+												A2($author$project$MaterialUI$Theme$getColor, btn.color, theme)))
+										]))
+								]))))),
+			{
+				label: A4(
+					$author$project$MaterialUI$Button$makeLabel,
+					theme,
+					btn.disabled ? $author$project$MaterialUI$Theme$Custom(
+						A2($author$project$MaterialUI$Theme$setAlpha, 0.5, theme.color.onSurface)) : btn.color,
+					btn.text,
+					btn.icon),
+				onPress: btn.disabled ? $elm$core$Maybe$Nothing : btn.onPress
+			});
+	});
 var $author$project$Page$Home$toErrorMsg = function (joinError) {
 	if (joinError.$ === 'LobbyError') {
 		var lobbyError = joinError.a;
@@ -16206,13 +17376,13 @@ var $author$project$Page$Home$view = function (model) {
 										$mdgriffith$elm_ui$Element$fillPortion(2))
 									]),
 								A3(
-									$author$project$MaterialUI$TextField$text,
+									$author$project$MaterialUI$TextFieldM$managed,
+									model.mui,
 									_List_fromArray(
 										[
 											$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
 										]),
-									{color: $author$project$MaterialUI$Theme$Primary, errorText: $elm$core$Maybe$Nothing, helperText: $elm$core$Maybe$Nothing, hideLabel: false, label: 'Game id', onChange: $author$project$Page$Home$GameId, state: $author$project$MaterialUI$TextField$Idle, text: model.gameId, type_: $author$project$MaterialUI$TextField$Outlined},
-									theme)),
+									{color: $author$project$MaterialUI$Theme$Primary, errorText: $elm$core$Maybe$Nothing, helperText: $elm$core$Maybe$Nothing, hideLabel: false, index: 'gameIdTf', label: 'Game id', onChange: $author$project$Page$Home$GameId, text: model.gameId, type_: $author$project$MaterialUI$Internal$TextField$Model$Outlined})),
 								A3(
 								$author$project$MaterialUI$Button$outlined,
 								_List_fromArray(
@@ -16777,10 +17947,11 @@ var $danmarcab$material_icons$Material$Icons$Navigation$close = A2(
 				]),
 			_List_Nil)
 		]));
-var $author$project$MaterialUI$Icon$Icon = function (a) {
+var $author$project$MaterialUI$Internal$Icon$Model$Icon = function (a) {
 	return {$: 'Icon', a: a};
 };
-var $author$project$MaterialUI$Icon$makeIcon = $author$project$MaterialUI$Icon$Icon;
+var $author$project$MaterialUI$Internal$Icon$Implementation$makeIcon = $author$project$MaterialUI$Internal$Icon$Model$Icon;
+var $author$project$MaterialUI$Icon$makeIcon = $author$project$MaterialUI$Internal$Icon$Implementation$makeIcon;
 var $author$project$MaterialUI$Icons$Navigation$close = $author$project$MaterialUI$Icon$makeIcon($danmarcab$material_icons$Material$Icons$Navigation$close);
 var $danmarcab$material_icons$Material$Icons$Toggle$radio_button_unchecked = A2(
 	$danmarcab$material_icons$Material$Icons$Internal$icon,
@@ -16796,6 +17967,7 @@ var $danmarcab$material_icons$Material$Icons$Toggle$radio_button_unchecked = A2(
 			_List_Nil)
 		]));
 var $author$project$MaterialUI$Icons$Toggle$radio_button_unchecked = $author$project$MaterialUI$Icon$makeIcon($danmarcab$material_icons$Material$Icons$Toggle$radio_button_unchecked);
+var $author$project$MaterialUI$Icon$view = $author$project$MaterialUI$Internal$Icon$Implementation$view;
 var $author$project$Page$TTT$InGame$playerHeader = F4(
 	function (theme, player, highlight, alignment) {
 		var symbolIcon = function () {
@@ -17026,6 +18198,10 @@ var $author$project$Page$TTT$InGame$view = function (model) {
 	};
 };
 var $author$project$Page$TTT$Lobby$AddBot = {$: 'AddBot'};
+var $author$project$MaterialUI$ColorStateList$Color = F2(
+	function (a, b) {
+		return {$: 'Color', a: a, b: b};
+	});
 var $author$project$Page$TTT$Lobby$CopyGameId = {$: 'CopyGameId'};
 var $author$project$Page$TTT$Lobby$Name = function (a) {
 	return {$: 'Name', a: a};
@@ -17039,54 +18215,365 @@ var $author$project$Game$Lobby$allPlayers = function (lobby) {
 		A2($author$project$Game$LobbyPlayer$Player, lobby.playerMe.name, lobby.playerMe.isReady),
 		lobby.players);
 };
-var $author$project$MaterialUI$Icon$button = F5(
-	function (attributes, theme, colorKey, size, _v0) {
-		var icon = _v0.a;
-		var padding = 8;
-		var color = A2($author$project$MaterialUI$Theme$getColor, colorKey, theme);
-		var iconColor = $avh4$elm_color$Color$fromRgba(
-			$mdgriffith$elm_ui$Element$toRgb(color));
-		var attr = _Utils_ap(
-			attributes,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$width(
-					$mdgriffith$elm_ui$Element$px(size + (2 * padding))),
-					$mdgriffith$elm_ui$Element$height(
-					$mdgriffith$elm_ui$Element$px(size + (2 * padding))),
-					$mdgriffith$elm_ui$Element$padding(padding),
-					$mdgriffith$elm_ui$Element$Border$rounded(50),
-					$mdgriffith$elm_ui$Element$mouseDown(
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$Background$color(
-							A2($author$project$MaterialUI$Theme$setAlpha, 0.2, color))
-						])),
-					$mdgriffith$elm_ui$Element$focused(
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$Background$color(
-							A2($author$project$MaterialUI$Theme$setAlpha, 0.15, color))
-						])),
-					$mdgriffith$elm_ui$Element$mouseOver(
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$Background$color(
-							A2($author$project$MaterialUI$Theme$setAlpha, 0.1, color))
-						]))
-				]));
+var $author$project$MaterialUI$Internal$Tooltip$Model$Bottom = {$: 'Bottom'};
+var $author$project$MaterialUI$ColorStateList$Focused = {$: 'Focused'};
+var $author$project$MaterialUI$ColorStateList$Hovered = {$: 'Hovered'};
+var $author$project$MaterialUI$ColorStateList$MouseDown = {$: 'MouseDown'};
+var $author$project$MaterialUI$Internal$Icon$Model$State = function (a) {
+	return {$: 'State', a: a};
+};
+var $author$project$MaterialUI$ColorStateList$get = F2(
+	function (state, colorStateList) {
+		switch (state.$) {
+			case 'Idle':
+				return colorStateList.idle;
+			case 'Hovered':
+				return colorStateList.hovered;
+			case 'Focused':
+				return colorStateList.focused;
+			case 'MouseDown':
+				return colorStateList.mouseDown;
+			default:
+				return colorStateList.disabled;
+		}
+	});
+var $author$project$MaterialUI$ColorStateList$toElementColor = F2(
+	function (theme, _v0) {
+		var alpha = _v0.a;
+		var c = _v0.b;
+		return A2(
+			$author$project$MaterialUI$Theme$setAlpha,
+			alpha,
+			A2($author$project$MaterialUI$Theme$getColor, c, theme));
+	});
+var $author$project$MaterialUI$ColorStateList$color = F3(
+	function (colorStateList, theme, state) {
+		return A2(
+			$author$project$MaterialUI$ColorStateList$toElementColor,
+			theme,
+			A2($author$project$MaterialUI$ColorStateList$get, state, colorStateList));
+	});
+var $author$project$MaterialUI$Internal$State$Clicked = {$: 'Clicked'};
+var $author$project$MaterialUI$Internal$State$Hovered = {$: 'Hovered'};
+var $author$project$MaterialUI$Internal$State$Idle = {$: 'Idle'};
+var $author$project$MaterialUI$Internal$State$getState = function (componentModel) {
+	var model = componentModel.state;
+	return (model.clicked && model.hovered) ? $author$project$MaterialUI$Internal$State$Clicked : (model.hovered ? $author$project$MaterialUI$Internal$State$Hovered : $author$project$MaterialUI$Internal$State$Idle);
+};
+var $author$project$MaterialUI$ColorStateList$Idle = {$: 'Idle'};
+var $author$project$MaterialUI$Internal$State$toColorStateListState = function (state) {
+	switch (state.$) {
+		case 'Idle':
+			return $author$project$MaterialUI$ColorStateList$Idle;
+		case 'Hovered':
+			return $author$project$MaterialUI$ColorStateList$Hovered;
+		default:
+			return $author$project$MaterialUI$ColorStateList$MouseDown;
+	}
+};
+var $author$project$MaterialUI$Internal$State$colorListState = A2($elm$core$Basics$composeR, $author$project$MaterialUI$Internal$State$getState, $author$project$MaterialUI$Internal$State$toColorStateListState);
+var $author$project$MaterialUI$Internal$State$MouseDown = {$: 'MouseDown'};
+var $author$project$MaterialUI$Internal$State$MouseEnter = {$: 'MouseEnter'};
+var $author$project$MaterialUI$Internal$State$MouseLeave = {$: 'MouseLeave'};
+var $author$project$MaterialUI$Internal$State$MouseUp = {$: 'MouseUp'};
+var $elm$html$Html$Events$onMouseDown = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'mousedown',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $mdgriffith$elm_ui$Element$Events$onMouseDown = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onMouseDown);
+var $elm$html$Html$Events$onMouseEnter = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'mouseenter',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $mdgriffith$elm_ui$Element$Events$onMouseEnter = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onMouseEnter);
+var $elm$html$Html$Events$onMouseLeave = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'mouseleave',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $mdgriffith$elm_ui$Element$Events$onMouseLeave = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onMouseLeave);
+var $elm$html$Html$Events$onMouseUp = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'mouseup',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $mdgriffith$elm_ui$Element$Events$onMouseUp = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onMouseUp);
+var $author$project$MaterialUI$Internal$State$install = function (lift) {
+	return _List_fromArray(
+		[
+			$mdgriffith$elm_ui$Element$Events$onMouseEnter(
+			lift($author$project$MaterialUI$Internal$State$MouseEnter)),
+			$mdgriffith$elm_ui$Element$Events$onMouseLeave(
+			lift($author$project$MaterialUI$Internal$State$MouseLeave)),
+			$mdgriffith$elm_ui$Element$Events$onMouseDown(
+			lift($author$project$MaterialUI$Internal$State$MouseDown)),
+			$mdgriffith$elm_ui$Element$Events$onMouseUp(
+			lift($author$project$MaterialUI$Internal$State$MouseUp))
+		]);
+};
+var $author$project$MaterialUI$Theme$Caption = {$: 'Caption'};
+var $author$project$MaterialUI$Internal$Tooltip$Model$MouseEnter = {$: 'MouseEnter'};
+var $author$project$MaterialUI$Internal$Tooltip$Model$MouseLeave = {$: 'MouseLeave'};
+var $mdgriffith$elm_ui$Internal$Model$Above = {$: 'Above'};
+var $mdgriffith$elm_ui$Element$above = function (element) {
+	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$Above, element);
+};
+var $mdgriffith$elm_ui$Internal$Model$Below = {$: 'Below'};
+var $mdgriffith$elm_ui$Element$below = function (element) {
+	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$Below, element);
+};
+var $author$project$MaterialUI$Internal$Component$elementCss = F2(
+	function (property, value) {
+		return $mdgriffith$elm_ui$Element$htmlAttribute(
+			A2($elm$html$Html$Attributes$style, property, value));
+	});
+var $mdgriffith$elm_ui$Internal$Model$OnLeft = {$: 'OnLeft'};
+var $mdgriffith$elm_ui$Element$onLeft = function (element) {
+	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$OnLeft, element);
+};
+var $mdgriffith$elm_ui$Internal$Model$OnRight = {$: 'OnRight'};
+var $mdgriffith$elm_ui$Element$onRight = function (element) {
+	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$OnRight, element);
+};
+var $author$project$MaterialUI$Internal$Tooltip$Implementation$padding = {bottom: 0, left: 0, right: 0, top: 0};
+var $author$project$MaterialUI$Text$view = F4(
+	function (attr, displayStr, fontscale, theme) {
+		var font = A2($author$project$MaterialUI$Theme$getFont, fontscale, theme);
 		return A2(
 			$mdgriffith$elm_ui$Element$el,
-			attr,
-			$mdgriffith$elm_ui$Element$html(
-				A2(
-					$elm$svg$Svg$svg,
-					_List_Nil,
+			_Utils_ap(
+				attr,
+				$author$project$MaterialUI$Theme$fontToAttributes(font)),
+			$mdgriffith$elm_ui$Element$text(
+				A2($author$project$MaterialUI$Theme$applyCase, font.fontcase, displayStr)));
+	});
+var $author$project$MaterialUI$Internal$Tooltip$Implementation$view = F4(
+	function (mui, layoutAtt, tooltip, content) {
+		var index = tooltip.index;
+		var lift = A2(
+			$elm$core$Basics$composeL,
+			mui.lift,
+			$author$project$MaterialUI$Internal$Message$TooltipMsg(index));
+		var model = A2(
+			$elm$core$Maybe$withDefault,
+			$author$project$MaterialUI$Internal$Tooltip$Model$defaultModel,
+			A2($elm$core$Dict$get, index, mui.tooltip));
+		var progress = function () {
+			var _v1 = model.state;
+			if (_v1.$ === 'Active') {
+				switch (_v1.a.$) {
+					case 'Showing':
+						var _v2 = _v1.a;
+						return 1;
+					case 'AnimatingIn':
+						var p = _v1.a.a;
+						return p;
+					case 'AnimatingOut':
+						var p = _v1.a.a;
+						return p;
+					default:
+						return 0;
+				}
+			} else {
+				return 0;
+			}
+		}();
+		var positionCss = _List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$alpha(progress),
+				(!progress) ? A2($author$project$MaterialUI$Internal$Component$elementCss, 'visibility', 'hidden') : A2($author$project$MaterialUI$Internal$Component$elementCss, 'visibility', 'visible')
+			]);
+		var position = function () {
+			var _v0 = tooltip.position;
+			switch (_v0.$) {
+				case 'Left':
+					return A2(
+						$elm$core$Basics$composeL,
+						$mdgriffith$elm_ui$Element$onLeft,
+						$mdgriffith$elm_ui$Element$el(
+							_Utils_ap(
+								positionCss,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$paddingEach(
+										_Utils_update(
+											$author$project$MaterialUI$Internal$Tooltip$Implementation$padding,
+											{right: 8})),
+										$mdgriffith$elm_ui$Element$centerY
+									]))));
+				case 'Right':
+					return A2(
+						$elm$core$Basics$composeL,
+						$mdgriffith$elm_ui$Element$onRight,
+						$mdgriffith$elm_ui$Element$el(
+							_Utils_ap(
+								positionCss,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$paddingEach(
+										_Utils_update(
+											$author$project$MaterialUI$Internal$Tooltip$Implementation$padding,
+											{left: 8})),
+										$mdgriffith$elm_ui$Element$centerY
+									]))));
+				case 'Top':
+					return A2(
+						$elm$core$Basics$composeL,
+						$mdgriffith$elm_ui$Element$above,
+						$mdgriffith$elm_ui$Element$el(
+							_Utils_ap(
+								positionCss,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$paddingEach(
+										_Utils_update(
+											$author$project$MaterialUI$Internal$Tooltip$Implementation$padding,
+											{bottom: 8})),
+										$mdgriffith$elm_ui$Element$centerX
+									]))));
+				default:
+					return A2(
+						$elm$core$Basics$composeL,
+						$mdgriffith$elm_ui$Element$below,
+						$mdgriffith$elm_ui$Element$el(
+							_Utils_ap(
+								positionCss,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$paddingEach(
+										_Utils_update(
+											$author$project$MaterialUI$Internal$Tooltip$Implementation$padding,
+											{top: 8})),
+										$mdgriffith$elm_ui$Element$centerX
+									]))));
+			}
+		}();
+		var tooltipView = A4(
+			$author$project$MaterialUI$Text$view,
+			_Utils_ap(
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$padding(8),
+						$mdgriffith$elm_ui$Element$Font$color(mui.theme.color.onTooltip),
+						$mdgriffith$elm_ui$Element$Background$color(mui.theme.color.tooltip)
+					]),
+				_Utils_ap(
+					A3($author$project$MaterialUI$Theme$shapeToAttributes, 100, 100, mui.theme.shape.tooltip),
+					(!progress) ? _List_fromArray(
+						[
+							A2($author$project$MaterialUI$Internal$Component$elementCss, 'visibility', 'hidden')
+						]) : _List_fromArray(
+						[
+							A2(
+							$author$project$MaterialUI$Internal$Component$elementCss,
+							'transform',
+							'scale(' + ($elm$core$String$fromFloat(progress) + ')')),
+							A2($author$project$MaterialUI$Internal$Component$elementCss, 'visibility', 'visible')
+						]))),
+			tooltip.text,
+			$author$project$MaterialUI$Theme$Caption,
+			mui.theme);
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			_Utils_ap(
+				layoutAtt,
+				_List_fromArray(
+					[
+						position(tooltipView)
+					])),
+			A2(
+				$mdgriffith$elm_ui$Element$el,
+				_Utils_ap(
+					layoutAtt,
 					_List_fromArray(
 						[
-							A2(icon, iconColor, size)
-						]))));
+							$mdgriffith$elm_ui$Element$Events$onMouseEnter(
+							lift($author$project$MaterialUI$Internal$Tooltip$Model$MouseEnter)),
+							$mdgriffith$elm_ui$Element$Events$onMouseLeave(
+							lift($author$project$MaterialUI$Internal$Tooltip$Model$MouseLeave))
+						])),
+				content));
 	});
+var $author$project$MaterialUI$Internal$Icon$Implementation$button = F3(
+	function (mui, attrs, iBut) {
+		var padding = 8;
+		var index = iBut.index;
+		var lift = A2(
+			$elm$core$Basics$composeL,
+			mui.lift,
+			$author$project$MaterialUI$Internal$Message$IconMsg(index));
+		var model = A2(
+			$elm$core$Maybe$withDefault,
+			$author$project$MaterialUI$Internal$Icon$Model$defaultModel,
+			A2($elm$core$Dict$get, index, mui.icon));
+		var icon = function () {
+			var _v0 = iBut.icon;
+			var i = _v0.a;
+			return i;
+		}();
+		var color = A2($author$project$MaterialUI$ColorStateList$color, iBut.color, mui.theme);
+		var iconColor = $avh4$elm_color$Color$fromRgba(
+			$mdgriffith$elm_ui$Element$toRgb(
+				color(
+					$author$project$MaterialUI$Internal$State$colorListState(model))));
+		var background = A2($author$project$MaterialUI$ColorStateList$color, iBut.background, mui.theme);
+		var attr = _Utils_ap(
+			attrs,
+			_Utils_ap(
+				$author$project$MaterialUI$Internal$State$install(
+					A2($elm$core$Basics$composeL, lift, $author$project$MaterialUI$Internal$Icon$Model$State)),
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width(
+						$mdgriffith$elm_ui$Element$px(iBut.size + (2 * padding))),
+						$mdgriffith$elm_ui$Element$height(
+						$mdgriffith$elm_ui$Element$px(iBut.size + (2 * padding))),
+						$mdgriffith$elm_ui$Element$padding(padding),
+						$mdgriffith$elm_ui$Element$Border$rounded(50),
+						$mdgriffith$elm_ui$Element$Events$onClick(iBut.onClick),
+						$mdgriffith$elm_ui$Element$mouseDown(
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$Background$color(
+								background($author$project$MaterialUI$ColorStateList$MouseDown))
+							])),
+						$mdgriffith$elm_ui$Element$focused(
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$Background$color(
+								background($author$project$MaterialUI$ColorStateList$Focused))
+							])),
+						$mdgriffith$elm_ui$Element$mouseOver(
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$Background$color(
+								background($author$project$MaterialUI$ColorStateList$Hovered))
+							]))
+					])));
+		return A4(
+			$author$project$MaterialUI$Internal$Tooltip$Implementation$view,
+			mui,
+			_List_Nil,
+			{index: iBut.index + 'tooltip', position: $author$project$MaterialUI$Internal$Tooltip$Model$Bottom, text: iBut.tooltip},
+			A2(
+				$mdgriffith$elm_ui$Element$el,
+				attr,
+				$mdgriffith$elm_ui$Element$html(
+					A2(
+						$elm$svg$Svg$svg,
+						_List_Nil,
+						_List_fromArray(
+							[
+								A2(icon, iconColor, iBut.size)
+							])))));
+	});
+var $author$project$MaterialUI$Icon$button = $author$project$MaterialUI$Internal$Icon$Implementation$button;
 var $danmarcab$material_icons$Material$Icons$Content$content_copy = A2(
 	$danmarcab$material_icons$Material$Icons$Internal$icon,
 	'0 0 48 48',
@@ -17101,6 +18588,14 @@ var $danmarcab$material_icons$Material$Icons$Content$content_copy = A2(
 			_List_Nil)
 		]));
 var $author$project$MaterialUI$Icons$Content$content_copy = $author$project$MaterialUI$Icon$makeIcon($danmarcab$material_icons$Material$Icons$Content$content_copy);
+var $author$project$MaterialUI$ColorStateList$transparent = A2($author$project$MaterialUI$ColorStateList$Color, 0, $author$project$MaterialUI$Theme$Primary);
+var $author$project$MaterialUI$ColorStateList$defaultBackgroundOnBackground = {
+	disabled: $author$project$MaterialUI$ColorStateList$transparent,
+	focused: A2($author$project$MaterialUI$ColorStateList$Color, 0.15, $author$project$MaterialUI$Theme$OnBackground),
+	hovered: A2($author$project$MaterialUI$ColorStateList$Color, 0.1, $author$project$MaterialUI$Theme$OnBackground),
+	idle: $author$project$MaterialUI$ColorStateList$transparent,
+	mouseDown: A2($author$project$MaterialUI$ColorStateList$Color, 0.2, $author$project$MaterialUI$Theme$OnBackground)
+};
 var $mdgriffith$elm_ui$Element$Font$italic = $mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.italic);
 var $author$project$Page$TTT$Lobby$playerRow = F2(
 	function (theme, player) {
@@ -17173,13 +18668,13 @@ var $author$project$Page$TTT$Lobby$view = function (model) {
 										$mdgriffith$elm_ui$Element$fillPortion(2))
 									]),
 								A3(
-									$author$project$MaterialUI$TextField$text,
+									$author$project$MaterialUI$TextFieldM$managed,
+									model.mui,
 									_List_fromArray(
 										[
 											$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
 										]),
-									{color: $author$project$MaterialUI$Theme$Primary, errorText: $elm$core$Maybe$Nothing, helperText: $elm$core$Maybe$Nothing, hideLabel: false, label: 'Name', onChange: $author$project$Page$TTT$Lobby$Name, state: $author$project$MaterialUI$TextField$Idle, text: model.lobby.playerMe.name, type_: $author$project$MaterialUI$TextField$Outlined},
-									theme)),
+									{color: $author$project$MaterialUI$Theme$Primary, errorText: $elm$core$Maybe$Nothing, helperText: $elm$core$Maybe$Nothing, hideLabel: false, index: 'nameTf', label: 'Name', onChange: $author$project$Page$TTT$Lobby$Name, text: model.lobby.playerMe.name, type_: $author$project$MaterialUI$Internal$TextField$Model$Outlined})),
 								function () {
 								var bText = model.lobby.playerMe.isReady ? 'Not Ready' : 'Ready';
 								return A3(
@@ -17243,16 +18738,25 @@ var $author$project$Page$TTT$Lobby$view = function (model) {
 												$author$project$MaterialUI$Theme$Body1,
 												theme)
 											])),
-										A5(
+										A3(
 										$author$project$MaterialUI$Icon$button,
-										_List_fromArray(
-											[
-												$mdgriffith$elm_ui$Element$Events$onClick($author$project$Page$TTT$Lobby$CopyGameId)
-											]),
-										theme,
-										$author$project$MaterialUI$Theme$OnBackground,
-										24,
-										$author$project$MaterialUI$Icons$Content$content_copy)
+										model.mui,
+										_List_Nil,
+										{
+											background: $author$project$MaterialUI$ColorStateList$defaultBackgroundOnBackground,
+											color: {
+												disabled: A2($author$project$MaterialUI$ColorStateList$Color, 0.5, $author$project$MaterialUI$Theme$OnBackground),
+												focused: A2($author$project$MaterialUI$ColorStateList$Color, 0.5, $author$project$MaterialUI$Theme$Primary),
+												hovered: A2($author$project$MaterialUI$ColorStateList$Color, 0.9, $author$project$MaterialUI$Theme$Primary),
+												idle: A2($author$project$MaterialUI$ColorStateList$Color, 0.9, $author$project$MaterialUI$Theme$OnBackground),
+												mouseDown: A2($author$project$MaterialUI$ColorStateList$Color, 1, $author$project$MaterialUI$Theme$Primary)
+											},
+											icon: $author$project$MaterialUI$Icons$Content$content_copy,
+											index: 'iconCopy',
+											onClick: $author$project$Page$TTT$Lobby$CopyGameId,
+											size: 24,
+											tooltip: 'Copy Id'
+										})
 									])),
 								A3(
 								$author$project$MaterialUI$Button$outlined,

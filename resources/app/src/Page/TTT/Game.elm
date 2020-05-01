@@ -178,7 +178,11 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     case model of
         Lobby lobby ->
-            Websocket.receive WebSocketIn
+            Sub.batch
+                [ Websocket.receive WebSocketIn
+                , Lobby.subscriptions lobby
+                    |> Sub.map GotLobbyMsg
+                ]
 
         InGame session ->
             Websocket.receive WebSocketIn
