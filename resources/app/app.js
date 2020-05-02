@@ -6519,7 +6519,7 @@ var $author$project$Websocket$connect = function (gameId) {
 };
 var $author$project$MaterialUI$Internal$Model$defaultModel = F2(
 	function (lift, theme) {
-		return {icon: $elm$core$Dict$empty, lift: lift, snackbar: $elm$core$Dict$empty, textfield: $elm$core$Dict$empty, theme: theme, tooltip: $elm$core$Dict$empty};
+		return {icon: $elm$core$Dict$empty, lift: lift, menu: $elm$core$Dict$empty, snackbar: $elm$core$Dict$empty, textfield: $elm$core$Dict$empty, theme: theme, tooltip: $elm$core$Dict$empty};
 	});
 var $author$project$MaterialUI$MaterilaUI$defaultModel = $author$project$MaterialUI$Internal$Model$defaultModel;
 var $author$project$Session$theme = function (session) {
@@ -7458,9 +7458,9 @@ var $author$project$Main$init = F3(
 var $elm$core$Platform$Sub$map = _Platform_map;
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
-var $author$project$MaterialUI$Internal$Message$SnackbarMsg = F2(
+var $author$project$MaterialUI$Internal$Message$SelectMsg = F2(
 	function (a, b) {
-		return {$: 'SnackbarMsg', a: a, b: b};
+		return {$: 'SelectMsg', a: a, b: b};
 	});
 var $author$project$MaterialUI$Internal$Component$subscriptions = F4(
 	function (get, lift, store, sub) {
@@ -7486,175 +7486,7 @@ var $author$project$MaterialUI$Internal$Component$subscriptions = F4(
 				_List_Nil,
 				get(store)));
 	});
-var $author$project$MaterialUI$Internal$Snackbar$Model$AnimationFrame = function (a) {
-	return {$: 'AnimationFrame', a: a};
-};
-var $elm$browser$Browser$AnimationManager$Delta = function (a) {
-	return {$: 'Delta', a: a};
-};
-var $elm$browser$Browser$AnimationManager$State = F3(
-	function (subs, request, oldTime) {
-		return {oldTime: oldTime, request: request, subs: subs};
-	});
-var $elm$browser$Browser$AnimationManager$init = $elm$core$Task$succeed(
-	A3($elm$browser$Browser$AnimationManager$State, _List_Nil, $elm$core$Maybe$Nothing, 0));
-var $elm$browser$Browser$AnimationManager$now = _Browser_now(_Utils_Tuple0);
-var $elm$browser$Browser$AnimationManager$rAF = _Browser_rAF(_Utils_Tuple0);
-var $elm$browser$Browser$AnimationManager$onEffects = F3(
-	function (router, subs, _v0) {
-		var request = _v0.request;
-		var oldTime = _v0.oldTime;
-		var _v1 = _Utils_Tuple2(request, subs);
-		if (_v1.a.$ === 'Nothing') {
-			if (!_v1.b.b) {
-				var _v2 = _v1.a;
-				return $elm$browser$Browser$AnimationManager$init;
-			} else {
-				var _v4 = _v1.a;
-				return A2(
-					$elm$core$Task$andThen,
-					function (pid) {
-						return A2(
-							$elm$core$Task$andThen,
-							function (time) {
-								return $elm$core$Task$succeed(
-									A3(
-										$elm$browser$Browser$AnimationManager$State,
-										subs,
-										$elm$core$Maybe$Just(pid),
-										time));
-							},
-							$elm$browser$Browser$AnimationManager$now);
-					},
-					$elm$core$Process$spawn(
-						A2(
-							$elm$core$Task$andThen,
-							$elm$core$Platform$sendToSelf(router),
-							$elm$browser$Browser$AnimationManager$rAF)));
-			}
-		} else {
-			if (!_v1.b.b) {
-				var pid = _v1.a.a;
-				return A2(
-					$elm$core$Task$andThen,
-					function (_v3) {
-						return $elm$browser$Browser$AnimationManager$init;
-					},
-					$elm$core$Process$kill(pid));
-			} else {
-				return $elm$core$Task$succeed(
-					A3($elm$browser$Browser$AnimationManager$State, subs, request, oldTime));
-			}
-		}
-	});
-var $elm$time$Time$Posix = function (a) {
-	return {$: 'Posix', a: a};
-};
-var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
-var $elm$browser$Browser$AnimationManager$onSelfMsg = F3(
-	function (router, newTime, _v0) {
-		var subs = _v0.subs;
-		var oldTime = _v0.oldTime;
-		var send = function (sub) {
-			if (sub.$ === 'Time') {
-				var tagger = sub.a;
-				return A2(
-					$elm$core$Platform$sendToApp,
-					router,
-					tagger(
-						$elm$time$Time$millisToPosix(newTime)));
-			} else {
-				var tagger = sub.a;
-				return A2(
-					$elm$core$Platform$sendToApp,
-					router,
-					tagger(newTime - oldTime));
-			}
-		};
-		return A2(
-			$elm$core$Task$andThen,
-			function (pid) {
-				return A2(
-					$elm$core$Task$andThen,
-					function (_v1) {
-						return $elm$core$Task$succeed(
-							A3(
-								$elm$browser$Browser$AnimationManager$State,
-								subs,
-								$elm$core$Maybe$Just(pid),
-								newTime));
-					},
-					$elm$core$Task$sequence(
-						A2($elm$core$List$map, send, subs)));
-			},
-			$elm$core$Process$spawn(
-				A2(
-					$elm$core$Task$andThen,
-					$elm$core$Platform$sendToSelf(router),
-					$elm$browser$Browser$AnimationManager$rAF)));
-	});
-var $elm$browser$Browser$AnimationManager$Time = function (a) {
-	return {$: 'Time', a: a};
-};
-var $elm$browser$Browser$AnimationManager$subMap = F2(
-	function (func, sub) {
-		if (sub.$ === 'Time') {
-			var tagger = sub.a;
-			return $elm$browser$Browser$AnimationManager$Time(
-				A2($elm$core$Basics$composeL, func, tagger));
-		} else {
-			var tagger = sub.a;
-			return $elm$browser$Browser$AnimationManager$Delta(
-				A2($elm$core$Basics$composeL, func, tagger));
-		}
-	});
-_Platform_effectManagers['Browser.AnimationManager'] = _Platform_createManager($elm$browser$Browser$AnimationManager$init, $elm$browser$Browser$AnimationManager$onEffects, $elm$browser$Browser$AnimationManager$onSelfMsg, 0, $elm$browser$Browser$AnimationManager$subMap);
-var $elm$browser$Browser$AnimationManager$subscription = _Platform_leaf('Browser.AnimationManager');
-var $elm$browser$Browser$AnimationManager$onAnimationFrameDelta = function (tagger) {
-	return $elm$browser$Browser$AnimationManager$subscription(
-		$elm$browser$Browser$AnimationManager$Delta(tagger));
-};
-var $elm$browser$Browser$Events$onAnimationFrameDelta = $elm$browser$Browser$AnimationManager$onAnimationFrameDelta;
-var $author$project$MaterialUI$Internal$Snackbar$Implementation$subscriptions_ = function (model) {
-	var isAnimating = function () {
-		var _v0 = model.status;
-		_v0$2:
-		while (true) {
-			if (_v0.$ === 'Active') {
-				switch (_v0.b.$) {
-					case 'FadingIn':
-						return true;
-					case 'FadingOut':
-						return true;
-					default:
-						break _v0$2;
-				}
-			} else {
-				break _v0$2;
-			}
-		}
-		return false;
-	}();
-	return isAnimating ? $elm$browser$Browser$Events$onAnimationFrameDelta($author$project$MaterialUI$Internal$Snackbar$Model$AnimationFrame) : $elm$core$Platform$Sub$none;
-};
-var $author$project$MaterialUI$Internal$Snackbar$Implementation$subscriptions = function (model) {
-	return A4(
-		$author$project$MaterialUI$Internal$Component$subscriptions,
-		function ($) {
-			return $.snackbar;
-		},
-		$author$project$MaterialUI$Internal$Message$SnackbarMsg,
-		model,
-		$author$project$MaterialUI$Internal$Snackbar$Implementation$subscriptions_);
-};
-var $author$project$MaterialUI$Internal$Message$TooltipMsg = F2(
-	function (a, b) {
-		return {$: 'TooltipMsg', a: a, b: b};
-	});
-var $author$project$MaterialUI$Internal$Tooltip$Model$BrowserAction = {$: 'BrowserAction'};
-var $author$project$MaterialUI$Internal$Tooltip$Model$OnAnimationFrame = function (a) {
-	return {$: 'OnAnimationFrame', a: a};
-};
+var $author$project$MaterialUI$Internal$Select$Model$ForceClose = {$: 'ForceClose'};
 var $elm$browser$Browser$Events$Document = {$: 'Document'};
 var $elm$browser$Browser$Events$MySub = F3(
 	function (a, b, c) {
@@ -7924,7 +7756,209 @@ var $elm$browser$Browser$Events$on = F3(
 		return $elm$browser$Browser$Events$subscription(
 			A3($elm$browser$Browser$Events$MySub, node, name, decoder));
 	});
+var $elm$browser$Browser$Events$onClick = A2($elm$browser$Browser$Events$on, $elm$browser$Browser$Events$Document, 'click');
 var $elm$browser$Browser$Events$onKeyDown = A2($elm$browser$Browser$Events$on, $elm$browser$Browser$Events$Document, 'keydown');
+var $author$project$MaterialUI$Internal$Select$Implementation$subscriptions_ = function (model) {
+	var _v0 = model.status;
+	switch (_v0.$) {
+		case 'Closed':
+			return $elm$core$Platform$Sub$none;
+		case 'Open':
+			return $elm$core$Platform$Sub$batch(
+				_List_fromArray(
+					[
+						$elm$browser$Browser$Events$onClick(
+						$elm$json$Json$Decode$succeed($author$project$MaterialUI$Internal$Select$Model$ForceClose)),
+						$elm$browser$Browser$Events$onKeyDown(
+						$elm$json$Json$Decode$succeed($author$project$MaterialUI$Internal$Select$Model$ForceClose))
+					]));
+		default:
+			return $elm$core$Platform$Sub$none;
+	}
+};
+var $author$project$MaterialUI$Internal$Select$Implementation$subscriptions = function (mui) {
+	return A4(
+		$author$project$MaterialUI$Internal$Component$subscriptions,
+		function ($) {
+			return $.menu;
+		},
+		$author$project$MaterialUI$Internal$Message$SelectMsg,
+		mui,
+		$author$project$MaterialUI$Internal$Select$Implementation$subscriptions_);
+};
+var $author$project$MaterialUI$Internal$Message$SnackbarMsg = F2(
+	function (a, b) {
+		return {$: 'SnackbarMsg', a: a, b: b};
+	});
+var $author$project$MaterialUI$Internal$Snackbar$Model$AnimationFrame = function (a) {
+	return {$: 'AnimationFrame', a: a};
+};
+var $elm$browser$Browser$AnimationManager$Delta = function (a) {
+	return {$: 'Delta', a: a};
+};
+var $elm$browser$Browser$AnimationManager$State = F3(
+	function (subs, request, oldTime) {
+		return {oldTime: oldTime, request: request, subs: subs};
+	});
+var $elm$browser$Browser$AnimationManager$init = $elm$core$Task$succeed(
+	A3($elm$browser$Browser$AnimationManager$State, _List_Nil, $elm$core$Maybe$Nothing, 0));
+var $elm$browser$Browser$AnimationManager$now = _Browser_now(_Utils_Tuple0);
+var $elm$browser$Browser$AnimationManager$rAF = _Browser_rAF(_Utils_Tuple0);
+var $elm$browser$Browser$AnimationManager$onEffects = F3(
+	function (router, subs, _v0) {
+		var request = _v0.request;
+		var oldTime = _v0.oldTime;
+		var _v1 = _Utils_Tuple2(request, subs);
+		if (_v1.a.$ === 'Nothing') {
+			if (!_v1.b.b) {
+				var _v2 = _v1.a;
+				return $elm$browser$Browser$AnimationManager$init;
+			} else {
+				var _v4 = _v1.a;
+				return A2(
+					$elm$core$Task$andThen,
+					function (pid) {
+						return A2(
+							$elm$core$Task$andThen,
+							function (time) {
+								return $elm$core$Task$succeed(
+									A3(
+										$elm$browser$Browser$AnimationManager$State,
+										subs,
+										$elm$core$Maybe$Just(pid),
+										time));
+							},
+							$elm$browser$Browser$AnimationManager$now);
+					},
+					$elm$core$Process$spawn(
+						A2(
+							$elm$core$Task$andThen,
+							$elm$core$Platform$sendToSelf(router),
+							$elm$browser$Browser$AnimationManager$rAF)));
+			}
+		} else {
+			if (!_v1.b.b) {
+				var pid = _v1.a.a;
+				return A2(
+					$elm$core$Task$andThen,
+					function (_v3) {
+						return $elm$browser$Browser$AnimationManager$init;
+					},
+					$elm$core$Process$kill(pid));
+			} else {
+				return $elm$core$Task$succeed(
+					A3($elm$browser$Browser$AnimationManager$State, subs, request, oldTime));
+			}
+		}
+	});
+var $elm$time$Time$Posix = function (a) {
+	return {$: 'Posix', a: a};
+};
+var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
+var $elm$browser$Browser$AnimationManager$onSelfMsg = F3(
+	function (router, newTime, _v0) {
+		var subs = _v0.subs;
+		var oldTime = _v0.oldTime;
+		var send = function (sub) {
+			if (sub.$ === 'Time') {
+				var tagger = sub.a;
+				return A2(
+					$elm$core$Platform$sendToApp,
+					router,
+					tagger(
+						$elm$time$Time$millisToPosix(newTime)));
+			} else {
+				var tagger = sub.a;
+				return A2(
+					$elm$core$Platform$sendToApp,
+					router,
+					tagger(newTime - oldTime));
+			}
+		};
+		return A2(
+			$elm$core$Task$andThen,
+			function (pid) {
+				return A2(
+					$elm$core$Task$andThen,
+					function (_v1) {
+						return $elm$core$Task$succeed(
+							A3(
+								$elm$browser$Browser$AnimationManager$State,
+								subs,
+								$elm$core$Maybe$Just(pid),
+								newTime));
+					},
+					$elm$core$Task$sequence(
+						A2($elm$core$List$map, send, subs)));
+			},
+			$elm$core$Process$spawn(
+				A2(
+					$elm$core$Task$andThen,
+					$elm$core$Platform$sendToSelf(router),
+					$elm$browser$Browser$AnimationManager$rAF)));
+	});
+var $elm$browser$Browser$AnimationManager$Time = function (a) {
+	return {$: 'Time', a: a};
+};
+var $elm$browser$Browser$AnimationManager$subMap = F2(
+	function (func, sub) {
+		if (sub.$ === 'Time') {
+			var tagger = sub.a;
+			return $elm$browser$Browser$AnimationManager$Time(
+				A2($elm$core$Basics$composeL, func, tagger));
+		} else {
+			var tagger = sub.a;
+			return $elm$browser$Browser$AnimationManager$Delta(
+				A2($elm$core$Basics$composeL, func, tagger));
+		}
+	});
+_Platform_effectManagers['Browser.AnimationManager'] = _Platform_createManager($elm$browser$Browser$AnimationManager$init, $elm$browser$Browser$AnimationManager$onEffects, $elm$browser$Browser$AnimationManager$onSelfMsg, 0, $elm$browser$Browser$AnimationManager$subMap);
+var $elm$browser$Browser$AnimationManager$subscription = _Platform_leaf('Browser.AnimationManager');
+var $elm$browser$Browser$AnimationManager$onAnimationFrameDelta = function (tagger) {
+	return $elm$browser$Browser$AnimationManager$subscription(
+		$elm$browser$Browser$AnimationManager$Delta(tagger));
+};
+var $elm$browser$Browser$Events$onAnimationFrameDelta = $elm$browser$Browser$AnimationManager$onAnimationFrameDelta;
+var $author$project$MaterialUI$Internal$Snackbar$Implementation$subscriptions_ = function (model) {
+	var isAnimating = function () {
+		var _v0 = model.status;
+		_v0$2:
+		while (true) {
+			if (_v0.$ === 'Active') {
+				switch (_v0.b.$) {
+					case 'FadingIn':
+						return true;
+					case 'FadingOut':
+						return true;
+					default:
+						break _v0$2;
+				}
+			} else {
+				break _v0$2;
+			}
+		}
+		return false;
+	}();
+	return isAnimating ? $elm$browser$Browser$Events$onAnimationFrameDelta($author$project$MaterialUI$Internal$Snackbar$Model$AnimationFrame) : $elm$core$Platform$Sub$none;
+};
+var $author$project$MaterialUI$Internal$Snackbar$Implementation$subscriptions = function (model) {
+	return A4(
+		$author$project$MaterialUI$Internal$Component$subscriptions,
+		function ($) {
+			return $.snackbar;
+		},
+		$author$project$MaterialUI$Internal$Message$SnackbarMsg,
+		model,
+		$author$project$MaterialUI$Internal$Snackbar$Implementation$subscriptions_);
+};
+var $author$project$MaterialUI$Internal$Message$TooltipMsg = F2(
+	function (a, b) {
+		return {$: 'TooltipMsg', a: a, b: b};
+	});
+var $author$project$MaterialUI$Internal$Tooltip$Model$BrowserAction = {$: 'BrowserAction'};
+var $author$project$MaterialUI$Internal$Tooltip$Model$OnAnimationFrame = function (a) {
+	return {$: 'OnAnimationFrame', a: a};
+};
 var $elm$browser$Browser$Events$onMouseDown = A2($elm$browser$Browser$Events$on, $elm$browser$Browser$Events$Document, 'mousedown');
 var $author$project$MaterialUI$Internal$Tooltip$Implementation$subscriptions_ = function (_v0) {
 	var browserAction = $elm$json$Json$Decode$succeed($author$project$MaterialUI$Internal$Tooltip$Model$BrowserAction);
@@ -7951,7 +7985,8 @@ var $author$project$MaterialUI$MaterilaUI$subscriptions = function (model) {
 		_List_fromArray(
 			[
 				$author$project$MaterialUI$Internal$Tooltip$Implementation$subscriptions(model),
-				$author$project$MaterialUI$Internal$Snackbar$Implementation$subscriptions(model)
+				$author$project$MaterialUI$Internal$Snackbar$Implementation$subscriptions(model),
+				$author$project$MaterialUI$Internal$Select$Implementation$subscriptions(model)
 			]));
 };
 var $author$project$Page$Home$subscriptions = function (model) {
@@ -8090,7 +8125,7 @@ var $author$project$MaterialUI$Internal$Message$IconMsg = F2(
 	function (a, b) {
 		return {$: 'IconMsg', a: a, b: b};
 	});
-var $author$project$MaterialUI$Internal$State$defaultModel = {clicked: false, hovered: false};
+var $author$project$MaterialUI$Internal$State$defaultModel = {clicked: false, focused: false, hovered: false};
 var $author$project$MaterialUI$Internal$Icon$Model$defaultModel = {state: $author$project$MaterialUI$Internal$State$defaultModel};
 var $author$project$MaterialUI$Internal$Component$getSet = F3(
 	function (getModel, setModel, _default) {
@@ -8152,15 +8187,23 @@ var $author$project$MaterialUI$Internal$State$update = F2(
 				case 'MouseLeave':
 					return _Utils_update(
 						state,
-						{hovered: false});
+						{clicked: false, hovered: false});
 				case 'MouseDown':
 					return _Utils_update(
 						state,
 						{clicked: true});
-				default:
+				case 'MouseUp':
 					return _Utils_update(
 						state,
 						{clicked: false});
+				case 'FocusGain':
+					return _Utils_update(
+						state,
+						{focused: true});
+				default:
+					return _Utils_update(
+						state,
+						{focused: false});
 			}
 		}();
 		return _Utils_update(
@@ -8188,6 +8231,106 @@ var $author$project$MaterialUI$Internal$Icon$Implementation$update = F3(
 				store.lift,
 				$author$project$MaterialUI$Internal$Message$IconMsg(index)),
 			$author$project$MaterialUI$Internal$Icon$Implementation$update_,
+			msg,
+			index,
+			store);
+	});
+var $author$project$MaterialUI$Internal$Select$Model$Closed = {$: 'Closed'};
+var $author$project$MaterialUI$Internal$Select$Model$defaultModel = {menuItems: $elm$core$Dict$empty, state: $author$project$MaterialUI$Internal$State$defaultModel, status: $author$project$MaterialUI$Internal$Select$Model$Closed};
+var $author$project$MaterialUI$Internal$Select$Implementation$getSet = A3(
+	$author$project$MaterialUI$Internal$Component$getSet,
+	function ($) {
+		return $.menu;
+	},
+	F2(
+		function (model, store) {
+			return _Utils_update(
+				store,
+				{menu: model});
+		}),
+	$author$project$MaterialUI$Internal$Select$Model$defaultModel);
+var $author$project$MaterialUI$Internal$Select$Model$FullyOpened = {$: 'FullyOpened'};
+var $author$project$MaterialUI$Internal$Select$Model$Open = {$: 'Open'};
+var $author$project$MaterialUI$Internal$Select$Model$Opening = {$: 'Opening'};
+var $author$project$MaterialUI$Internal$Select$Model$defaultMenuItemModel = {state: $author$project$MaterialUI$Internal$State$defaultModel};
+var $elm$core$Basics$always = F2(
+	function (a, _v0) {
+		return a;
+	});
+var $elm$core$Process$sleep = _Process_sleep;
+var $author$project$MaterialUI$Internal$Component$delayedCmd = F2(
+	function (delay, command) {
+		return A2(
+			$elm$core$Task$perform,
+			$elm$core$Basics$always(command),
+			$elm$core$Process$sleep(delay));
+	});
+var $elm$core$Basics$neq = _Utils_notEqual;
+var $author$project$MaterialUI$Internal$Select$Implementation$update_ = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'State':
+				var stateMsg = msg.a;
+				return _Utils_Tuple2(
+					A2($author$project$MaterialUI$Internal$State$update, stateMsg, model),
+					$elm$core$Platform$Cmd$none);
+			case 'Clicked':
+				var _v1 = model.status;
+				switch (_v1.$) {
+					case 'Open':
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{menuItems: $elm$core$Dict$empty, status: $author$project$MaterialUI$Internal$Select$Model$Closed}),
+							$elm$core$Platform$Cmd$none);
+					case 'Opening':
+						return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					default:
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{status: $author$project$MaterialUI$Internal$Select$Model$Opening}),
+							A2($author$project$MaterialUI$Internal$Component$delayedCmd, 10, $author$project$MaterialUI$Internal$Select$Model$FullyOpened));
+				}
+			case 'ForceClose':
+				return (!_Utils_eq(model.status, $author$project$MaterialUI$Internal$Select$Model$Opening)) ? _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{menuItems: $elm$core$Dict$empty, status: $author$project$MaterialUI$Internal$Select$Model$Closed}),
+					$elm$core$Platform$Cmd$none) : _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			case 'FullyOpened':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{status: $author$project$MaterialUI$Internal$Select$Model$Open}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				var index = msg.a;
+				var stateMsg = msg.b;
+				var itemModel = A2(
+					$elm$core$Maybe$withDefault,
+					$author$project$MaterialUI$Internal$Select$Model$defaultMenuItemModel,
+					A2($elm$core$Dict$get, index, model.menuItems));
+				var updatedModel = A2($author$project$MaterialUI$Internal$State$update, stateMsg, itemModel);
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							menuItems: A3($elm$core$Dict$insert, index, updatedModel, model.menuItems)
+						}),
+					$elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$MaterialUI$Internal$Select$Implementation$update = F3(
+	function (msg, index, store) {
+		return A6(
+			$author$project$MaterialUI$Internal$Component$update,
+			$author$project$MaterialUI$Internal$Select$Implementation$getSet,
+			A2(
+				$elm$core$Basics$composeL,
+				store.lift,
+				$author$project$MaterialUI$Internal$Message$SelectMsg(index)),
+			$author$project$MaterialUI$Internal$Select$Implementation$update_,
 			msg,
 			index,
 			store);
@@ -8236,18 +8379,6 @@ var $elm$core$Tuple$mapSecond = F2(
 		return _Utils_Tuple2(
 			x,
 			func(y));
-	});
-var $elm$core$Basics$always = F2(
-	function (a, _v0) {
-		return a;
-	});
-var $elm$core$Process$sleep = _Process_sleep;
-var $author$project$MaterialUI$Internal$Component$delayedCmd = F2(
-	function (delay, command) {
-		return A2(
-			$elm$core$Task$perform,
-			$elm$core$Basics$always(command),
-			$elm$core$Process$sleep(delay));
 	});
 var $author$project$MaterialUI$Internal$Snackbar$Implementation$setSnackbar = F2(
 	function (snackbar, model) {
@@ -8667,10 +8798,14 @@ var $author$project$MaterialUI$MaterilaUI$update = F2(
 				var index = msg.a;
 				var subMsg = msg.b;
 				return A3($author$project$MaterialUI$Internal$Tooltip$Implementation$update, subMsg, index, model);
-			default:
+			case 'SnackbarMsg':
 				var index = msg.a;
 				var subMsg = msg.b;
 				return A3($author$project$MaterialUI$Internal$Snackbar$Implementation$update, subMsg, index, model);
+			default:
+				var index = msg.a;
+				var subMsg = msg.b;
+				return A3($author$project$MaterialUI$Internal$Select$Implementation$update, subMsg, index, model);
 		}
 	});
 var $author$project$UIHelper$materialUpdate = F2(
@@ -12807,7 +12942,6 @@ var $elm$core$List$minimum = function (list) {
 		return $elm$core$Maybe$Nothing;
 	}
 };
-var $elm$core$Basics$neq = _Utils_notEqual;
 var $mdgriffith$elm_ui$Internal$Model$convertAdjustment = function (adjustment) {
 	var lines = _List_fromArray(
 		[adjustment.capital, adjustment.baseline, adjustment.descender, adjustment.lowercase]);
@@ -18342,11 +18476,12 @@ var $author$project$MaterialUI$ColorStateList$color = F3(
 			A2($author$project$MaterialUI$ColorStateList$get, state, colorStateList));
 	});
 var $author$project$MaterialUI$Internal$State$Clicked = {$: 'Clicked'};
+var $author$project$MaterialUI$Internal$State$Focused = {$: 'Focused'};
 var $author$project$MaterialUI$Internal$State$Hovered = {$: 'Hovered'};
 var $author$project$MaterialUI$Internal$State$Idle = {$: 'Idle'};
 var $author$project$MaterialUI$Internal$State$getState = function (componentModel) {
 	var model = componentModel.state;
-	return (model.clicked && model.hovered) ? $author$project$MaterialUI$Internal$State$Clicked : (model.hovered ? $author$project$MaterialUI$Internal$State$Hovered : $author$project$MaterialUI$Internal$State$Idle);
+	return (model.clicked && model.hovered) ? $author$project$MaterialUI$Internal$State$Clicked : (model.focused ? $author$project$MaterialUI$Internal$State$Focused : (model.hovered ? $author$project$MaterialUI$Internal$State$Hovered : $author$project$MaterialUI$Internal$State$Idle));
 };
 var $author$project$MaterialUI$ColorStateList$Idle = {$: 'Idle'};
 var $author$project$MaterialUI$Internal$State$toColorStateListState = function (state) {
@@ -18355,11 +18490,15 @@ var $author$project$MaterialUI$Internal$State$toColorStateListState = function (
 			return $author$project$MaterialUI$ColorStateList$Idle;
 		case 'Hovered':
 			return $author$project$MaterialUI$ColorStateList$Hovered;
-		default:
+		case 'Clicked':
 			return $author$project$MaterialUI$ColorStateList$MouseDown;
+		default:
+			return $author$project$MaterialUI$ColorStateList$Focused;
 	}
 };
 var $author$project$MaterialUI$Internal$State$colorListState = A2($elm$core$Basics$composeR, $author$project$MaterialUI$Internal$State$getState, $author$project$MaterialUI$Internal$State$toColorStateListState);
+var $author$project$MaterialUI$Internal$State$FocusGain = {$: 'FocusGain'};
+var $author$project$MaterialUI$Internal$State$FocusLose = {$: 'FocusLose'};
 var $author$project$MaterialUI$Internal$State$MouseDown = {$: 'MouseDown'};
 var $author$project$MaterialUI$Internal$State$MouseEnter = {$: 'MouseEnter'};
 var $author$project$MaterialUI$Internal$State$MouseLeave = {$: 'MouseLeave'};
@@ -18402,7 +18541,11 @@ var $author$project$MaterialUI$Internal$State$install = function (lift) {
 			$mdgriffith$elm_ui$Element$Events$onMouseDown(
 			lift($author$project$MaterialUI$Internal$State$MouseDown)),
 			$mdgriffith$elm_ui$Element$Events$onMouseUp(
-			lift($author$project$MaterialUI$Internal$State$MouseUp))
+			lift($author$project$MaterialUI$Internal$State$MouseUp)),
+			$mdgriffith$elm_ui$Element$Events$onFocus(
+			lift($author$project$MaterialUI$Internal$State$FocusGain)),
+			$mdgriffith$elm_ui$Element$Events$onLoseFocus(
+			lift($author$project$MaterialUI$Internal$State$FocusLose))
 		]);
 };
 var $author$project$MaterialUI$Theme$Caption = {$: 'Caption'};
