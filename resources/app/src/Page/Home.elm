@@ -5,6 +5,7 @@ import Game.Lobby exposing (Lobby)
 import Http
 import MaterialUI.Internal.TextField.Model as TextField
 import MaterialUI.MaterilaUI as MaterialUI
+import MaterialUI.Select as Select
 import MaterialUI.TextFieldM as TextField
 import ServerResponse.EnterLobby as EnterLobbyResponse exposing (Error(..))
 import ServerResponse.InGame as InGameResponse
@@ -34,6 +35,7 @@ type alias Model =
     { session: Session
     , gameId: String
     , error: Maybe JoinError
+    , mode : GameMode
     , lobby: Maybe Lobby
     , mui : MaterialUI.Model Session.CustomColor Msg
     }
@@ -44,11 +46,17 @@ type JoinError
     | ConnectionError (Maybe Http.Error)
 
 
+type GameMode
+    = TicTacToe
+    | Misery
+
+
 init : Session -> Maybe JoinError -> ( Model, Cmd Msg )
 init session maybeError =
     ( { session = session
     , gameId = ""
     , error = maybeError
+    , mode = TicTacToe
     , lobby = Nothing
     , mui = MaterialUI.defaultModel Mui (Session.theme session)
     }
@@ -70,6 +78,7 @@ type Msg
     | GameId String
     | ServerResponse (Result Http.Error TTTResponse.Response)
     | Mui MaterialUI.Msg
+    | ModeSelected GameMode
 
 
 update: Msg -> Model -> ( Model, Cmd Msg )
@@ -140,6 +149,9 @@ update msg model =
         Mui subMsg ->
             materialUpdate subMsg model
 
+        ModeSelected gameMode ->
+            ( { model | mode = gameMode }, Cmd.none )
+
 
 -- VIEW
 
@@ -186,7 +198,24 @@ view model =
             [ width fill
             , spacing 10
             ]
-            [ nonEl [ width <| fillPortion 2 ]
+            [ el
+                [ width <| fillPortion 2 ]
+                <| Select.outlined
+                    model.mui
+                    [ width fill ]
+                    { index = "modeSelect"
+                    , color = Select.defaultColorPrimary
+                    , label = "Mode"
+                    , items =
+                        [ Select.item TicTacToe
+                        , Select.item Misery
+                        ]
+                    , toItem = \mode -> case mode of
+                        TicTacToe -> { text = "Tic Tac Toe" }
+                        Misery -> { text = "Misery" }
+                    , onClick = ModeSelected
+                    , selectedItem = Just model.mode
+                    }
             ,Button.outlined
                 [ alignLeft
                 , width <| fillPortion 1

@@ -6574,6 +6574,7 @@ var $author$project$Page$TTT$Game$fromLobby = F3(
 var $author$project$Page$Home$Mui = function (a) {
 	return {$: 'Mui', a: a};
 };
+var $author$project$Page$Home$TicTacToe = {$: 'TicTacToe'};
 var $elm$json$Json$Encode$null = _Json_encodeNull;
 var $author$project$Websocket$disconnect_ = _Platform_outgoingPort(
 	'disconnect_',
@@ -6588,6 +6589,7 @@ var $author$project$Page$Home$init = F2(
 				error: maybeError,
 				gameId: '',
 				lobby: $elm$core$Maybe$Nothing,
+				mode: $author$project$Page$Home$TicTacToe,
 				mui: A2(
 					$author$project$MaterialUI$MaterilaUI$defaultModel,
 					$author$project$Page$Home$Mui,
@@ -8934,9 +8936,16 @@ var $author$project$Page$Home$update = F2(
 							}),
 						$elm$core$Platform$Cmd$none);
 				}
-			default:
+			case 'Mui':
 				var subMsg = msg.a;
 				return A2($author$project$UIHelper$materialUpdate, subMsg, model);
+			default:
+				var gameMode = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{mode: gameMode}),
+					$elm$core$Platform$Cmd$none);
 		}
 	});
 var $author$project$Page$NotFound$update = F2(
@@ -9641,6 +9650,10 @@ var $author$project$Page$Home$GameId = function (a) {
 	return {$: 'GameId', a: a};
 };
 var $author$project$Page$Home$JoinGame = {$: 'JoinGame'};
+var $author$project$Page$Home$Misery = {$: 'Misery'};
+var $author$project$Page$Home$ModeSelected = function (a) {
+	return {$: 'ModeSelected', a: a};
+};
 var $author$project$Page$Home$NewTTTGame = {$: 'NewTTTGame'};
 var $author$project$MaterialUI$Internal$TextField$Model$Outlined = {$: 'Outlined'};
 var $author$project$MaterialUI$Theme$Primary = {$: 'Primary'};
@@ -9649,6 +9662,18 @@ var $mdgriffith$elm_ui$Internal$Model$AlignX = function (a) {
 };
 var $mdgriffith$elm_ui$Internal$Model$Left = {$: 'Left'};
 var $mdgriffith$elm_ui$Element$alignLeft = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Left);
+var $author$project$MaterialUI$ColorStateList$Color = F2(
+	function (a, b) {
+		return {$: 'Color', a: a, b: b};
+	});
+var $author$project$MaterialUI$Theme$OnSurface = {$: 'OnSurface'};
+var $author$project$MaterialUI$Select$defaultColorPrimary = {
+	disabled: A2($author$project$MaterialUI$ColorStateList$Color, 0.3, $author$project$MaterialUI$Theme$OnSurface),
+	focused: A2($author$project$MaterialUI$ColorStateList$Color, 1, $author$project$MaterialUI$Theme$Primary),
+	hovered: A2($author$project$MaterialUI$ColorStateList$Color, 0.6, $author$project$MaterialUI$Theme$OnSurface),
+	idle: A2($author$project$MaterialUI$ColorStateList$Color, 0.3, $author$project$MaterialUI$Theme$OnSurface),
+	mouseDown: A2($author$project$MaterialUI$ColorStateList$Color, 1, $author$project$MaterialUI$Theme$Primary)
+};
 var $author$project$MaterialUI$Theme$H5 = {$: 'H5'};
 var $mdgriffith$elm_ui$Internal$Model$Right = {$: 'Right'};
 var $mdgriffith$elm_ui$Element$alignRight = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Right);
@@ -15642,6 +15667,10 @@ var $author$project$Page$Home$errorCard = F2(
 							])))
 				]));
 	});
+var $author$project$MaterialUI$Internal$Select$Model$Item = function (a) {
+	return {$: 'Item', a: a};
+};
+var $author$project$MaterialUI$Select$item = $author$project$MaterialUI$Internal$Select$Model$Item;
 var $author$project$MaterialUI$Internal$TextField$Model$ComponentFocused = {$: 'ComponentFocused'};
 var $author$project$MaterialUI$Internal$TextField$Model$ComponentFocusedLost = {$: 'ComponentFocusedLost'};
 var $author$project$MaterialUI$Internal$TextField$Model$Focused = {$: 'Focused'};
@@ -17551,6 +17580,531 @@ var $author$project$MaterialUI$Button$outlined = F3(
 				onPress: btn.disabled ? $elm$core$Maybe$Nothing : btn.onPress
 			});
 	});
+var $author$project$MaterialUI$Internal$Select$Model$Clicked = {$: 'Clicked'};
+var $author$project$MaterialUI$ColorStateList$Focused = {$: 'Focused'};
+var $author$project$MaterialUI$Internal$Select$Model$State = function (a) {
+	return {$: 'State', a: a};
+};
+var $author$project$MaterialUI$Theme$Subtitle1 = {$: 'Subtitle1'};
+var $author$project$MaterialUI$Theme$Surface = {$: 'Surface'};
+var $elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
+var $elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
+var $elm$svg$Svg$g = $elm$svg$Svg$trustedNode('g');
+var $elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
+var $danmarcab$material_icons$Material$Icons$Internal$toRgbaString = function (color) {
+	var _v0 = $avh4$elm_color$Color$toRgba(color);
+	var red = _v0.red;
+	var green = _v0.green;
+	var blue = _v0.blue;
+	var alpha = _v0.alpha;
+	return 'rgba(' + ($elm$core$String$fromInt(
+		$elm$core$Basics$round(255 * red)) + (',' + ($elm$core$String$fromInt(
+		$elm$core$Basics$round(255 * green)) + (',' + ($elm$core$String$fromInt(
+		$elm$core$Basics$round(255 * blue)) + (',' + ($elm$core$String$fromFloat(alpha) + ')')))))));
+};
+var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
+var $elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
+var $danmarcab$material_icons$Material$Icons$Internal$icon = F4(
+	function (viewBox, children, color, size) {
+		var stringSize = $elm$core$String$fromInt(size);
+		var stringColor = $danmarcab$material_icons$Material$Icons$Internal$toRgbaString(color);
+		return A2(
+			$elm$svg$Svg$svg,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$width(stringSize),
+					$elm$svg$Svg$Attributes$height(stringSize),
+					$elm$svg$Svg$Attributes$viewBox(viewBox)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$svg$Svg$g,
+					_List_fromArray(
+						[
+							$elm$svg$Svg$Attributes$fill(stringColor)
+						]),
+					children)
+				]));
+	});
+var $elm$svg$Svg$path = $elm$svg$Svg$trustedNode('path');
+var $danmarcab$material_icons$Material$Icons$Navigation$arrow_drop_down = A2(
+	$danmarcab$material_icons$Material$Icons$Internal$icon,
+	'0 0 48 48',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$path,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$d('M14 20l10 10 10-10z')
+				]),
+			_List_Nil)
+		]));
+var $author$project$MaterialUI$Internal$Icon$Model$Icon = function (a) {
+	return {$: 'Icon', a: a};
+};
+var $author$project$MaterialUI$Internal$Icon$Implementation$makeIcon = $author$project$MaterialUI$Internal$Icon$Model$Icon;
+var $author$project$MaterialUI$Icon$makeIcon = $author$project$MaterialUI$Internal$Icon$Implementation$makeIcon;
+var $author$project$MaterialUI$Icons$Navigation$arrow_drop_down = $author$project$MaterialUI$Icon$makeIcon($danmarcab$material_icons$Material$Icons$Navigation$arrow_drop_down);
+var $danmarcab$material_icons$Material$Icons$Navigation$arrow_drop_up = A2(
+	$danmarcab$material_icons$Material$Icons$Internal$icon,
+	'0 0 48 48',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$path,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$d('M14 28l10-10 10 10z')
+				]),
+			_List_Nil)
+		]));
+var $author$project$MaterialUI$Icons$Navigation$arrow_drop_up = $author$project$MaterialUI$Icon$makeIcon($danmarcab$material_icons$Material$Icons$Navigation$arrow_drop_up);
+var $mdgriffith$elm_ui$Internal$Model$Below = {$: 'Below'};
+var $mdgriffith$elm_ui$Element$below = function (element) {
+	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$Below, element);
+};
+var $author$project$MaterialUI$ColorStateList$get = F2(
+	function (state, colorStateList) {
+		switch (state.$) {
+			case 'Idle':
+				return colorStateList.idle;
+			case 'Hovered':
+				return colorStateList.hovered;
+			case 'Focused':
+				return colorStateList.focused;
+			case 'MouseDown':
+				return colorStateList.mouseDown;
+			default:
+				return colorStateList.disabled;
+		}
+	});
+var $author$project$MaterialUI$ColorStateList$toElementColor = F2(
+	function (theme, _v0) {
+		var alpha = _v0.a;
+		var c = _v0.b;
+		return A2(
+			$author$project$MaterialUI$Theme$setAlpha,
+			alpha,
+			A2($author$project$MaterialUI$Theme$getColor, c, theme));
+	});
+var $author$project$MaterialUI$ColorStateList$color = F3(
+	function (colorStateList, theme, state) {
+		return A2(
+			$author$project$MaterialUI$ColorStateList$toElementColor,
+			theme,
+			A2($author$project$MaterialUI$ColorStateList$get, state, colorStateList));
+	});
+var $author$project$MaterialUI$Internal$Component$elementCss = F2(
+	function (property, value) {
+		return $mdgriffith$elm_ui$Element$htmlAttribute(
+			A2($elm$html$Html$Attributes$style, property, value));
+	});
+var $author$project$MaterialUI$Theme$Alternative = function (a) {
+	return {$: 'Alternative', a: a};
+};
+var $author$project$MaterialUI$Theme$Background = {$: 'Background'};
+var $author$project$MaterialUI$Theme$Error = {$: 'Error'};
+var $author$project$MaterialUI$Theme$OnBackground = {$: 'OnBackground'};
+var $author$project$MaterialUI$Theme$OnError = {$: 'OnError'};
+var $author$project$MaterialUI$Theme$OnPrimary = {$: 'OnPrimary'};
+var $author$project$MaterialUI$Theme$OnPrimaryVariant = {$: 'OnPrimaryVariant'};
+var $author$project$MaterialUI$Theme$OnSecondary = {$: 'OnSecondary'};
+var $author$project$MaterialUI$Theme$OnSecondaryVariant = {$: 'OnSecondaryVariant'};
+var $author$project$MaterialUI$Theme$OnTooltip = {$: 'OnTooltip'};
+var $author$project$MaterialUI$Theme$PrimaryVariant = {$: 'PrimaryVariant'};
+var $author$project$MaterialUI$Theme$Secondary = {$: 'Secondary'};
+var $author$project$MaterialUI$Theme$SecondaryVariant = {$: 'SecondaryVariant'};
+var $author$project$MaterialUI$Theme$Tooltip = {$: 'Tooltip'};
+var $author$project$MaterialUI$Theme$onColor = function (key) {
+	switch (key.$) {
+		case 'Primary':
+			return $author$project$MaterialUI$Theme$OnPrimary;
+		case 'PrimaryVariant':
+			return $author$project$MaterialUI$Theme$OnPrimaryVariant;
+		case 'OnPrimary':
+			return $author$project$MaterialUI$Theme$Primary;
+		case 'OnPrimaryVariant':
+			return $author$project$MaterialUI$Theme$PrimaryVariant;
+		case 'Secondary':
+			return $author$project$MaterialUI$Theme$OnSecondary;
+		case 'SecondaryVariant':
+			return $author$project$MaterialUI$Theme$OnSecondaryVariant;
+		case 'OnSecondary':
+			return $author$project$MaterialUI$Theme$Secondary;
+		case 'OnSecondaryVariant':
+			return $author$project$MaterialUI$Theme$SecondaryVariant;
+		case 'Background':
+			return $author$project$MaterialUI$Theme$OnBackground;
+		case 'OnBackground':
+			return $author$project$MaterialUI$Theme$Background;
+		case 'Surface':
+			return $author$project$MaterialUI$Theme$OnSurface;
+		case 'OnSurface':
+			return $author$project$MaterialUI$Theme$Surface;
+		case 'Tooltip':
+			return $author$project$MaterialUI$Theme$OnTooltip;
+		case 'OnTooltip':
+			return $author$project$MaterialUI$Theme$Tooltip;
+		case 'Error':
+			return $author$project$MaterialUI$Theme$OnError;
+		case 'OnError':
+			return $author$project$MaterialUI$Theme$Error;
+		case 'Custom':
+			var color = key.a;
+			return $author$project$MaterialUI$Theme$OnSurface;
+		default:
+			var a = key.a;
+			return $author$project$MaterialUI$Theme$Alternative(a);
+	}
+};
+var $author$project$MaterialUI$Theme$getOnColor = A2($elm$core$Basics$composeR, $author$project$MaterialUI$Theme$onColor, $author$project$MaterialUI$Theme$getColor);
+var $author$project$MaterialUI$Theme$isDark = function (theme) {
+	var _v0 = theme.variant;
+	if (_v0.$ === 'DarkVariant') {
+		return true;
+	} else {
+		return false;
+	}
+};
+var $author$project$MaterialUI$Internal$Select$Implementation$elevateBackground = F2(
+	function (colorKey, theme) {
+		var color = A2($author$project$MaterialUI$Theme$getColor, colorKey, theme);
+		if ($author$project$MaterialUI$Theme$isDark(theme)) {
+			var onColor = $mdgriffith$elm_ui$Element$toRgb(
+				A2($author$project$MaterialUI$Theme$getOnColor, colorKey, theme));
+			var factor = 0.08;
+			var _v0 = $mdgriffith$elm_ui$Element$toRgb(color);
+			var red = _v0.red;
+			var green = _v0.green;
+			var blue = _v0.blue;
+			var alpha = _v0.alpha;
+			return _List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$Background$color(
+					$mdgriffith$elm_ui$Element$fromRgb(
+						{alpha: alpha, blue: blue + (onColor.blue * factor), green: green + (onColor.green * factor), red: red + (onColor.red * factor)}))
+				]);
+		} else {
+			return _List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$Background$color(color),
+					$mdgriffith$elm_ui$Element$Border$shadow(
+					{
+						blur: 2,
+						color: A2($author$project$MaterialUI$Theme$setAlpha, 0.16, theme.color.onSurface),
+						offset: _Utils_Tuple2(1, 1),
+						size: 1
+					})
+				]);
+		}
+	});
+var $author$project$MaterialUI$Internal$State$Clicked = {$: 'Clicked'};
+var $author$project$MaterialUI$Internal$State$Focused = {$: 'Focused'};
+var $author$project$MaterialUI$Internal$State$Hovered = {$: 'Hovered'};
+var $author$project$MaterialUI$Internal$State$Idle = {$: 'Idle'};
+var $author$project$MaterialUI$Internal$State$getState = function (componentModel) {
+	var model = componentModel.state;
+	return (model.clicked && model.hovered) ? $author$project$MaterialUI$Internal$State$Clicked : (model.focused ? $author$project$MaterialUI$Internal$State$Focused : (model.hovered ? $author$project$MaterialUI$Internal$State$Hovered : $author$project$MaterialUI$Internal$State$Idle));
+};
+var $author$project$MaterialUI$ColorStateList$Hovered = {$: 'Hovered'};
+var $author$project$MaterialUI$ColorStateList$Idle = {$: 'Idle'};
+var $author$project$MaterialUI$ColorStateList$MouseDown = {$: 'MouseDown'};
+var $author$project$MaterialUI$Internal$State$toColorStateListState = function (state) {
+	switch (state.$) {
+		case 'Idle':
+			return $author$project$MaterialUI$ColorStateList$Idle;
+		case 'Hovered':
+			return $author$project$MaterialUI$ColorStateList$Hovered;
+		case 'Clicked':
+			return $author$project$MaterialUI$ColorStateList$MouseDown;
+		default:
+			return $author$project$MaterialUI$ColorStateList$Focused;
+	}
+};
+var $author$project$MaterialUI$Internal$State$colorListState = A2($elm$core$Basics$composeR, $author$project$MaterialUI$Internal$State$getState, $author$project$MaterialUI$Internal$State$toColorStateListState);
+var $author$project$MaterialUI$Internal$State$getColor = F3(
+	function (model, colorStateList, theme) {
+		return A3(
+			$author$project$MaterialUI$ColorStateList$color,
+			colorStateList,
+			theme,
+			$author$project$MaterialUI$Internal$State$colorListState(model));
+	});
+var $author$project$MaterialUI$Internal$State$FocusGain = {$: 'FocusGain'};
+var $author$project$MaterialUI$Internal$State$FocusLose = {$: 'FocusLose'};
+var $author$project$MaterialUI$Internal$State$MouseDown = {$: 'MouseDown'};
+var $author$project$MaterialUI$Internal$State$MouseEnter = {$: 'MouseEnter'};
+var $author$project$MaterialUI$Internal$State$MouseLeave = {$: 'MouseLeave'};
+var $author$project$MaterialUI$Internal$State$MouseUp = {$: 'MouseUp'};
+var $elm$html$Html$Events$onMouseDown = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'mousedown',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $mdgriffith$elm_ui$Element$Events$onMouseDown = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onMouseDown);
+var $elm$html$Html$Events$onMouseEnter = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'mouseenter',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $mdgriffith$elm_ui$Element$Events$onMouseEnter = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onMouseEnter);
+var $elm$html$Html$Events$onMouseLeave = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'mouseleave',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $mdgriffith$elm_ui$Element$Events$onMouseLeave = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onMouseLeave);
+var $elm$html$Html$Events$onMouseUp = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'mouseup',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $mdgriffith$elm_ui$Element$Events$onMouseUp = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onMouseUp);
+var $author$project$MaterialUI$Internal$State$install = function (lift) {
+	return _List_fromArray(
+		[
+			$mdgriffith$elm_ui$Element$Events$onMouseEnter(
+			lift($author$project$MaterialUI$Internal$State$MouseEnter)),
+			$mdgriffith$elm_ui$Element$Events$onMouseLeave(
+			lift($author$project$MaterialUI$Internal$State$MouseLeave)),
+			$mdgriffith$elm_ui$Element$Events$onMouseDown(
+			lift($author$project$MaterialUI$Internal$State$MouseDown)),
+			$mdgriffith$elm_ui$Element$Events$onMouseUp(
+			lift($author$project$MaterialUI$Internal$State$MouseUp)),
+			$mdgriffith$elm_ui$Element$Events$onFocus(
+			lift($author$project$MaterialUI$Internal$State$FocusGain)),
+			$mdgriffith$elm_ui$Element$Events$onLoseFocus(
+			lift($author$project$MaterialUI$Internal$State$FocusLose))
+		]);
+};
+var $author$project$MaterialUI$Internal$State$isActive = function (state) {
+	switch (state.$) {
+		case 'Idle':
+			return false;
+		case 'Hovered':
+			return false;
+		case 'Clicked':
+			return true;
+		default:
+			return true;
+	}
+};
+var $author$project$MaterialUI$Internal$Select$Model$ItemState = F2(
+	function (a, b) {
+		return {$: 'ItemState', a: a, b: b};
+	});
+var $author$project$MaterialUI$ColorStateList$transparent = A2($author$project$MaterialUI$ColorStateList$Color, 0, $author$project$MaterialUI$Theme$Primary);
+var $author$project$MaterialUI$Internal$Select$Implementation$menuItemBackgroundCST = {
+	disabled: A2($author$project$MaterialUI$ColorStateList$Color, 1, $author$project$MaterialUI$Theme$Surface),
+	focused: A2($author$project$MaterialUI$ColorStateList$Color, 0.2, $author$project$MaterialUI$Theme$OnSurface),
+	hovered: A2($author$project$MaterialUI$ColorStateList$Color, 0.1, $author$project$MaterialUI$Theme$OnSurface),
+	idle: $author$project$MaterialUI$ColorStateList$transparent,
+	mouseDown: A2($author$project$MaterialUI$ColorStateList$Color, 0.3, $author$project$MaterialUI$Theme$OnSurface)
+};
+var $author$project$MaterialUI$Text$view = F4(
+	function (attr, displayStr, fontscale, theme) {
+		var font = A2($author$project$MaterialUI$Theme$getFont, fontscale, theme);
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			_Utils_ap(
+				attr,
+				$author$project$MaterialUI$Theme$fontToAttributes(font)),
+			$mdgriffith$elm_ui$Element$text(
+				A2($author$project$MaterialUI$Theme$applyCase, font.fontcase, displayStr)));
+	});
+var $author$project$MaterialUI$Internal$Select$Implementation$menuItemView = F5(
+	function (mui, menu, store, pos, menuItem) {
+		var item = menuItem.a;
+		var index = $elm$core$String$fromInt(pos);
+		var menuModel = A2(
+			$elm$core$Maybe$withDefault,
+			$author$project$MaterialUI$Internal$Select$Model$defaultMenuItemModel,
+			A2($elm$core$Dict$get, index, store.menuItems));
+		var _v1 = menu.toItem(item);
+		var text = _v1.text;
+		return A4(
+			$author$project$MaterialUI$Text$view,
+			_Utils_ap(
+				$author$project$MaterialUI$Internal$State$install(
+					A2(
+						$elm$core$Basics$composeL,
+						A2(
+							$elm$core$Basics$composeL,
+							mui.lift,
+							$author$project$MaterialUI$Internal$Message$SelectMsg(menu.index)),
+						$author$project$MaterialUI$Internal$Select$Model$ItemState(index))),
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						A2($mdgriffith$elm_ui$Element$paddingXY, 12, 8),
+						$mdgriffith$elm_ui$Element$Background$color(
+						A3($author$project$MaterialUI$Internal$State$getColor, menuModel, $author$project$MaterialUI$Internal$Select$Implementation$menuItemBackgroundCST, mui.theme)),
+						$mdgriffith$elm_ui$Element$Events$onClick(
+						menu.onClick(item)),
+						$mdgriffith$elm_ui$Element$pointer
+					])),
+			text,
+			$author$project$MaterialUI$Theme$Body1,
+			mui.theme);
+	});
+var $author$project$MaterialUI$Icon$view = $author$project$MaterialUI$Internal$Icon$Implementation$view;
+var $author$project$MaterialUI$Internal$Select$Implementation$outlined = F3(
+	function (mui, attrs, menu) {
+		var theme = mui.theme;
+		var selectionText = A2(
+			$elm$core$Maybe$withDefault,
+			'',
+			A2(
+				$elm$core$Maybe$map,
+				function (item) {
+					return menu.toItem(item).text;
+				},
+				menu.selectedItem));
+		var index = menu.index;
+		var lift = A2(
+			$elm$core$Basics$composeL,
+			mui.lift,
+			$author$project$MaterialUI$Internal$Message$SelectMsg(index));
+		var model = A2(
+			$elm$core$Maybe$withDefault,
+			$author$project$MaterialUI$Internal$Select$Model$defaultModel,
+			A2($elm$core$Dict$get, index, mui.menu));
+		var isActive = $author$project$MaterialUI$Internal$State$isActive(
+			$author$project$MaterialUI$Internal$State$getState(model)) || (_Utils_eq(model.status, $author$project$MaterialUI$Internal$Select$Model$Open) || _Utils_eq(model.status, $author$project$MaterialUI$Internal$Select$Model$Opening));
+		var labelAtTop = function () {
+			var _v2 = menu.selectedItem;
+			if (_v2.$ === 'Just') {
+				return true;
+			} else {
+				return isActive;
+			}
+		}();
+		var labelFont = labelAtTop ? $author$project$MaterialUI$Theme$fontToAttributes(theme.typescale.caption) : $author$project$MaterialUI$Theme$fontToAttributes(theme.typescale.subtitle1);
+		var labelPosition = A2(
+			$elm$core$List$cons,
+			$mdgriffith$elm_ui$Element$alignBottom,
+			labelAtTop ? _List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$moveRight(10),
+					$mdgriffith$elm_ui$Element$Background$color(theme.color.surface),
+					$mdgriffith$elm_ui$Element$moveUp(48)
+				]) : _List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$moveRight(10),
+					$mdgriffith$elm_ui$Element$moveUp(20)
+				]));
+		var labelFontColor = isActive ? A3($author$project$MaterialUI$ColorStateList$color, menu.color, theme, $author$project$MaterialUI$ColorStateList$Focused) : A2($author$project$MaterialUI$Theme$setAlpha, 0.6, theme.color.onSurface);
+		var label = A2(
+			$mdgriffith$elm_ui$Element$el,
+			_Utils_ap(
+				labelPosition,
+				_Utils_ap(
+					labelFont,
+					_List_fromArray(
+						[
+							A2($author$project$MaterialUI$Internal$Component$elementCss, 'transition', 'all 0.15s'),
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+							A2($mdgriffith$elm_ui$Element$paddingXY, 4, 0),
+							$mdgriffith$elm_ui$Element$Font$color(labelFontColor)
+						]))),
+			$mdgriffith$elm_ui$Element$text(menu.label));
+		var menuList = function () {
+			var _v1 = model.status;
+			if (_v1.$ === 'Closed') {
+				return $mdgriffith$elm_ui$Element$none;
+			} else {
+				return A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$paddingEach(
+							{bottom: 0, left: 0, right: 0, top: 2}),
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+						]),
+					A2(
+						$mdgriffith$elm_ui$Element$column,
+						_Utils_ap(
+							A2($author$project$MaterialUI$Internal$Select$Implementation$elevateBackground, $author$project$MaterialUI$Theme$Surface, mui.theme),
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+									A2($mdgriffith$elm_ui$Element$paddingXY, 0, 6),
+									$mdgriffith$elm_ui$Element$Border$rounded(6)
+								])),
+						A2(
+							$elm$core$List$indexedMap,
+							A3($author$project$MaterialUI$Internal$Select$Implementation$menuItemView, mui, menu, model),
+							menu.items)));
+			}
+		}();
+		var statusIcon = function () {
+			var _v0 = model.status;
+			switch (_v0.$) {
+				case 'Closed':
+					return $author$project$MaterialUI$Icons$Navigation$arrow_drop_down;
+				case 'Open':
+					return $author$project$MaterialUI$Icons$Navigation$arrow_drop_up;
+				default:
+					return $author$project$MaterialUI$Icons$Navigation$arrow_drop_up;
+			}
+		}();
+		var borderWidth = isActive ? 2 : 1;
+		var borderColor = isActive ? A3($author$project$MaterialUI$ColorStateList$color, menu.color, theme, $author$project$MaterialUI$ColorStateList$Focused) : A3($author$project$MaterialUI$Internal$State$getColor, model, menu.color, theme);
+		var borders = _Utils_ap(
+			A3($author$project$MaterialUI$Theme$shapeToAttributes, 56, 56, theme.shape.textField.outlined),
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$Border$width(borderWidth),
+					$mdgriffith$elm_ui$Element$Border$color(borderColor),
+					A2($author$project$MaterialUI$Internal$Component$elementCss, 'transition', 'border-width 0.15s')
+				]));
+		return A2(
+			$mdgriffith$elm_ui$Element$row,
+			_Utils_ap(
+				attrs,
+				_Utils_ap(
+					$author$project$MaterialUI$Internal$State$install(
+						A2($elm$core$Basics$composeL, lift, $author$project$MaterialUI$Internal$Select$Model$State)),
+					_Utils_ap(
+						borders,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$inFront(label),
+								$mdgriffith$elm_ui$Element$below(menuList),
+								$mdgriffith$elm_ui$Element$height(
+								$mdgriffith$elm_ui$Element$px(56)),
+								A2($mdgriffith$elm_ui$Element$paddingXY, 12, 0),
+								$mdgriffith$elm_ui$Element$Events$onClick(
+								lift($author$project$MaterialUI$Internal$Select$Model$Clicked)),
+								$mdgriffith$elm_ui$Element$pointer
+							])))),
+			_List_fromArray(
+				[
+					A4(
+					$author$project$MaterialUI$Text$view,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$centerY,
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+						]),
+					selectionText,
+					$author$project$MaterialUI$Theme$Subtitle1,
+					mui.theme),
+					A4(
+					$author$project$MaterialUI$Icon$view,
+					mui.theme,
+					$author$project$MaterialUI$Theme$Custom(labelFontColor),
+					24,
+					statusIcon)
+				]));
+	});
+var $author$project$MaterialUI$Select$outlined = $author$project$MaterialUI$Internal$Select$Implementation$outlined;
 var $author$project$Page$Home$toErrorMsg = function (joinError) {
 	if (joinError.$ === 'LobbyError') {
 		var lobbyError = joinError.a;
@@ -17631,12 +18185,39 @@ var $author$project$Page$Home$view = function (model) {
 							]),
 						_List_fromArray(
 							[
-								$author$project$UIHelper$nonEl(
+								A2(
+								$mdgriffith$elm_ui$Element$el,
 								_List_fromArray(
 									[
 										$mdgriffith$elm_ui$Element$width(
 										$mdgriffith$elm_ui$Element$fillPortion(2))
-									])),
+									]),
+								A3(
+									$author$project$MaterialUI$Select$outlined,
+									model.mui,
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+										]),
+									{
+										color: $author$project$MaterialUI$Select$defaultColorPrimary,
+										index: 'modeSelect',
+										items: _List_fromArray(
+											[
+												$author$project$MaterialUI$Select$item($author$project$Page$Home$TicTacToe),
+												$author$project$MaterialUI$Select$item($author$project$Page$Home$Misery)
+											]),
+										label: 'Mode',
+										onClick: $author$project$Page$Home$ModeSelected,
+										selectedItem: $elm$core$Maybe$Just(model.mode),
+										toItem: function (mode) {
+											if (mode.$ === 'TicTacToe') {
+												return {text: 'Tic Tac Toe'};
+											} else {
+												return {text: 'Misery'};
+											}
+										}
+									})),
 								A3(
 								$author$project$MaterialUI$Button$outlined,
 								_List_fromArray(
@@ -17656,9 +18237,9 @@ var $author$project$Page$Home$view = function (model) {
 							]))
 					]),
 				function () {
-					var _v0 = model.error;
-					if (_v0.$ === 'Just') {
-						var error = _v0.a;
+					var _v1 = model.error;
+					if (_v1.$ === 'Just') {
+						var error = _v1.a;
 						return _List_fromArray(
 							[
 								A2(
@@ -17762,16 +18343,12 @@ var $author$project$Page$Rematch$view = function (model) {
 		title: 'Rematch'
 	};
 };
-var $author$project$MaterialUI$Theme$Alternative = function (a) {
-	return {$: 'Alternative', a: a};
-};
 var $author$project$Page$TTT$InGame$CellClicked = function (a) {
 	return {$: 'CellClicked', a: a};
 };
 var $elm$svg$Svg$circle = $elm$svg$Svg$trustedNode('circle');
 var $elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
 var $elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
-var $elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
 var $elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
 var $elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
 var $elm$svg$Svg$Attributes$strokeWidth = _VirtualDom_attribute('stroke-width');
@@ -17987,8 +18564,6 @@ var $avh4$elm_color$Color$toCssString = function (_v0) {
 			]));
 };
 var $elm$svg$Svg$Attributes$preserveAspectRatio = _VirtualDom_attribute('preserveAspectRatio');
-var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
-var $elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
 var $author$project$Page$TTT$SvgSymbol$toHtml = $elm$svg$Svg$svg(
 	_List_fromArray(
 		[
@@ -18118,44 +18693,6 @@ var $author$project$Page$TTT$InGame$headerButtonColumn = function (theme) {
 				theme)
 			]));
 };
-var $elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
-var $elm$svg$Svg$g = $elm$svg$Svg$trustedNode('g');
-var $elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
-var $danmarcab$material_icons$Material$Icons$Internal$toRgbaString = function (color) {
-	var _v0 = $avh4$elm_color$Color$toRgba(color);
-	var red = _v0.red;
-	var green = _v0.green;
-	var blue = _v0.blue;
-	var alpha = _v0.alpha;
-	return 'rgba(' + ($elm$core$String$fromInt(
-		$elm$core$Basics$round(255 * red)) + (',' + ($elm$core$String$fromInt(
-		$elm$core$Basics$round(255 * green)) + (',' + ($elm$core$String$fromInt(
-		$elm$core$Basics$round(255 * blue)) + (',' + ($elm$core$String$fromFloat(alpha) + ')')))))));
-};
-var $danmarcab$material_icons$Material$Icons$Internal$icon = F4(
-	function (viewBox, children, color, size) {
-		var stringSize = $elm$core$String$fromInt(size);
-		var stringColor = $danmarcab$material_icons$Material$Icons$Internal$toRgbaString(color);
-		return A2(
-			$elm$svg$Svg$svg,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$width(stringSize),
-					$elm$svg$Svg$Attributes$height(stringSize),
-					$elm$svg$Svg$Attributes$viewBox(viewBox)
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$elm$svg$Svg$g,
-					_List_fromArray(
-						[
-							$elm$svg$Svg$Attributes$fill(stringColor)
-						]),
-					children)
-				]));
-	});
-var $elm$svg$Svg$path = $elm$svg$Svg$trustedNode('path');
 var $danmarcab$material_icons$Material$Icons$Navigation$close = A2(
 	$danmarcab$material_icons$Material$Icons$Internal$icon,
 	'0 0 48 48',
@@ -18169,11 +18706,6 @@ var $danmarcab$material_icons$Material$Icons$Navigation$close = A2(
 				]),
 			_List_Nil)
 		]));
-var $author$project$MaterialUI$Internal$Icon$Model$Icon = function (a) {
-	return {$: 'Icon', a: a};
-};
-var $author$project$MaterialUI$Internal$Icon$Implementation$makeIcon = $author$project$MaterialUI$Internal$Icon$Model$Icon;
-var $author$project$MaterialUI$Icon$makeIcon = $author$project$MaterialUI$Internal$Icon$Implementation$makeIcon;
 var $author$project$MaterialUI$Icons$Navigation$close = $author$project$MaterialUI$Icon$makeIcon($danmarcab$material_icons$Material$Icons$Navigation$close);
 var $danmarcab$material_icons$Material$Icons$Toggle$radio_button_unchecked = A2(
 	$danmarcab$material_icons$Material$Icons$Internal$icon,
@@ -18189,7 +18721,6 @@ var $danmarcab$material_icons$Material$Icons$Toggle$radio_button_unchecked = A2(
 			_List_Nil)
 		]));
 var $author$project$MaterialUI$Icons$Toggle$radio_button_unchecked = $author$project$MaterialUI$Icon$makeIcon($danmarcab$material_icons$Material$Icons$Toggle$radio_button_unchecked);
-var $author$project$MaterialUI$Icon$view = $author$project$MaterialUI$Internal$Icon$Implementation$view;
 var $author$project$Page$TTT$InGame$playerHeader = F4(
 	function (theme, player, highlight, alignment) {
 		var symbolIcon = function () {
@@ -18420,15 +18951,10 @@ var $author$project$Page$TTT$InGame$view = function (model) {
 	};
 };
 var $author$project$Page$TTT$Lobby$AddBot = {$: 'AddBot'};
-var $author$project$MaterialUI$ColorStateList$Color = F2(
-	function (a, b) {
-		return {$: 'Color', a: a, b: b};
-	});
 var $author$project$Page$TTT$Lobby$CopyGameId = {$: 'CopyGameId'};
 var $author$project$Page$TTT$Lobby$Name = function (a) {
 	return {$: 'Name', a: a};
 };
-var $author$project$MaterialUI$Theme$OnBackground = {$: 'OnBackground'};
 var $author$project$MaterialUI$Theme$Overline = {$: 'Overline'};
 var $author$project$Page$TTT$Lobby$Ready = {$: 'Ready'};
 var $author$project$Game$Lobby$allPlayers = function (lobby) {
@@ -18438,115 +18964,8 @@ var $author$project$Game$Lobby$allPlayers = function (lobby) {
 		lobby.players);
 };
 var $author$project$MaterialUI$Internal$Tooltip$Model$Bottom = {$: 'Bottom'};
-var $author$project$MaterialUI$ColorStateList$Focused = {$: 'Focused'};
-var $author$project$MaterialUI$ColorStateList$Hovered = {$: 'Hovered'};
-var $author$project$MaterialUI$ColorStateList$MouseDown = {$: 'MouseDown'};
 var $author$project$MaterialUI$Internal$Icon$Model$State = function (a) {
 	return {$: 'State', a: a};
-};
-var $author$project$MaterialUI$ColorStateList$get = F2(
-	function (state, colorStateList) {
-		switch (state.$) {
-			case 'Idle':
-				return colorStateList.idle;
-			case 'Hovered':
-				return colorStateList.hovered;
-			case 'Focused':
-				return colorStateList.focused;
-			case 'MouseDown':
-				return colorStateList.mouseDown;
-			default:
-				return colorStateList.disabled;
-		}
-	});
-var $author$project$MaterialUI$ColorStateList$toElementColor = F2(
-	function (theme, _v0) {
-		var alpha = _v0.a;
-		var c = _v0.b;
-		return A2(
-			$author$project$MaterialUI$Theme$setAlpha,
-			alpha,
-			A2($author$project$MaterialUI$Theme$getColor, c, theme));
-	});
-var $author$project$MaterialUI$ColorStateList$color = F3(
-	function (colorStateList, theme, state) {
-		return A2(
-			$author$project$MaterialUI$ColorStateList$toElementColor,
-			theme,
-			A2($author$project$MaterialUI$ColorStateList$get, state, colorStateList));
-	});
-var $author$project$MaterialUI$Internal$State$Clicked = {$: 'Clicked'};
-var $author$project$MaterialUI$Internal$State$Focused = {$: 'Focused'};
-var $author$project$MaterialUI$Internal$State$Hovered = {$: 'Hovered'};
-var $author$project$MaterialUI$Internal$State$Idle = {$: 'Idle'};
-var $author$project$MaterialUI$Internal$State$getState = function (componentModel) {
-	var model = componentModel.state;
-	return (model.clicked && model.hovered) ? $author$project$MaterialUI$Internal$State$Clicked : (model.focused ? $author$project$MaterialUI$Internal$State$Focused : (model.hovered ? $author$project$MaterialUI$Internal$State$Hovered : $author$project$MaterialUI$Internal$State$Idle));
-};
-var $author$project$MaterialUI$ColorStateList$Idle = {$: 'Idle'};
-var $author$project$MaterialUI$Internal$State$toColorStateListState = function (state) {
-	switch (state.$) {
-		case 'Idle':
-			return $author$project$MaterialUI$ColorStateList$Idle;
-		case 'Hovered':
-			return $author$project$MaterialUI$ColorStateList$Hovered;
-		case 'Clicked':
-			return $author$project$MaterialUI$ColorStateList$MouseDown;
-		default:
-			return $author$project$MaterialUI$ColorStateList$Focused;
-	}
-};
-var $author$project$MaterialUI$Internal$State$colorListState = A2($elm$core$Basics$composeR, $author$project$MaterialUI$Internal$State$getState, $author$project$MaterialUI$Internal$State$toColorStateListState);
-var $author$project$MaterialUI$Internal$State$FocusGain = {$: 'FocusGain'};
-var $author$project$MaterialUI$Internal$State$FocusLose = {$: 'FocusLose'};
-var $author$project$MaterialUI$Internal$State$MouseDown = {$: 'MouseDown'};
-var $author$project$MaterialUI$Internal$State$MouseEnter = {$: 'MouseEnter'};
-var $author$project$MaterialUI$Internal$State$MouseLeave = {$: 'MouseLeave'};
-var $author$project$MaterialUI$Internal$State$MouseUp = {$: 'MouseUp'};
-var $elm$html$Html$Events$onMouseDown = function (msg) {
-	return A2(
-		$elm$html$Html$Events$on,
-		'mousedown',
-		$elm$json$Json$Decode$succeed(msg));
-};
-var $mdgriffith$elm_ui$Element$Events$onMouseDown = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onMouseDown);
-var $elm$html$Html$Events$onMouseEnter = function (msg) {
-	return A2(
-		$elm$html$Html$Events$on,
-		'mouseenter',
-		$elm$json$Json$Decode$succeed(msg));
-};
-var $mdgriffith$elm_ui$Element$Events$onMouseEnter = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onMouseEnter);
-var $elm$html$Html$Events$onMouseLeave = function (msg) {
-	return A2(
-		$elm$html$Html$Events$on,
-		'mouseleave',
-		$elm$json$Json$Decode$succeed(msg));
-};
-var $mdgriffith$elm_ui$Element$Events$onMouseLeave = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onMouseLeave);
-var $elm$html$Html$Events$onMouseUp = function (msg) {
-	return A2(
-		$elm$html$Html$Events$on,
-		'mouseup',
-		$elm$json$Json$Decode$succeed(msg));
-};
-var $mdgriffith$elm_ui$Element$Events$onMouseUp = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onMouseUp);
-var $author$project$MaterialUI$Internal$State$install = function (lift) {
-	return _List_fromArray(
-		[
-			$mdgriffith$elm_ui$Element$Events$onMouseEnter(
-			lift($author$project$MaterialUI$Internal$State$MouseEnter)),
-			$mdgriffith$elm_ui$Element$Events$onMouseLeave(
-			lift($author$project$MaterialUI$Internal$State$MouseLeave)),
-			$mdgriffith$elm_ui$Element$Events$onMouseDown(
-			lift($author$project$MaterialUI$Internal$State$MouseDown)),
-			$mdgriffith$elm_ui$Element$Events$onMouseUp(
-			lift($author$project$MaterialUI$Internal$State$MouseUp)),
-			$mdgriffith$elm_ui$Element$Events$onFocus(
-			lift($author$project$MaterialUI$Internal$State$FocusGain)),
-			$mdgriffith$elm_ui$Element$Events$onLoseFocus(
-			lift($author$project$MaterialUI$Internal$State$FocusLose))
-		]);
 };
 var $author$project$MaterialUI$Theme$Caption = {$: 'Caption'};
 var $author$project$MaterialUI$Internal$Tooltip$Model$MouseEnter = {$: 'MouseEnter'};
@@ -18555,15 +18974,6 @@ var $mdgriffith$elm_ui$Internal$Model$Above = {$: 'Above'};
 var $mdgriffith$elm_ui$Element$above = function (element) {
 	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$Above, element);
 };
-var $mdgriffith$elm_ui$Internal$Model$Below = {$: 'Below'};
-var $mdgriffith$elm_ui$Element$below = function (element) {
-	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$Below, element);
-};
-var $author$project$MaterialUI$Internal$Component$elementCss = F2(
-	function (property, value) {
-		return $mdgriffith$elm_ui$Element$htmlAttribute(
-			A2($elm$html$Html$Attributes$style, property, value));
-	});
 var $mdgriffith$elm_ui$Internal$Model$OnLeft = {$: 'OnLeft'};
 var $mdgriffith$elm_ui$Element$onLeft = function (element) {
 	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$OnLeft, element);
@@ -18573,17 +18983,6 @@ var $mdgriffith$elm_ui$Element$onRight = function (element) {
 	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$OnRight, element);
 };
 var $author$project$MaterialUI$Internal$Tooltip$Implementation$padding = {bottom: 0, left: 0, right: 0, top: 0};
-var $author$project$MaterialUI$Text$view = F4(
-	function (attr, displayStr, fontscale, theme) {
-		var font = A2($author$project$MaterialUI$Theme$getFont, fontscale, theme);
-		return A2(
-			$mdgriffith$elm_ui$Element$el,
-			_Utils_ap(
-				attr,
-				$author$project$MaterialUI$Theme$fontToAttributes(font)),
-			$mdgriffith$elm_ui$Element$text(
-				A2($author$project$MaterialUI$Theme$applyCase, font.fontcase, displayStr)));
-	});
 var $author$project$MaterialUI$Internal$Tooltip$Implementation$view = F4(
 	function (mui, layoutAtt, tooltip, content) {
 		var index = tooltip.index;
@@ -18819,7 +19218,6 @@ var $danmarcab$material_icons$Material$Icons$Content$content_copy = A2(
 			_List_Nil)
 		]));
 var $author$project$MaterialUI$Icons$Content$content_copy = $author$project$MaterialUI$Icon$makeIcon($danmarcab$material_icons$Material$Icons$Content$content_copy);
-var $author$project$MaterialUI$ColorStateList$transparent = A2($author$project$MaterialUI$ColorStateList$Color, 0, $author$project$MaterialUI$Theme$Primary);
 var $author$project$MaterialUI$ColorStateList$defaultBackgroundOnBackground = {
 	disabled: $author$project$MaterialUI$ColorStateList$transparent,
 	focused: A2($author$project$MaterialUI$ColorStateList$Color, 0.15, $author$project$MaterialUI$Theme$OnBackground),
