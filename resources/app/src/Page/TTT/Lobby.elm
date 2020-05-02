@@ -9,6 +9,7 @@ import MaterialUI.Icons.Content as Content
 import MaterialUI.Icon as Icon
 import MaterialUI.Internal.TextField.Model as TextField
 import MaterialUI.MaterilaUI as MaterialUI
+import MaterialUI.Snackbar as Snackbar
 import MaterialUI.TextFieldM as TextField
 import Monocle.Lens as Lens exposing (Lens)
 import ServerRequest.InLobby as InLobbyRequest
@@ -90,9 +91,21 @@ update msg model =
 
         CopyGameId ->
             let
-                a = Debug.log "copying gameId" ""
+                ( newMui, effects ) = Snackbar.set
+                    { text = "Copied Link"
+                    , position = Snackbar.leading
+                    , duration = Snackbar.short
+                    , action = Nothing
+                    }
+                    "snackbar"
+                    model.mui
             in
-            ( model, ClipBoard.copyToClipBoard <| Url.Builder.absolute [ "game", model.lobby.gameId ] [] )
+            ( { model | mui = newMui }
+            , Cmd.batch
+                [ ClipBoard.copyToClipBoard <| Url.Builder.absolute [ "game", model.lobby.gameId ] []
+                , effects
+                ]
+            )
 
         Mui subMsg ->
             materialUpdate subMsg model
@@ -193,7 +206,7 @@ view model =
                         , disabled = ColorStateList.Color 0.5 Theme.OnBackground
                         }
                     , background = ColorStateList.defaultBackgroundOnBackground
-                    , tooltip = "Copy Id"
+                    , tooltip = "Copy Link"
                     , size = 24
                     }
                 ]
@@ -210,6 +223,7 @@ view model =
                 theme
             ]
         ] ++ (Lobby.allPlayers model.lobby |> List.map (playerRow theme))
+        ++ [ Snackbar.view model.mui "snackbar" ]
     }
 
 

@@ -9004,6 +9004,8 @@ var $author$project$ServerRequest$InLobby$addBotMsg = F2(
 				A2($author$project$ServerRequest$InLobby$header, gameId, requestingPlayer)));
 	});
 var $author$project$ClipBoard$copyToClipBoard = _Platform_outgoingPort('copyToClipBoard', $elm$json$Json$Encode$string);
+var $author$project$MaterialUI$Internal$Snackbar$Model$Leading = {$: 'Leading'};
+var $author$project$MaterialUI$Snackbar$leading = $author$project$MaterialUI$Internal$Snackbar$Model$Leading;
 var $arturopala$elm_monocle$Monocle$Lens$modify = F2(
 	function (lens, f) {
 		var mf = function (a) {
@@ -9103,6 +9105,79 @@ var $author$project$ServerRequest$InLobby$readyChangedMsg = F2(
 							$elm$json$Json$Encode$bool(changedPlayer.isReady))
 						]))));
 	});
+var $author$project$MaterialUI$Internal$Snackbar$Implementation$add_ = F4(
+	function (queueTransform, behavior, snackbar, model) {
+		var updatedModel = _Utils_update(
+			model,
+			{
+				queue: A2(queueTransform, snackbar, model.queue)
+			});
+		var _v0 = model.status;
+		if (_v0.$ === 'Nil') {
+			return $author$project$MaterialUI$Internal$Snackbar$Implementation$tryDequeue(updatedModel);
+		} else {
+			if (behavior.$ === 'KeepCurrent') {
+				return _Utils_Tuple2(updatedModel, $elm$core$Platform$Cmd$none);
+			} else {
+				return _Utils_Tuple2(
+					updatedModel,
+					$author$project$MaterialUI$Internal$Component$cmd(
+						$author$project$MaterialUI$Internal$Snackbar$Model$Dismiss(model.snackbarId)));
+			}
+		}
+	});
+var $author$project$MaterialUI$Internal$Snackbar$Implementation$updateSnackModel = F4(
+	function (mui, index, snackbar, updateFunc) {
+		var model = A2(
+			$elm$core$Maybe$withDefault,
+			$author$project$MaterialUI$Internal$Snackbar$Model$defaultModel,
+			A2($elm$core$Dict$get, index, mui.snackbar));
+		var _v0 = A2(
+			$elm$core$Tuple$mapSecond,
+			$elm$core$Platform$Cmd$map(
+				A2(
+					$elm$core$Basics$composeL,
+					mui.lift,
+					$author$project$MaterialUI$Internal$Message$SnackbarMsg(index))),
+			A2(updateFunc, snackbar, model));
+		var updatedModel = _v0.a;
+		var effects = _v0.b;
+		return _Utils_Tuple2(
+			_Utils_update(
+				mui,
+				{
+					snackbar: A3($elm$core$Dict$insert, index, updatedModel, mui.snackbar)
+				}),
+			effects);
+	});
+var $author$project$MaterialUI$Internal$Snackbar$Implementation$add = F5(
+	function (mui, index, snackbar, queueTransform, behavior) {
+		return A4(
+			$author$project$MaterialUI$Internal$Snackbar$Implementation$updateSnackModel,
+			mui,
+			index,
+			snackbar,
+			A2($author$project$MaterialUI$Internal$Snackbar$Implementation$add_, queueTransform, behavior));
+	});
+var $author$project$MaterialUI$Snackbar$add = $author$project$MaterialUI$Internal$Snackbar$Implementation$add;
+var $author$project$MaterialUI$Internal$Snackbar$Model$DismissCurrent = {$: 'DismissCurrent'};
+var $author$project$MaterialUI$Snackbar$dismissCurrent = $author$project$MaterialUI$Internal$Snackbar$Model$DismissCurrent;
+var $author$project$MaterialUI$Snackbar$set = F3(
+	function (snackbar, index, mui) {
+		return A5(
+			$author$project$MaterialUI$Snackbar$add,
+			mui,
+			index,
+			snackbar,
+			F2(
+				function (c, _v0) {
+					return _List_fromArray(
+						[c]);
+				}),
+			$author$project$MaterialUI$Snackbar$dismissCurrent);
+	});
+var $author$project$MaterialUI$Internal$Snackbar$Model$Short = {$: 'Short'};
+var $author$project$MaterialUI$Snackbar$short = $author$project$MaterialUI$Internal$Snackbar$Model$Short;
 var $author$project$Page$TTT$Lobby$update = F2(
 	function (msg, model) {
 		var lobby = model.lobby;
@@ -9131,15 +9206,28 @@ var $author$project$Page$TTT$Lobby$update = F2(
 					$author$project$Websocket$send(
 						A2($author$project$ServerRequest$InLobby$addBotMsg, lobby.gameId, lobby.playerMe)));
 			case 'CopyGameId':
-				var a = A2($elm$core$Debug$log, 'copying gameId', '');
+				var _v1 = A3(
+					$author$project$MaterialUI$Snackbar$set,
+					{action: $elm$core$Maybe$Nothing, duration: $author$project$MaterialUI$Snackbar$short, position: $author$project$MaterialUI$Snackbar$leading, text: 'Copied Link'},
+					'snackbar',
+					model.mui);
+				var newMui = _v1.a;
+				var effects = _v1.b;
 				return _Utils_Tuple2(
-					model,
-					$author$project$ClipBoard$copyToClipBoard(
-						A2(
-							$elm$url$Url$Builder$absolute,
-							_List_fromArray(
-								['game', model.lobby.gameId]),
-							_List_Nil)));
+					_Utils_update(
+						model,
+						{mui: newMui}),
+					$elm$core$Platform$Cmd$batch(
+						_List_fromArray(
+							[
+								$author$project$ClipBoard$copyToClipBoard(
+								A2(
+									$elm$url$Url$Builder$absolute,
+									_List_fromArray(
+										['game', model.lobby.gameId]),
+									_List_Nil)),
+								effects
+							])));
 			default:
 				var subMsg = msg.a;
 				return A2($author$project$UIHelper$materialUpdate, subMsg, model);
@@ -18640,6 +18728,383 @@ var $author$project$Page$TTT$Lobby$playerRow = F2(
 					theme)
 				]));
 	});
+var $author$project$MaterialUI$Internal$Snackbar$Model$Clicked = {$: 'Clicked'};
+var $author$project$MaterialUI$Theme$inverted = function (theme) {
+	var _v0 = theme.variant;
+	if (_v0.$ === 'LightVariant') {
+		var inverted_ = _v0.a;
+		return inverted_(_Utils_Tuple0);
+	} else {
+		var inverted_ = _v0.a;
+		return inverted_(_Utils_Tuple0);
+	}
+};
+var $author$project$MaterialUI$Button$text = F3(
+	function (attr, btn, theme) {
+		return A2(
+			$mdgriffith$elm_ui$Element$Input$button,
+			_Utils_ap(
+				$author$project$MaterialUI$Theme$fontToAttributes(theme.typescale.button),
+				_Utils_ap(
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$height(
+							$mdgriffith$elm_ui$Element$px(36)),
+							$mdgriffith$elm_ui$Element$width(
+							A2($mdgriffith$elm_ui$Element$minimum, 64, $mdgriffith$elm_ui$Element$shrink)),
+							A2($mdgriffith$elm_ui$Element$paddingXY, 8, 0),
+							$mdgriffith$elm_ui$Element$focused(
+							_List_fromArray(
+								[
+									A2($mdgriffith$elm_ui$Element$Border$glow, theme.color.surface, 0)
+								]))
+						]),
+					_Utils_ap(
+						attr,
+						btn.disabled ? _List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$Font$color(
+								A2($author$project$MaterialUI$Theme$setAlpha, 0.5, theme.color.onSurface)),
+								$author$project$MaterialUI$Internal$disabled(true)
+							]) : _List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$Font$color(
+								A2($author$project$MaterialUI$Theme$getColor, btn.color, theme)),
+								$mdgriffith$elm_ui$Element$mouseDown(
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$Background$color(
+										A2(
+											$author$project$MaterialUI$Theme$setAlpha,
+											0.2,
+											A2($author$project$MaterialUI$Theme$getColor, btn.color, theme)))
+									])),
+								$mdgriffith$elm_ui$Element$focused(
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$Background$color(
+										A2(
+											$author$project$MaterialUI$Theme$setAlpha,
+											0.15,
+											A2($author$project$MaterialUI$Theme$getColor, btn.color, theme)))
+									])),
+								$mdgriffith$elm_ui$Element$mouseOver(
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$Background$color(
+										A2(
+											$author$project$MaterialUI$Theme$setAlpha,
+											0.1,
+											A2($author$project$MaterialUI$Theme$getColor, btn.color, theme)))
+									]))
+							])))),
+			{
+				label: A4(
+					$author$project$MaterialUI$Button$makeLabel,
+					theme,
+					btn.disabled ? $author$project$MaterialUI$Theme$Custom(
+						A2($author$project$MaterialUI$Theme$setAlpha, 0.5, theme.color.onSurface)) : btn.color,
+					btn.text,
+					btn.icon),
+				onPress: btn.disabled ? $elm$core$Maybe$Nothing : btn.onPress
+			});
+	});
+var $author$project$MaterialUI$Internal$Snackbar$Implementation$actionToButton = F3(
+	function (action, theme, lift) {
+		return A3(
+			$author$project$MaterialUI$Button$text,
+			_List_fromArray(
+				[$mdgriffith$elm_ui$Element$alignRight]),
+			{
+				color: action.color,
+				disabled: false,
+				icon: $elm$core$Maybe$Nothing,
+				onPress: $elm$core$Maybe$Just(
+					lift($author$project$MaterialUI$Internal$Snackbar$Model$Clicked)),
+				text: action.text
+			},
+			$author$project$MaterialUI$Theme$inverted(theme));
+	});
+var $mdgriffith$elm_ui$Internal$Model$Padding = F5(
+	function (a, b, c, d, e) {
+		return {$: 'Padding', a: a, b: b, c: c, d: d, e: e};
+	});
+var $mdgriffith$elm_ui$Internal$Model$Spaced = F3(
+	function (a, b, c) {
+		return {$: 'Spaced', a: a, b: b, c: c};
+	});
+var $mdgriffith$elm_ui$Internal$Model$extractSpacingAndPadding = function (attrs) {
+	return A3(
+		$elm$core$List$foldr,
+		F2(
+			function (attr, _v0) {
+				var pad = _v0.a;
+				var spacing = _v0.b;
+				return _Utils_Tuple2(
+					function () {
+						if (pad.$ === 'Just') {
+							var x = pad.a;
+							return pad;
+						} else {
+							if ((attr.$ === 'StyleClass') && (attr.b.$ === 'PaddingStyle')) {
+								var _v3 = attr.b;
+								var name = _v3.a;
+								var t = _v3.b;
+								var r = _v3.c;
+								var b = _v3.d;
+								var l = _v3.e;
+								return $elm$core$Maybe$Just(
+									A5($mdgriffith$elm_ui$Internal$Model$Padding, name, t, r, b, l));
+							} else {
+								return $elm$core$Maybe$Nothing;
+							}
+						}
+					}(),
+					function () {
+						if (spacing.$ === 'Just') {
+							var x = spacing.a;
+							return spacing;
+						} else {
+							if ((attr.$ === 'StyleClass') && (attr.b.$ === 'SpacingStyle')) {
+								var _v6 = attr.b;
+								var name = _v6.a;
+								var x = _v6.b;
+								var y = _v6.c;
+								return $elm$core$Maybe$Just(
+									A3($mdgriffith$elm_ui$Internal$Model$Spaced, name, x, y));
+							} else {
+								return $elm$core$Maybe$Nothing;
+							}
+						}
+					}());
+			}),
+		_Utils_Tuple2($elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing),
+		attrs);
+};
+var $mdgriffith$elm_ui$Element$wrappedRow = F2(
+	function (attrs, children) {
+		var _v0 = $mdgriffith$elm_ui$Internal$Model$extractSpacingAndPadding(attrs);
+		var padded = _v0.a;
+		var spaced = _v0.b;
+		if (spaced.$ === 'Nothing') {
+			return A4(
+				$mdgriffith$elm_ui$Internal$Model$element,
+				$mdgriffith$elm_ui$Internal$Model$asRow,
+				$mdgriffith$elm_ui$Internal$Model$div,
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.wrapped)))),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+						A2(
+							$elm$core$List$cons,
+							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+							attrs))),
+				$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+		} else {
+			var _v2 = spaced.a;
+			var spaceName = _v2.a;
+			var x = _v2.b;
+			var y = _v2.c;
+			var newPadding = function () {
+				if (padded.$ === 'Just') {
+					var _v5 = padded.a;
+					var name = _v5.a;
+					var t = _v5.b;
+					var r = _v5.c;
+					var b = _v5.d;
+					var l = _v5.e;
+					return ((_Utils_cmp(r, (x / 2) | 0) > -1) && (_Utils_cmp(b, (y / 2) | 0) > -1)) ? $elm$core$Maybe$Just(
+						$mdgriffith$elm_ui$Element$paddingEach(
+							{bottom: b - ((y / 2) | 0), left: l - ((x / 2) | 0), right: r - ((x / 2) | 0), top: t - ((y / 2) | 0)})) : $elm$core$Maybe$Nothing;
+				} else {
+					return $elm$core$Maybe$Nothing;
+				}
+			}();
+			if (newPadding.$ === 'Just') {
+				var pad = newPadding.a;
+				return A4(
+					$mdgriffith$elm_ui$Internal$Model$element,
+					$mdgriffith$elm_ui$Internal$Model$asRow,
+					$mdgriffith$elm_ui$Internal$Model$div,
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.wrapped)))),
+						A2(
+							$elm$core$List$cons,
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+							A2(
+								$elm$core$List$cons,
+								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+								_Utils_ap(
+									attrs,
+									_List_fromArray(
+										[pad]))))),
+					$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+			} else {
+				var halfY = -(y / 2);
+				var halfX = -(x / 2);
+				return A4(
+					$mdgriffith$elm_ui$Internal$Model$element,
+					$mdgriffith$elm_ui$Internal$Model$asEl,
+					$mdgriffith$elm_ui$Internal$Model$div,
+					attrs,
+					$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+						_List_fromArray(
+							[
+								A4(
+								$mdgriffith$elm_ui$Internal$Model$element,
+								$mdgriffith$elm_ui$Internal$Model$asRow,
+								$mdgriffith$elm_ui$Internal$Model$div,
+								A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.wrapped)))),
+									A2(
+										$elm$core$List$cons,
+										$mdgriffith$elm_ui$Internal$Model$Attr(
+											A2(
+												$elm$html$Html$Attributes$style,
+												'margin',
+												$elm$core$String$fromFloat(halfY) + ('px' + (' ' + ($elm$core$String$fromFloat(halfX) + 'px'))))),
+										A2(
+											$elm$core$List$cons,
+											$mdgriffith$elm_ui$Internal$Model$Attr(
+												A2(
+													$elm$html$Html$Attributes$style,
+													'width',
+													'calc(100% + ' + ($elm$core$String$fromInt(x) + 'px)'))),
+											A2(
+												$elm$core$List$cons,
+												$mdgriffith$elm_ui$Internal$Model$Attr(
+													A2(
+														$elm$html$Html$Attributes$style,
+														'height',
+														'calc(100% + ' + ($elm$core$String$fromInt(y) + 'px)'))),
+												A2(
+													$elm$core$List$cons,
+													A2(
+														$mdgriffith$elm_ui$Internal$Model$StyleClass,
+														$mdgriffith$elm_ui$Internal$Flag$spacing,
+														A3($mdgriffith$elm_ui$Internal$Model$SpacingStyle, spaceName, x, y)),
+													_List_Nil))))),
+								$mdgriffith$elm_ui$Internal$Model$Unkeyed(children))
+							])));
+			}
+		}
+	});
+var $author$project$MaterialUI$Text$wrapping = F4(
+	function (attrs, displayStr, fontscale, theme) {
+		var font = A2($author$project$MaterialUI$Theme$getFont, fontscale, theme);
+		return A2(
+			$mdgriffith$elm_ui$Element$paragraph,
+			_Utils_ap(
+				attrs,
+				$author$project$MaterialUI$Theme$fontToAttributes(font)),
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$text(
+					A2($author$project$MaterialUI$Theme$applyCase, font.fontcase, displayStr))
+				]));
+	});
+var $author$project$MaterialUI$Internal$Snackbar$Implementation$view = F2(
+	function (mui, index) {
+		var model = A2(
+			$elm$core$Maybe$withDefault,
+			$author$project$MaterialUI$Internal$Snackbar$Model$defaultModel,
+			A2($elm$core$Dict$get, index, mui.snackbar));
+		var lift = A2(
+			$elm$core$Basics$composeL,
+			mui.lift,
+			$author$project$MaterialUI$Internal$Message$SnackbarMsg(index));
+		var invTheme = $author$project$MaterialUI$Theme$inverted(mui.theme);
+		var _v0 = model.status;
+		if (_v0.$ === 'Active') {
+			var snackbar = _v0.a;
+			var state = _v0.b;
+			var text = A4(
+				$author$project$MaterialUI$Text$wrapping,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$padding(12),
+						$mdgriffith$elm_ui$Element$alignLeft,
+						$mdgriffith$elm_ui$Element$width(
+						A2(
+							$mdgriffith$elm_ui$Element$minimum,
+							150,
+							$mdgriffith$elm_ui$Element$fillPortion(1)))
+					]),
+				snackbar.text,
+				$author$project$MaterialUI$Theme$Body1,
+				mui.theme);
+			var opacity = function () {
+				switch (state.$) {
+					case 'Showing':
+						return 1;
+					case 'FadingIn':
+						var progress = state.a;
+						return progress;
+					default:
+						var progress = state.a;
+						return progress;
+				}
+			}();
+			var button = A2(
+				$elm$core$Maybe$withDefault,
+				$mdgriffith$elm_ui$Element$none,
+				A2(
+					$elm$core$Maybe$map,
+					function (action) {
+						return A3($author$project$MaterialUI$Internal$Snackbar$Implementation$actionToButton, action, mui.theme, lift);
+					},
+					snackbar.action));
+			var alignAttr = function () {
+				var _v1 = snackbar.position;
+				if (_v1.$ === 'Leading') {
+					return _List_fromArray(
+						[
+							A2($author$project$MaterialUI$Internal$Component$elementCss, 'left', '0')
+						]);
+				} else {
+					return _List_fromArray(
+						[
+							A2($author$project$MaterialUI$Internal$Component$elementCss, 'left', '50%'),
+							A2($author$project$MaterialUI$Internal$Component$elementCss, 'transform', 'translateX(-50%)')
+						]);
+				}
+			}();
+			return A2(
+				$mdgriffith$elm_ui$Element$el,
+				_Utils_ap(
+					alignAttr,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$padding(16),
+							$mdgriffith$elm_ui$Element$width(
+							A2($mdgriffith$elm_ui$Element$maximum, 500, $mdgriffith$elm_ui$Element$fill)),
+							A2($author$project$MaterialUI$Internal$Component$elementCss, 'position', 'fixed'),
+							A2($author$project$MaterialUI$Internal$Component$elementCss, 'bottom', '0'),
+							$mdgriffith$elm_ui$Element$alpha(opacity)
+						])),
+				A2(
+					$mdgriffith$elm_ui$Element$wrappedRow,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$paddingEach(
+							{bottom: 4, left: 12, right: 12, top: 4}),
+							$mdgriffith$elm_ui$Element$spacing(4),
+							$mdgriffith$elm_ui$Element$Background$color(invTheme.color.surface),
+							$mdgriffith$elm_ui$Element$Font$color(invTheme.color.onSurface),
+							$mdgriffith$elm_ui$Element$Border$rounded(8)
+						]),
+					_List_fromArray(
+						[text, button])));
+		} else {
+			return $mdgriffith$elm_ui$Element$none;
+		}
+	});
+var $author$project$MaterialUI$Snackbar$view = $author$project$MaterialUI$Internal$Snackbar$Implementation$view;
 var $author$project$Page$TTT$Lobby$view = function (model) {
 	var theme = $author$project$Session$theme(
 		$author$project$Page$TTT$Lobby$toSession(model));
@@ -18755,7 +19220,7 @@ var $author$project$Page$TTT$Lobby$view = function (model) {
 											index: 'iconCopy',
 											onClick: $author$project$Page$TTT$Lobby$CopyGameId,
 											size: 24,
-											tooltip: 'Copy Id'
+											tooltip: 'Copy Link'
 										})
 									])),
 								A3(
@@ -18776,10 +19241,15 @@ var $author$project$Page$TTT$Lobby$view = function (model) {
 								theme)
 							]))
 					]),
-				A2(
-					$elm$core$List$map,
-					$author$project$Page$TTT$Lobby$playerRow(theme),
-					$author$project$Game$Lobby$allPlayers(model.lobby)))),
+				_Utils_ap(
+					A2(
+						$elm$core$List$map,
+						$author$project$Page$TTT$Lobby$playerRow(theme),
+						$author$project$Game$Lobby$allPlayers(model.lobby)),
+					_List_fromArray(
+						[
+							A2($author$project$MaterialUI$Snackbar$view, model.mui, 'snackbar')
+						])))),
 		title: 'Home'
 	};
 };
