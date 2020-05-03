@@ -102,7 +102,7 @@ update msg model =
             in
             ( { model | mui = newMui }
             , Cmd.batch
-                [ ClipBoard.copyToClipBoard <| Url.Builder.absolute [ "game", model.lobby.gameId ] []
+                [ ClipBoard.copyToClipBoard <| Url.Builder.absolute [ "ttt", "game", model.lobby.gameId ] []
                 , effects
                 ]
             )

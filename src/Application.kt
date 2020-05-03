@@ -57,85 +57,9 @@ fun Application.module(testing: Boolean = false) {
         }
     }
 
-    launch {
-        for (messages in tttGameServer.asyncMessages) {
-            sendViaWebsocket(messages)
-        }
-    }
+    installGameRouting(tttGameServer, "ttt")
 
     routing {
-        //trace { application.log.trace(it.buildText()) }
-        webSocket("/ttt/{gameId}/ws") {
-            val gameId = call.parameters["gameId"] ?: kotlin.run {
-                close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "No gameId"))
-                return@webSocket
-            }
-
-            // We check that we actually have a session. We should always have one,
-            // since we have defined an interceptor before to set one.
-            val session = call.sessions.get<SessionId>() ?: kotlin.run {
-                close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "No session"))
-                return@webSocket
-            }
-
-            val welcomeMsg = tttGameServer.clientJoined(session, GameId(gameId), this)
-            send(Frame.Text(welcomeMsg.stringify()))
-            try {
-                for (frame in incoming) {
-                    when (frame) {
-                        is Frame.Text -> {
-                            val text = frame.readText()
-                            log.info("message from ${session}: $text")
-                            sendViaWebsocket(tttGameServer.handleJsonRequest(session, text))
-                        }
-                    }
-                }
-            } finally {
-                tttGameServer.clientLeft(session, GameId(gameId), this)
-            }
-        }
-        get("/newGame") {
-            val sessionId = call.sessions.get<SessionId>()
-            if (sessionId == null) {
-                call.respond(HttpStatusCode.BadRequest, "No Session!")
-                return@get
-            }
-            val newGame = tttGameServer.newGame()
-            addPlayerToGame(newGame.id, tttGameServer, sessionId)
-        }
-        get("/joinGame") { call.respondJson(TTTResponse.NoSuchGame("")) }
-        get<JoinGame> { idContainer ->
-            val gameId = idContainer.gameId
-            addPlayerToGame(GameId(gameId), tttGameServer)
-        }
-        get<Rematch> { rematch ->
-            val rematchId = tttGameServer.rematchIdOfGame(GameId(rematch.oldGameId))
-            val sessionId = call.sessions.get<SessionId>()
-            if (sessionId == null) {
-                call.respond(HttpStatusCode.BadRequest, "No Session!")
-                return@get
-            }
-            val oldPlayerName: String? = tttGameServer.withGame(GameId(rematch.oldGameId)) { game ->
-                when (game) {
-                    null -> null
-
-                    is TTTGame.Lobby -> game.players.mapNotNull {
-                        if (it is TTTGame.Lobby.Player.Human && it.technical.sessionId == sessionId) it.name else null
-                    }.firstOrNull()
-
-                    is TTTGame.InGame -> game.players.mapNotNull { p ->
-                        if (p is TTTGame.InGame.Player.Human && p.technical.sessionId == sessionId) p.name else null
-                    }.firstOrNull()
-                }
-            }
-            if (oldPlayerName != null) {
-                val technical = TechnicalPlayer(PlayerId.create(), sessionId, ListK.empty(), emptyMap<String, Job>().k())
-                val player = TTTGame.Lobby.Player.Human(oldPlayerName, false, technical)
-                handleAddPlayerMsgs(rematchId, sessionId, tttGameServer.addNewPlayer(player, rematchId))
-            } else {
-                addPlayerToGame(rematchId, tttGameServer, sessionId)
-            }
-        }
         static {
             defaultIndexHtml()
             resource("app.js", "app.js", "app")
@@ -143,6 +67,9 @@ fun Application.module(testing: Boolean = false) {
                 defaultIndexHtml()
                 static("*") {
                     defaultIndexHtml()
+                    static("*") {
+                        defaultIndexHtml()
+                    }
                 }
             }
         }
@@ -151,34 +78,4 @@ fun Application.module(testing: Boolean = false) {
 
 fun Route.defaultIndexHtml() {
     defaultResource("index.html", "app")
-}
-
-
-@KtorExperimentalLocationsAPI
-@Location("/joinGame/{gameId}")
-data class JoinGame(val gameId: String)
-
-@KtorExperimentalLocationsAPI
-@Location("/rematch/{oldGameId}")
-data class Rematch(val oldGameId: String)
-
-
-private suspend fun PipelineContext<*, ApplicationCall>.addPlayerToGame(gameId: GameId, tttGameServer: TTTGameServer, paramSessionId: SessionId? = null) {
-    val sessionId = paramSessionId ?: call.sessions.get<SessionId>()
-    if (sessionId == null) {
-        call.respond(HttpStatusCode.BadRequest, "No Session!")
-        return
-    }
-    handleAddPlayerMsgs(gameId, sessionId, tttGameServer.addNewPlayer(sessionId, gameId))
-}
-
-private suspend fun PipelineContext<*, ApplicationCall>.handleAddPlayerMsgs(gameId: GameId, sessionId: SessionId, msgs: Messages) {
-    if (msgs.isCouldNotMatchGame()) {
-        call.respondJson(TTTResponse.NoSuchGame(gameId.asString()))
-    } else {
-        val respondMsg = msgs.entries.firstOrNull { it.key.sessionId == sessionId }
-                ?: throw IllegalStateException("no join response was produced")
-        call.respondJson(respondMsg.value)
-        context.application.sendViaWebsocket(msgs)
-    }
 }

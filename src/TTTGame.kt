@@ -1,13 +1,9 @@
 import arrow.core.*
 import arrow.optics.Lens
 import arrow.optics.Setter
-import io.ktor.http.cio.websocket.WebSocketSession
-import kotlinx.coroutines.Job
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.contract
 
-sealed class TTTGame {
-    abstract val id: GameId
+sealed class TTTGame : Game {
+    abstract override val id: GameId
     abstract operator fun get(sessionId: SessionId): TechnicalPlayer?
 
     data class Lobby(
@@ -28,8 +24,8 @@ sealed class TTTGame {
 
         override fun get(sessionId: SessionId): TechnicalPlayer? =
                 players.filter(Player.Human::class)
-                .firstOrNull { player -> player.technical.sessionId == sessionId }
-                ?.technical
+                        .firstOrNull { player -> player.technical.sessionId == sessionId }
+                        ?.technical
 
         sealed class Player {
             abstract val name: String
@@ -45,7 +41,7 @@ sealed class TTTGame {
             }
 
             data class Bot(override val name: String, val playerId: PlayerId) : Player() {
-                    override val isReady: Boolean = true
+                override val isReady: Boolean = true
             }
         }
 
@@ -57,7 +53,7 @@ sealed class TTTGame {
 
             fun player(predicate: Predicate<Player.Human>): Setter<Lobby, Player.Human> = Setter { lobby, playerUpdate ->
                 lobby.copy(players = lobby.players.map {
-                    if(it is Player.Human && predicate(it)) playerUpdate(it) else it
+                    if (it is Player.Human && predicate(it)) playerUpdate(it) else it
                 }.k())
             }
 
@@ -124,7 +120,9 @@ sealed class TTTGame {
         private fun checkStatus(board: ListK<CellState>): Status {
             if (board.size != 9) return Status.OnGoing
             val indexes = listOf(listOf(0, 1, 2), listOf(3, 4, 5), listOf(6, 7, 8), listOf(0, 3, 6), listOf(1, 4, 7), listOf(2, 5, 8), listOf(0, 4, 8), listOf(2, 4, 6))
-            val winningIndices = indexes.firstOrNone { board.slice(it).allEqual() && board[it.first()] != CellState.EMPTY }
+            val winningIndices = indexes.firstOrNone {
+                board.slice(it).allEqual() && board[it.first()] != CellState.EMPTY
+            }
             return winningIndices.flatMap { (i1, i2, i3) ->
                 val winningPlayerRef = when (board[i1]) {
                     CellState.P1 -> PlayerRef.P1
@@ -198,36 +196,5 @@ sealed class TTTGame {
 
             fun technical(predicate: Predicate<Player.Human>): Setter<InGame, TechnicalPlayer> = humanPlayer(predicate) + Player.Human.technical
         }
-    }
-}
-
-@ExperimentalContracts
-fun TTTGame.InGame.Player.isHuman(): Boolean {
-    contract {
-        returns(true) implies (this@isHuman is TTTGame.InGame.Player.Human)
-    }
-    return this is TTTGame.InGame.Player.Human
-}
-
-@ExperimentalContracts
-fun TTTGame.Lobby.Player.isHuman(): Boolean {
-    contract {
-        returns(true) implies (this@isHuman is TTTGame.Lobby.Player.Human)
-    }
-    return this is TTTGame.Lobby.Player.Human
-}
-
-data class TechnicalPlayer(
-        val playerId: PlayerId,
-        val sessionId: SessionId,
-        val sockets: ListK<WebSocketSession>,
-        val jobs: MapK<String, Job>
-) {
-
-    fun addSocket(webSocket: WebSocketSession): TechnicalPlayer = copy(sockets = (sockets + webSocket).k())
-    fun removeSocket(webSocket: WebSocketSession): TechnicalPlayer = copy(sockets = (sockets - webSocket).k())
-
-    companion object {
-        val DUMMY = TechnicalPlayer(PlayerId("DUMMY_PLAYER"), SessionId("DUMMY_SESSION"), ListK.empty(), emptyMap<String, Job>().k())
     }
 }

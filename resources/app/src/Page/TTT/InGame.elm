@@ -70,7 +70,7 @@ update msg model =
             ( model, Websocket.send (InGameRequest.setPiece game.gameId game.playerMe.id index) )
 
         Rematch ->
-            ( model, Nav.pushUrl navKey <| Url.Builder.absolute [ "joinRematch", game.gameId ] [] )
+            ( model, Nav.pushUrl navKey <| Url.Builder.absolute [ "ttt", "joinRematch", game.gameId ] [] )
 
         Leave ->
             ( model

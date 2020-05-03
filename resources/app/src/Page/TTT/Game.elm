@@ -53,7 +53,7 @@ fromLobby session gameId maybeLobby =
         Nothing ->
             ( Loading session
             , Http.get
-                { url = (Url.Builder.absolute [ "joinGame", gameId ] [])
+                { url = (Url.Builder.absolute [ "ttt", "joinGame", gameId ] [])
                 , expect = Http.expectJson JoinResponse TTTResponse.decoder
                 }
             )

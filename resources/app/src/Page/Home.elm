@@ -87,7 +87,7 @@ update msg model =
         NewTTTGame ->
             ( model
             , Http.get
-                { url = (Url.Builder.absolute [ "newGame" ] [])
+                { url = (Url.Builder.absolute [ "ttt", "newGame" ] [])
                 , expect = Http.expectJson (ServerResponse << Result.map TTTResponse.EnterLobbyResponse) EnterLobbyResponse.decoder
                 }
             )
@@ -95,7 +95,7 @@ update msg model =
         JoinGame ->
             ( model
             , Http.get
-                { url = (Url.Builder.absolute [ "joinGame", Debug.log "join game url" model.gameId ] [])
+                { url = (Url.Builder.absolute [ "ttt", "joinGame", Debug.log "join game url" model.gameId ] [])
                 , expect = Http.expectJson ServerResponse TTTResponse.decoder
                 }
             )
@@ -113,7 +113,8 @@ update msg model =
                             ( { model | lobby = Just lobby }
                             , Nav.pushUrl navKey
                                 <| Url.Builder.absolute
-                                    [ "game"
+                                    [ "ttt"
+                                    , "game"
                                     , lobby.gameId
                                     ] []
                             )
@@ -132,7 +133,8 @@ update msg model =
                             ( model
                             , Nav.pushUrl navKey
                                 <| Url.Builder.absolute
-                                    [ "game"
+                                    [ "ttt"
+                                    , "game"
                                     , game.gameId
                                     ] []
                             )

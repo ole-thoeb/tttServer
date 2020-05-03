@@ -17,8 +17,8 @@ parser : Parser (Route -> a) a
 parser =
     oneOf
         [ Parser.map Home (Parser.top <?> Home.joinErrorQueryParser)
-        , Parser.map Game (s "game" </> string)
-        , Parser.map Rematch (s "joinRematch" </> string)
+        , Parser.map Game (s "ttt" </> s "game" </> string)
+        , Parser.map Rematch (s "ttt" </> s "joinRematch" </> string)
         ]
 
 

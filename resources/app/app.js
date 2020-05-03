@@ -6566,7 +6566,7 @@ var $author$project$Page$TTT$Game$fromLobby = F3(
 						url: A2(
 							$elm$url$Url$Builder$absolute,
 							_List_fromArray(
-								['joinGame', gameId]),
+								['ttt', 'joinGame', gameId]),
 							_List_Nil)
 					}));
 		}
@@ -6625,7 +6625,7 @@ var $author$project$Page$Rematch$init = F2(
 							url: A2(
 								$elm$url$Url$Builder$absolute,
 								_List_fromArray(
-									['rematch', oldGameId]),
+									['ttt', 'rematch', oldGameId]),
 								_List_Nil)
 						})
 					])));
@@ -7430,15 +7430,21 @@ var $author$project$Route$parser = $elm$url$Url$Parser$oneOf(
 			$author$project$Route$Game,
 			A2(
 				$elm$url$Url$Parser$slash,
-				$elm$url$Url$Parser$s('game'),
-				$elm$url$Url$Parser$string)),
+				$elm$url$Url$Parser$s('ttt'),
+				A2(
+					$elm$url$Url$Parser$slash,
+					$elm$url$Url$Parser$s('game'),
+					$elm$url$Url$Parser$string))),
 			A2(
 			$elm$url$Url$Parser$map,
 			$author$project$Route$Rematch,
 			A2(
 				$elm$url$Url$Parser$slash,
-				$elm$url$Url$Parser$s('joinRematch'),
-				$elm$url$Url$Parser$string))
+				$elm$url$Url$Parser$s('ttt'),
+				A2(
+					$elm$url$Url$Parser$slash,
+					$elm$url$Url$Parser$s('joinRematch'),
+					$elm$url$Url$Parser$string)))
 		]));
 var $author$project$Route$fromUrl = function (url) {
 	return A2(
@@ -8839,7 +8845,7 @@ var $author$project$Page$Home$update = F2(
 							url: A2(
 								$elm$url$Url$Builder$absolute,
 								_List_fromArray(
-									['newGame']),
+									['ttt', 'newGame']),
 								_List_Nil)
 						}));
 			case 'JoinGame':
@@ -8852,6 +8858,7 @@ var $author$project$Page$Home$update = F2(
 								$elm$url$Url$Builder$absolute,
 								_List_fromArray(
 									[
+										'ttt',
 										'joinGame',
 										A2($elm$core$Debug$log, 'join game url', model.gameId)
 									]),
@@ -8883,7 +8890,7 @@ var $author$project$Page$Home$update = F2(
 								A2(
 									$elm$url$Url$Builder$absolute,
 									_List_fromArray(
-										['game', lobby.gameId]),
+										['ttt', 'game', lobby.gameId]),
 									_List_Nil)));
 					};
 					var a = A2($elm$core$Debug$log, 'response', response);
@@ -8917,7 +8924,7 @@ var $author$project$Page$Home$update = F2(
 										A2(
 											$elm$url$Url$Builder$absolute,
 											_List_fromArray(
-												['game', game.gameId]),
+												['ttt', 'game', game.gameId]),
 											_List_Nil)));
 							} else {
 								return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
@@ -9017,7 +9024,7 @@ var $author$project$Page$Rematch$update = F2(
 						A2(
 							$elm$url$Url$Builder$absolute,
 							_List_fromArray(
-								['game', lobby.gameId]),
+								['ttt', 'game', lobby.gameId]),
 							_List_Nil)));
 			} else {
 				var error = response.a;
@@ -9116,7 +9123,7 @@ var $author$project$Page$TTT$InGame$update = F2(
 						A2(
 							$elm$url$Url$Builder$absolute,
 							_List_fromArray(
-								['joinRematch', game.gameId]),
+								['ttt', 'joinRematch', game.gameId]),
 							_List_Nil)));
 			default:
 				return _Utils_Tuple2(
@@ -9368,7 +9375,7 @@ var $author$project$Page$TTT$Lobby$update = F2(
 								A2(
 									$elm$url$Url$Builder$absolute,
 									_List_fromArray(
-										['game', model.lobby.gameId]),
+										['ttt', 'game', model.lobby.gameId]),
 									_List_Nil)),
 								effects
 							])));

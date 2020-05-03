@@ -22,7 +22,7 @@ init session oldGameId =
     , Cmd.batch
         [ Websocket.disconnect
         , Http.get
-            { url = (Url.Builder.absolute [ "rematch", oldGameId ] [])
+            { url = (Url.Builder.absolute [ "ttt", "rematch", oldGameId ] [])
             , expect = Http.expectJson ServerResponse EnterLobby.decoder
             }
         ]
@@ -56,7 +56,8 @@ update msg model =
                             ( model
                             , Nav.pushUrl (session |> Session.navKey)
                                 <| Url.Builder.absolute
-                                    [ "game"
+                                    [ "ttt"
+                                    , "game"
                                     , lobby.gameId
                                     ] []
                             )

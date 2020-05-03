@@ -23,11 +23,14 @@ import messages.responses.TTTResponse
 import org.slf4j.Logger
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.set
 
 class TTTGameServer(
         private val application: Application,
         val testing: Boolean
-) : CoroutineScope by application {
+) : GameServer<TTTGame>, CoroutineScope by application {
 
     private val games: ConcurrentHashMap<GameId, TTTGame> = ConcurrentHashMap()
     private val locks: ConcurrentHashMap<GameId, Mutex> = ConcurrentHashMap()
@@ -38,11 +41,11 @@ class TTTGameServer(
     val log get() = application.log
 
     private val messageChannel = Channel<Messages>(Channel.UNLIMITED)
-    val asyncMessages: ReceiveChannel<Messages> get() = messageChannel
+    override val asyncMessages: ReceiveChannel<Messages> get() = messageChannel
 
     private var testGameId = AtomicInteger(0)
 
-    fun newGame(): TTTGame {
+    override suspend fun newGame(): TTTGame {
         val gameId = if (testing) GameId(testGameId.incrementAndGet().toString()) else GameId.create()
         val game = TTTGame.Lobby(gameId)
         locks[gameId] = Mutex()
@@ -51,7 +54,7 @@ class TTTGameServer(
     }
 
     suspend fun rematchIdOfGame(gameId: GameId): GameId {
-        fun getRematchId(): GameId {
+        suspend fun getRematchId(): GameId {
             val rematchId = rematchMap[gameId]
             if (rematchId != null)
                 return rematchId
@@ -85,7 +88,45 @@ class TTTGameServer(
         return lockGame(gameId, { action(null) }, action)
     }
 
-    suspend fun clientJoined(sessionId: SessionId, gameId: GameId, websocket: WebSocketSession): JsonSerializable {
+    override suspend fun addPlayer(sessionId: SessionId, gameId: GameId): GameServer.DirectResponse =
+            addPlayer(sessionId, gameId) { addNewPlayer(sessionId, gameId) }
+
+    private suspend fun addPlayer(sessionId: SessionId, gameId: GameId, addMethod: suspend () -> Messages): GameServer.DirectResponse {
+        val messages = addMethod()
+        return if (messages.isCouldNotMatchGame()) {
+            GameServer.DirectResponse(TTTResponse.NoSuchGame(gameId.asString()), noMessages())
+        } else {
+            val respondMsg = messages.entries.firstOrNull { it.key.sessionId == sessionId }
+                    ?: throw IllegalStateException("no join response was produced")
+            GameServer.DirectResponse(respondMsg.value, messages)
+        }
+    }
+
+    override suspend fun rematch(sessionId: SessionId, oldGameId: GameId): GameServer.DirectResponse {
+        val rematchId = rematchIdOfGame(oldGameId)
+        val oldPlayerName: String? = withGame(oldGameId) { game ->
+            when (game) {
+                null -> null
+
+                is TTTGame.Lobby -> game.players.firstOrNull {
+                    it is TTTGame.Lobby.Player.Human && it.technical.sessionId == sessionId
+                }?.name
+
+                is TTTGame.InGame -> game.players.firstOrNull { p ->
+                    p is TTTGame.InGame.Player.Human && p.technical.sessionId == sessionId
+                }?.name
+            }
+        }
+        return if (oldPlayerName != null) {
+            val technical = TechnicalPlayer(PlayerId.create(), sessionId, ListK.empty(), emptyMap<String, Job>().k())
+            val player = TTTGame.Lobby.Player.Human(oldPlayerName, false, technical)
+            addPlayer(sessionId, rematchId) { addNewPlayer(player, rematchId) }
+        } else {
+            addPlayer(sessionId, rematchId)
+        }
+    }
+
+    override suspend fun clientJoined(sessionId: SessionId, gameId: GameId, websocket: WebSocketSession): JsonSerializable {
         return updateGame(gameId) { game ->
             log.info("session ${sessionId.asString()}, game ${gameId.asString()}: client joined")
 
@@ -123,7 +164,7 @@ class TTTGameServer(
         }.entries.first().value
     }
 
-    suspend fun clientLeft(sessionId: SessionId, gameId: GameId, websocket: WebSocketSession) {
+    override suspend fun clientLeft(sessionId: SessionId, gameId: GameId, websocket: WebSocketSession) {
         updateGame(gameId) { lockedGame ->
             log.info("session ${sessionId.asString()}, game ${gameId.asString()}: client left")
 
@@ -149,7 +190,7 @@ class TTTGameServer(
     private fun noSuchGame(unknownGameId: GameId): Messages =
             mapOf(TechnicalPlayer.DUMMY to TTTResponse.NoSuchGame(unknownGameId.asString()))
 
-    suspend fun handleJsonRequest(session: SessionId, request: JsonString): Messages {
+    override suspend fun handleJsonRequest(session: SessionId, request: JsonString): Messages {
         val deserializers = LobbyRequest.deserializers + GameRequest.deserializers
         return jsonParser.parsRequest(request, deserializers.k()).fix().fold(
                 { error ->
