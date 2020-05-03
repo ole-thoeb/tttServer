@@ -1,7 +1,5 @@
 package messages.responses
 
-import TTTGame
-import TechnicalPlayer
 import json.JsonSerializable
 import json.JsonTypeDeserializer
 import json.packageJson

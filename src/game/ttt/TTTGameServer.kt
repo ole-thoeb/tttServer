@@ -1,8 +1,15 @@
+package game.ttt
+
+import GameId
+import Messages
+import PlayerId
+import SessionId
 import arrow.core.*
 import arrow.core.extensions.either.monadError.monadError
+import game.*
 import io.ktor.application.Application
-import io.ktor.application.log
 import io.ktor.http.cio.websocket.WebSocketSession
+import isCouldNotMatchGame
 import json.JsonParser
 import json.JsonSerializable
 import json.JsonString
@@ -13,14 +20,13 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import messages.requests.GameRequest
 import messages.requests.LobbyRequest
 import messages.responses.InGameResponse
 import messages.responses.LobbyResponse
 import messages.responses.TTTResponse
-import org.slf4j.Logger
+import noMessages
+import noSuchGame
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.collections.component1
@@ -28,17 +34,15 @@ import kotlin.collections.component2
 import kotlin.collections.set
 
 class TTTGameServer(
-        private val application: Application,
+        override val application: Application,
         val testing: Boolean
-) : GameServer<TTTGame>, CoroutineScope by application {
-
-    private val games: ConcurrentHashMap<GameId, TTTGame> = ConcurrentHashMap()
-    private val locks: ConcurrentHashMap<GameId, Mutex> = ConcurrentHashMap()
+) : GameServer<TTTGame>,
+        CoroutineScope by application,
+        SynchronizedGameRegistry<TTTGame> by LockingSynchronizedGameRegistry() {
 
     private val rematchMap: ConcurrentHashMap<GameId, GameId> = ConcurrentHashMap()
 
     private val jsonParser = JsonParser(Either.monadError())
-    val log get() = application.log
 
     private val messageChannel = Channel<Messages>(Channel.UNLIMITED)
     override val asyncMessages: ReceiveChannel<Messages> get() = messageChannel
@@ -47,10 +51,7 @@ class TTTGameServer(
 
     override suspend fun newGame(): TTTGame {
         val gameId = if (testing) GameId(testGameId.incrementAndGet().toString()) else GameId.create()
-        val game = TTTGame.Lobby(gameId)
-        locks[gameId] = Mutex()
-        games[gameId] = game
-        return game
+        return add(TTTGame.Lobby(gameId))
     }
 
     suspend fun rematchIdOfGame(gameId: GameId): GameId {
@@ -64,28 +65,7 @@ class TTTGameServer(
             return rematch.id
         }
 
-        val lock = locks[gameId]
-        return lock?.withLock { getRematchId() } ?: getRematchId()
-    }
-
-    private suspend inline fun <R> lockGame(gameId: GameId, default: () -> R, block: (TTTGame) -> R): R {
-        val mutex = locks[gameId] ?: return default()
-        mutex.withLock {
-            val game = games[gameId] ?: return default()
-            return block(game)
-        }
-    }
-
-    suspend fun <MSG : JsonSerializable> updateGame(gameId: GameId, update: (TTTGame) -> Tuple2<TTTGame, MessagesOf<MSG>>): Messages {
-        return lockGame(gameId, { noSuchGame(gameId) }) { game ->
-            val (updatedGame, msgs) = update(game)
-            games[gameId] = updatedGame
-            return msgs
-        }
-    }
-
-    suspend fun <T> withGame(gameId: GameId, action: (TTTGame?) -> T): T {
-        return lockGame(gameId, { action(null) }, action)
+        return trySynchronize(gameId, { getRematchId() }, { getRematchId() })
     }
 
     override suspend fun addPlayer(sessionId: SessionId, gameId: GameId): GameServer.DirectResponse =
@@ -187,9 +167,6 @@ class TTTGameServer(
         }
     }
 
-    private fun noSuchGame(unknownGameId: GameId): Messages =
-            mapOf(TechnicalPlayer.DUMMY to TTTResponse.NoSuchGame(unknownGameId.asString()))
-
     override suspend fun handleJsonRequest(session: SessionId, request: JsonString): Messages {
         val deserializers = LobbyRequest.deserializers + GameRequest.deserializers
         return jsonParser.parsRequest(request, deserializers.k()).fix().fold(
@@ -212,15 +189,7 @@ class TTTGameServer(
 
     private fun startDisconnectJob(gameId: GameId, playerId: PlayerId): Job = launchAsyncAction {
         delay(CLIENT_TIME_OUT)
-        val lock = locks[gameId] ?: return@launchAsyncAction
-        lock.withLock {
-            val game = games[gameId] ?: return@launchAsyncAction
-
-            val removeGame = {
-                games.remove(game.id)
-                locks.remove(game.id)
-            }
-
+        withGame(gameId) { game ->
             when (game) {
                 is TTTGame.Lobby -> {
                     val updatedGame = TTTGame.Lobby.players().modify(game) { players ->
@@ -228,9 +197,9 @@ class TTTGameServer(
                     }
 
                     if (updatedGame.players.all { it is TTTGame.Lobby.Player.Bot }) {
-                        removeGame()
+                        removeUnlocked(gameId)
                     } else {
-                        games[game.id] = updatedGame
+                        updateUnlocked(updatedGame)
                         messageChannel.send(lobbyStateMsgs(updatedGame))
                     }
                 }
@@ -238,7 +207,7 @@ class TTTGameServer(
                     val t1 = game.player1.technical
                     val t2 = game.player2.technical
                     when {
-                        t1.sockets.isEmpty() && t2.sockets.isEmpty() -> removeGame()
+                        t1.sockets.isEmpty() && t2.sockets.isEmpty() -> removeUnlocked(gameId)
                         t1.playerId == playerId && t1.sockets.isEmpty() ->
                             messageChannel.send(mapOf(t2 to TTTResponse.PlayerDisconnected(game.player1.name)))
                         t2.playerId == playerId && t2.sockets.isEmpty() ->
@@ -246,29 +215,12 @@ class TTTGameServer(
                     }
                 }
             }
-            return@withLock
+            return@withGame
         }
     }
 
-    data class AsyncActionContext(
-            val messageChanel: Channel<Messages>,
-            val log: Logger,
-            val scope: CoroutineScope
-    ) : CoroutineScope by scope
-
-    fun launchAsyncAction(block: suspend AsyncActionContext.() -> Unit): Job = launch {
-        block(AsyncActionContext(messageChannel, log, this@TTTGameServer))
-    }
-
-    suspend fun AsyncActionContext.asyncUpdateGame(gameId: GameId, update: suspend (TTTGame) -> Tuple2<TTTGame, Messages>) {
-        lockGame(gameId, { null }) { game ->
-            val (updatedGame, msgs) = update(game)
-            games[gameId] = updatedGame
-            msgs
-        }?.let { msgs ->
-            log.info("should send $msgs")
-            messageChanel.send(msgs)
-        }
+    override fun launchAsyncAction(block: suspend GameServer.AsyncActionContext.() -> Unit): Job = launch {
+        block(GameServer.AsyncActionContext(messageChannel, log, this@TTTGameServer))
     }
 
     companion object {

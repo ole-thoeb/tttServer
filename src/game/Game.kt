@@ -1,3 +1,8 @@
+package game
+
+import GameId
+import PlayerId
+import SessionId
 import arrow.core.ListK
 import arrow.core.MapK
 import arrow.core.k

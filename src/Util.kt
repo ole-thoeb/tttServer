@@ -3,6 +3,7 @@ import arrow.core.Option
 import arrow.core.Predicate
 import arrow.typeclasses.ApplicativeError
 import arrow.typeclasses.MonadError
+import game.TechnicalPlayer
 import json.JsonSerializable
 import messages.responses.TTTResponse
 import kotlin.reflect.KClass
@@ -39,7 +40,7 @@ fun <T> Iterable<T>.allEqual(): Boolean {
     if (!iter.hasNext()) return true
     val element = iter.next()
     while (iter.hasNext()) {
-        if (element != iter.next()) return false;
+        if (element != iter.next()) return false
     }
     return true
 }
@@ -53,3 +54,6 @@ typealias Messages = MessagesOf<JsonSerializable>
 fun Messages.isCouldNotMatchGame(): Boolean = size == 1 && this[TechnicalPlayer.DUMMY] is TTTResponse.NoSuchGame
 
 fun <T: JsonSerializable> noMessages(): MessagesOf<T> = emptyMap()
+
+fun noSuchGame(unknownGameId: GameId): Messages =
+        mapOf(TechnicalPlayer.DUMMY to TTTResponse.NoSuchGame(unknownGameId.asString()))

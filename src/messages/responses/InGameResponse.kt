@@ -1,6 +1,6 @@
 package messages.responses
 
-import TTTGame
+import game.ttt.TTTGame
 import json.JsonSerializable
 import json.JsonTypeDeserializer
 import json.packageJson

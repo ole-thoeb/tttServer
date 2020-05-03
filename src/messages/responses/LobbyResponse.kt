@@ -1,8 +1,7 @@
 package messages.responses
 
 import LobbyError
-import TTTGame
-import arrow.core.ListK
+import game.ttt.TTTGame
 import json.JsonSerializable
 import json.JsonTypeDeserializer
 import json.packageJson
