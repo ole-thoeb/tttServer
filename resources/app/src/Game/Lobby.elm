@@ -1,13 +1,14 @@
 module Game.Lobby exposing (Lobby, decoder, playerNameOfLobby, playerReadyOfLobby, allPlayers)
 
 
+import Game
 import Game.LobbyPlayer as LobbyPlayer
 import Json.Decode as Decode exposing (Decoder)
 import Monocle.Lens as Lens exposing (Lens)
 
 
 type alias Lobby =
-    { gameId: String
+    { gameId: Game.Id
     , players: List LobbyPlayer.Player
     , playerMe: LobbyPlayer.PlayerMe
     }
@@ -16,7 +17,7 @@ type alias Lobby =
 decoder : Decoder Lobby
 decoder =
     Decode.map3 Lobby
-        (Decode.field "gameId" Decode.string)
+        (Decode.field "gameId" Game.idDecoder)
         (Decode.field "players" <| Decode.list LobbyPlayer.decoder)
         (Decode.field "playerMe" LobbyPlayer.meDecoder)
 

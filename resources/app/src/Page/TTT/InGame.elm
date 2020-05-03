@@ -9,6 +9,8 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Events as Events
 import Element.Font as Font
+import Endpoint
+import Game
 import Game.TTTGame as TTTGame exposing (CellState, TTTGame)
 import Game.TTTGamePlayer as TTTGamePlayer exposing (Symbol)
 import Html
@@ -41,7 +43,7 @@ init session game =
     ( { session = session
     , game = game
     }
-    , Websocket.connect game.gameId
+    , Websocket.connect Game.TicTacToe game.gameId
     )
 
 
@@ -70,11 +72,11 @@ update msg model =
             ( model, Websocket.send (InGameRequest.setPiece game.gameId game.playerMe.id index) )
 
         Rematch ->
-            ( model, Nav.pushUrl navKey <| Url.Builder.absolute [ "ttt", "joinRematch", game.gameId ] [] )
+            ( model, Nav.pushUrl navKey <| Endpoint.rematch Game.TicTacToe game.gameId )
 
         Leave ->
             ( model
-            , Nav.pushUrl navKey <| Url.Builder.absolute [] []
+            , Nav.pushUrl navKey Endpoint.home
             )
 
 

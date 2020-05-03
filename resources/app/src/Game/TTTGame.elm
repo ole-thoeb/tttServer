@@ -2,6 +2,7 @@ module Game.TTTGame exposing (TTTGame, decoder, CellState(..), cellStateFromSymb
 
 
 import Array exposing (Array)
+import Game
 import Game.TTTGamePlayer as TTTPlayer
 import Json.Decode as Decode exposing (Decoder)
 
@@ -16,7 +17,7 @@ type Status
 
 
 type alias TTTGame =
-    { gameId : String
+    { gameId : Game.Id
     , playerMe : TTTPlayer.PlayerMe
     , opponent: TTTPlayer.Player
     , meTurn : Bool
@@ -60,7 +61,7 @@ cellStateFromSymbol symbol =
 decoder : Decoder TTTGame
 decoder =
     Decode.map6 TTTGame
-        (Decode.field "gameId" Decode.string)
+        (Decode.field "gameId" Game.idDecoder)
         (Decode.field "playerMe" TTTPlayer.meDecoder)
         (Decode.field "opponent" TTTPlayer.decoder)
         (Decode.field "meTurn" Decode.bool)

@@ -1,6 +1,7 @@
 module Route exposing (Route(..), fromUrl)
 
 
+import Game
 import Page.Home as Home
 import Url exposing (Url)
 import Url.Parser as Parser exposing ((</>), (<?>),  Parser, oneOf, s, string)
@@ -8,8 +9,8 @@ import Url.Parser as Parser exposing ((</>), (<?>),  Parser, oneOf, s, string)
 
 type Route
     = Home (Maybe Home.JoinError)
-    | Game String
-    | Rematch String
+    | Game Game.Id
+    | Rematch Game.Id
     | NotFound
 
 
@@ -17,9 +18,15 @@ parser : Parser (Route -> a) a
 parser =
     oneOf
         [ Parser.map Home (Parser.top <?> Home.joinErrorQueryParser)
-        , Parser.map Game (s "ttt" </> s "game" </> string)
-        , Parser.map Rematch (s "ttt" </> s "joinRematch" </> string)
+        , Parser.map Game (s "ttt" </> s "game" </> idParser)
+        , Parser.map Rematch (s "ttt" </> s "rematch" </> idParser)
         ]
+
+
+idParser : Parser (Game.Id -> a) a
+idParser =
+    Parser.map Game.idFromString string
+
 
 
 fromUrl : Url -> Route

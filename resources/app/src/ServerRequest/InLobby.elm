@@ -1,12 +1,13 @@
 module ServerRequest.InLobby exposing (nameChangedMsg, readyChangedMsg, addBotMsg)
 
 
+import Game
 import Game.LobbyPlayer exposing (PlayerMe)
 import Json.Encode as Encode
 import ServerRequest.JsonHelper exposing (remoteMsg)
 
 
-nameChangedMsg : String -> PlayerMe -> Encode.Value
+nameChangedMsg : Game.Id -> PlayerMe -> Encode.Value
 nameChangedMsg gameId changedPlayer =
     Encode.object
         ( (header gameId changedPlayer) ++
@@ -14,7 +15,7 @@ nameChangedMsg gameId changedPlayer =
         |> remoteMsg "lobbyName"
 
 
-readyChangedMsg : String -> PlayerMe -> Encode.Value
+readyChangedMsg : Game.Id -> PlayerMe -> Encode.Value
 readyChangedMsg gameId changedPlayer =
     Encode.object
         ( (header gameId changedPlayer) ++
@@ -22,15 +23,15 @@ readyChangedMsg gameId changedPlayer =
         |> remoteMsg "lobbyReady"
 
 
-addBotMsg : String -> PlayerMe -> Encode.Value
+addBotMsg : Game.Id -> PlayerMe -> Encode.Value
 addBotMsg gameId requestingPlayer =
     Encode.object
         (header gameId requestingPlayer)
         |> remoteMsg "addBot"
 
 
-header : String -> PlayerMe -> List ( String, Encode.Value )
+header : Game.Id -> PlayerMe -> List ( String, Encode.Value )
 header gameId player =
-    [ ( "gameId", Encode.string gameId )
+    [ ( "gameId", Game.encodeId gameId )
     , ( "playerId", Encode.string player.id )
     ]

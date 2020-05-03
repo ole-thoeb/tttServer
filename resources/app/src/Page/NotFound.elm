@@ -1,6 +1,7 @@
 module Page.NotFound exposing (view, init, Model, toSession, update, Msg)
 
 import Browser.Navigation as Nav
+import Endpoint
 import Html exposing (Html)
 import Session exposing (Session)
 import UIHelper exposing (..)
@@ -48,7 +49,7 @@ update: Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         HomeClicked ->
-            ( model, Nav.pushUrl (Session.navKey (toSession model)) (Url.Builder.absolute [] []) )
+            ( model, Nav.pushUrl (Session.navKey (toSession model)) Endpoint.home )
 
 
 -- VIEW

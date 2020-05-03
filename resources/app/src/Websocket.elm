@@ -1,5 +1,7 @@
 port module Websocket exposing (send, receive, connect, disconnect)
 
+import Endpoint
+import Game
 import Json.Encode as Encode
 import Url.Builder
 
@@ -20,9 +22,9 @@ disconnect = disconnect_ ()
 port connect_ : Encode.Value -> Cmd msg
 
 
-connect : String -> Cmd msg
-connect gameId =
+connect : Game.Mode -> Game.Id -> Cmd msg
+connect mode gameId =
     Encode.object
-        [ ( "url", Encode.string <| Url.Builder.absolute [ "ttt", gameId, "ws" ] [])
+        [ ( "url", Encode.string <| Endpoint.websocket mode gameId )
         ]
         |> connect_

@@ -1,7 +1,8 @@
 module Page.TTT.Lobby exposing (Model, init, toSession, Msg, update, view, updateFromWebsocket, subscriptions)
 
 import ClipBoard
-import Element.Events as Events
+import Endpoint
+import Game
 import Game.Lobby as Lobby exposing (Lobby)
 import Game.LobbyPlayer exposing (Player)
 import MaterialUI.ColorStateList as ColorStateList
@@ -19,14 +20,12 @@ import UIHelper exposing (..)
 
 import Element exposing (..)
 import Element.Font as Font
-import Element.Background as Background
 import Element.Border as Border
 
 import MaterialUI.Button as Button
 import MaterialUI.Theme as Theme exposing (Theme)
 
 import Html
-import Url.Builder
 import Websocket
 
 
@@ -47,7 +46,7 @@ init session lobby =
     , lobby = lobby
     , mui = MaterialUI.defaultModel Mui (Session.theme session)
     }
-    , Websocket.connect lobby.gameId
+    , Websocket.connect Game.TicTacToe lobby.gameId
     )
 
 
@@ -102,7 +101,7 @@ update msg model =
             in
             ( { model | mui = newMui }
             , Cmd.batch
-                [ ClipBoard.copyToClipBoard <| Url.Builder.absolute [ "ttt", "game", model.lobby.gameId ] []
+                [ ClipBoard.copyToClipBoard <| Endpoint.game Game.TicTacToe model.lobby.gameId
                 , effects
                 ]
             )
@@ -188,7 +187,7 @@ view model =
                         [ Font.alignLeft
                         , alignLeft
                         ]
-                        model.lobby.gameId
+                        (Game.idToString model.lobby.gameId)
                         Theme.Body1
                         theme
                     ]

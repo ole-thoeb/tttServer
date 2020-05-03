@@ -5418,25 +5418,7 @@ var $author$project$Page$TTT$Game$Loading = function (a) {
 var $author$project$Page$TTT$Game$Lobby = function (a) {
 	return {$: 'Lobby', a: a};
 };
-var $elm$url$Url$Builder$toQueryPair = function (_v0) {
-	var key = _v0.a;
-	var value = _v0.b;
-	return key + ('=' + value);
-};
-var $elm$url$Url$Builder$toQuery = function (parameters) {
-	if (!parameters.b) {
-		return '';
-	} else {
-		return '?' + A2(
-			$elm$core$String$join,
-			'&',
-			A2($elm$core$List$map, $elm$url$Url$Builder$toQueryPair, parameters));
-	}
-};
-var $elm$url$Url$Builder$absolute = F2(
-	function (pathSegments, parameters) {
-		return '/' + (A2($elm$core$String$join, '/', pathSegments) + $elm$url$Url$Builder$toQuery(parameters));
-	});
+var $author$project$Game$TicTacToe = {$: 'TicTacToe'};
 var $author$project$ServerResponse$TTTResponse$EnterLobbyResponse = function (a) {
 	return {$: 'EnterLobbyResponse', a: a};
 };
@@ -5492,6 +5474,11 @@ var $author$project$Game$LobbyPlayer$nameDecoder = A2($elm$json$Json$Decode$fiel
 var $elm$json$Json$Decode$bool = _Json_decodeBool;
 var $author$project$Game$LobbyPlayer$readyDecoder = A2($elm$json$Json$Decode$field, 'isReady', $elm$json$Json$Decode$bool);
 var $author$project$Game$LobbyPlayer$decoder = A3($elm$json$Json$Decode$map2, $author$project$Game$LobbyPlayer$Player, $author$project$Game$LobbyPlayer$nameDecoder, $author$project$Game$LobbyPlayer$readyDecoder);
+var $author$project$Game$Id = function (a) {
+	return {$: 'Id', a: a};
+};
+var $author$project$Game$idFromString = $author$project$Game$Id;
+var $author$project$Game$idDecoder = A2($elm$json$Json$Decode$map, $author$project$Game$idFromString, $elm$json$Json$Decode$string);
 var $elm$json$Json$Decode$list = _Json_decodeList;
 var $elm$json$Json$Decode$map3 = _Json_map3;
 var $author$project$Game$LobbyPlayer$PlayerMe = F3(
@@ -5503,7 +5490,7 @@ var $author$project$Game$LobbyPlayer$meDecoder = A4($elm$json$Json$Decode$map3, 
 var $author$project$Game$Lobby$decoder = A4(
 	$elm$json$Json$Decode$map3,
 	$author$project$Game$Lobby$Lobby,
-	A2($elm$json$Json$Decode$field, 'gameId', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'gameId', $author$project$Game$idDecoder),
 	A2(
 		$elm$json$Json$Decode$field,
 		'players',
@@ -5650,7 +5637,7 @@ var $author$project$Game$TTTGame$statusDecoder = A2(
 var $author$project$Game$TTTGame$decoder = A7(
 	$elm$json$Json$Decode$map6,
 	$author$project$Game$TTTGame$TTTGame,
-	A2($elm$json$Json$Decode$field, 'gameId', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'gameId', $author$project$Game$idDecoder),
 	A2($elm$json$Json$Decode$field, 'playerMe', $author$project$Game$TTTGamePlayer$meDecoder),
 	A2($elm$json$Json$Decode$field, 'opponent', $author$project$Game$TTTGamePlayer$decoder),
 	A2($elm$json$Json$Decode$field, 'meTurn', $elm$json$Json$Decode$bool),
@@ -6502,21 +6489,60 @@ var $elm$json$Json$Encode$object = function (pairs) {
 			pairs));
 };
 var $elm$json$Json$Encode$string = _Json_wrap;
-var $author$project$Websocket$connect = function (gameId) {
-	return $author$project$Websocket$connect_(
-		$elm$json$Json$Encode$object(
+var $elm$url$Url$Builder$toQueryPair = function (_v0) {
+	var key = _v0.a;
+	var value = _v0.b;
+	return key + ('=' + value);
+};
+var $elm$url$Url$Builder$toQuery = function (parameters) {
+	if (!parameters.b) {
+		return '';
+	} else {
+		return '?' + A2(
+			$elm$core$String$join,
+			'&',
+			A2($elm$core$List$map, $elm$url$Url$Builder$toQueryPair, parameters));
+	}
+};
+var $elm$url$Url$Builder$absolute = F2(
+	function (pathSegments, parameters) {
+		return '/' + (A2($elm$core$String$join, '/', pathSegments) + $elm$url$Url$Builder$toQuery(parameters));
+	});
+var $author$project$Game$idToString = function (_v0) {
+	var string = _v0.a;
+	return string;
+};
+var $author$project$Endpoint$modePreFix = function (mode) {
+	if (mode.$ === 'TicTacToe') {
+		return 'ttt';
+	} else {
+		return 'misery';
+	}
+};
+var $author$project$Endpoint$websocket = F2(
+	function (mode, id) {
+		return A2(
+			$elm$url$Url$Builder$absolute,
 			_List_fromArray(
 				[
-					_Utils_Tuple2(
-					'url',
-					$elm$json$Json$Encode$string(
-						A2(
-							$elm$url$Url$Builder$absolute,
-							_List_fromArray(
-								['ttt', gameId, 'ws']),
-							_List_Nil)))
-				])));
-};
+					$author$project$Endpoint$modePreFix(mode),
+					$author$project$Game$idToString(id),
+					'ws'
+				]),
+			_List_Nil);
+	});
+var $author$project$Websocket$connect = F2(
+	function (mode, gameId) {
+		return $author$project$Websocket$connect_(
+			$elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'url',
+						$elm$json$Json$Encode$string(
+							A2($author$project$Endpoint$websocket, mode, gameId)))
+					])));
+	});
 var $author$project$MaterialUI$Internal$Model$defaultModel = F2(
 	function (lift, theme) {
 		return {icon: $elm$core$Dict$empty, lift: lift, menu: $elm$core$Dict$empty, snackbar: $elm$core$Dict$empty, textfield: $elm$core$Dict$empty, theme: theme, tooltip: $elm$core$Dict$empty};
@@ -6537,8 +6563,21 @@ var $author$project$Page$TTT$Lobby$init = F2(
 					$author$project$Session$theme(session)),
 				session: session
 			},
-			$author$project$Websocket$connect(lobby.gameId));
+			A2($author$project$Websocket$connect, $author$project$Game$TicTacToe, lobby.gameId));
 	});
+var $author$project$Endpoint$endpointHelper = F3(
+	function (middleSegment, mode, id) {
+		return A2(
+			$elm$url$Url$Builder$absolute,
+			_List_fromArray(
+				[
+					$author$project$Endpoint$modePreFix(mode),
+					middleSegment,
+					$author$project$Game$idToString(id)
+				]),
+			_List_Nil);
+	});
+var $author$project$Endpoint$joinGame = $author$project$Endpoint$endpointHelper('joinGame');
 var $elm$core$Platform$Cmd$map = _Platform_map;
 var $author$project$Util$updateWith = F3(
 	function (toModel, toMsg, _v0) {
@@ -6563,18 +6602,13 @@ var $author$project$Page$TTT$Game$fromLobby = F3(
 				$elm$http$Http$get(
 					{
 						expect: A2($elm$http$Http$expectJson, $author$project$Page$TTT$Game$JoinResponse, $author$project$ServerResponse$TTTResponse$decoder),
-						url: A2(
-							$elm$url$Url$Builder$absolute,
-							_List_fromArray(
-								['ttt', 'joinGame', gameId]),
-							_List_Nil)
+						url: A2($author$project$Endpoint$joinGame, $author$project$Game$TicTacToe, gameId)
 					}));
 		}
 	});
 var $author$project$Page$Home$Mui = function (a) {
 	return {$: 'Mui', a: a};
 };
-var $author$project$Page$Home$TicTacToe = {$: 'TicTacToe'};
 var $elm$json$Json$Encode$null = _Json_encodeNull;
 var $author$project$Websocket$disconnect_ = _Platform_outgoingPort(
 	'disconnect_',
@@ -6589,7 +6623,7 @@ var $author$project$Page$Home$init = F2(
 				error: maybeError,
 				gameId: '',
 				lobby: $elm$core$Maybe$Nothing,
-				mode: $author$project$Page$Home$TicTacToe,
+				mode: $author$project$Game$TicTacToe,
 				mui: A2(
 					$author$project$MaterialUI$MaterilaUI$defaultModel,
 					$author$project$Page$Home$Mui,
@@ -6611,6 +6645,7 @@ var $author$project$Page$Rematch$Loading = function (a) {
 var $author$project$Page$Rematch$ServerResponse = function (a) {
 	return {$: 'ServerResponse', a: a};
 };
+var $author$project$Endpoint$joinRematch = $author$project$Endpoint$endpointHelper('joinRematch');
 var $author$project$Page$Rematch$init = F2(
 	function (session, oldGameId) {
 		return _Utils_Tuple2(
@@ -6622,11 +6657,7 @@ var $author$project$Page$Rematch$init = F2(
 						$elm$http$Http$get(
 						{
 							expect: A2($elm$http$Http$expectJson, $author$project$Page$Rematch$ServerResponse, $author$project$ServerResponse$EnterLobby$decoder),
-							url: A2(
-								$elm$url$Url$Builder$absolute,
-								_List_fromArray(
-									['ttt', 'rematch', oldGameId]),
-								_List_Nil)
+							url: A2($author$project$Endpoint$joinRematch, $author$project$Game$TicTacToe, oldGameId)
 						})
 					])));
 	});
@@ -7155,6 +7186,76 @@ var $author$project$Route$Home = function (a) {
 var $author$project$Route$Rematch = function (a) {
 	return {$: 'Rematch', a: a};
 };
+var $elm$url$Url$Parser$Parser = function (a) {
+	return {$: 'Parser', a: a};
+};
+var $elm$url$Url$Parser$mapState = F2(
+	function (func, _v0) {
+		var visited = _v0.visited;
+		var unvisited = _v0.unvisited;
+		var params = _v0.params;
+		var frag = _v0.frag;
+		var value = _v0.value;
+		return A5(
+			$elm$url$Url$Parser$State,
+			visited,
+			unvisited,
+			params,
+			frag,
+			func(value));
+	});
+var $elm$url$Url$Parser$map = F2(
+	function (subValue, _v0) {
+		var parseArg = _v0.a;
+		return $elm$url$Url$Parser$Parser(
+			function (_v1) {
+				var visited = _v1.visited;
+				var unvisited = _v1.unvisited;
+				var params = _v1.params;
+				var frag = _v1.frag;
+				var value = _v1.value;
+				return A2(
+					$elm$core$List$map,
+					$elm$url$Url$Parser$mapState(value),
+					parseArg(
+						A5($elm$url$Url$Parser$State, visited, unvisited, params, frag, subValue)));
+			});
+	});
+var $elm$url$Url$Parser$custom = F2(
+	function (tipe, stringToSomething) {
+		return $elm$url$Url$Parser$Parser(
+			function (_v0) {
+				var visited = _v0.visited;
+				var unvisited = _v0.unvisited;
+				var params = _v0.params;
+				var frag = _v0.frag;
+				var value = _v0.value;
+				if (!unvisited.b) {
+					return _List_Nil;
+				} else {
+					var next = unvisited.a;
+					var rest = unvisited.b;
+					var _v2 = stringToSomething(next);
+					if (_v2.$ === 'Just') {
+						var nextValue = _v2.a;
+						return _List_fromArray(
+							[
+								A5(
+								$elm$url$Url$Parser$State,
+								A2($elm$core$List$cons, next, visited),
+								rest,
+								params,
+								frag,
+								value(nextValue))
+							]);
+					} else {
+						return _List_Nil;
+					}
+				}
+			});
+	});
+var $elm$url$Url$Parser$string = A2($elm$url$Url$Parser$custom, 'STRING', $elm$core$Maybe$Just);
+var $author$project$Route$idParser = A2($elm$url$Url$Parser$map, $author$project$Game$idFromString, $elm$url$Url$Parser$string);
 var $author$project$Page$Home$ConnectionError = function (a) {
 	return {$: 'ConnectionError', a: a};
 };
@@ -7248,41 +7349,6 @@ var $author$project$Page$Home$joinErrorQueryParser = A2(
 		} else {
 			return $elm$core$Maybe$Nothing;
 		}
-	});
-var $elm$url$Url$Parser$Parser = function (a) {
-	return {$: 'Parser', a: a};
-};
-var $elm$url$Url$Parser$mapState = F2(
-	function (func, _v0) {
-		var visited = _v0.visited;
-		var unvisited = _v0.unvisited;
-		var params = _v0.params;
-		var frag = _v0.frag;
-		var value = _v0.value;
-		return A5(
-			$elm$url$Url$Parser$State,
-			visited,
-			unvisited,
-			params,
-			frag,
-			func(value));
-	});
-var $elm$url$Url$Parser$map = F2(
-	function (subValue, _v0) {
-		var parseArg = _v0.a;
-		return $elm$url$Url$Parser$Parser(
-			function (_v1) {
-				var visited = _v1.visited;
-				var unvisited = _v1.unvisited;
-				var params = _v1.params;
-				var frag = _v1.frag;
-				var value = _v1.value;
-				return A2(
-					$elm$core$List$map,
-					$elm$url$Url$Parser$mapState(value),
-					parseArg(
-						A5($elm$url$Url$Parser$State, visited, unvisited, params, frag, subValue)));
-			});
 	});
 var $elm$core$List$append = F2(
 	function (xs, ys) {
@@ -7379,40 +7445,6 @@ var $elm$url$Url$Parser$s = function (str) {
 			}
 		});
 };
-var $elm$url$Url$Parser$custom = F2(
-	function (tipe, stringToSomething) {
-		return $elm$url$Url$Parser$Parser(
-			function (_v0) {
-				var visited = _v0.visited;
-				var unvisited = _v0.unvisited;
-				var params = _v0.params;
-				var frag = _v0.frag;
-				var value = _v0.value;
-				if (!unvisited.b) {
-					return _List_Nil;
-				} else {
-					var next = unvisited.a;
-					var rest = unvisited.b;
-					var _v2 = stringToSomething(next);
-					if (_v2.$ === 'Just') {
-						var nextValue = _v2.a;
-						return _List_fromArray(
-							[
-								A5(
-								$elm$url$Url$Parser$State,
-								A2($elm$core$List$cons, next, visited),
-								rest,
-								params,
-								frag,
-								value(nextValue))
-							]);
-					} else {
-						return _List_Nil;
-					}
-				}
-			});
-	});
-var $elm$url$Url$Parser$string = A2($elm$url$Url$Parser$custom, 'STRING', $elm$core$Maybe$Just);
 var $elm$url$Url$Parser$top = $elm$url$Url$Parser$Parser(
 	function (state) {
 		return _List_fromArray(
@@ -7434,7 +7466,7 @@ var $author$project$Route$parser = $elm$url$Url$Parser$oneOf(
 				A2(
 					$elm$url$Url$Parser$slash,
 					$elm$url$Url$Parser$s('game'),
-					$elm$url$Url$Parser$string))),
+					$author$project$Route$idParser))),
 			A2(
 			$elm$url$Url$Parser$map,
 			$author$project$Route$Rematch,
@@ -7443,8 +7475,8 @@ var $author$project$Route$parser = $elm$url$Url$Parser$oneOf(
 				$elm$url$Url$Parser$s('ttt'),
 				A2(
 					$elm$url$Url$Parser$slash,
-					$elm$url$Url$Parser$s('joinRematch'),
-					$elm$url$Url$Parser$string)))
+					$elm$url$Url$Parser$s('rematch'),
+					$author$project$Route$idParser)))
 		]));
 var $author$project$Route$fromUrl = function (url) {
 	return A2(
@@ -8110,6 +8142,7 @@ var $elm$url$Url$toString = function (url) {
 var $author$project$Page$Home$ServerResponse = function (a) {
 	return {$: 'ServerResponse', a: a};
 };
+var $author$project$Endpoint$game = $author$project$Endpoint$endpointHelper('game');
 var $elm$core$Result$map = F2(
 	function (func, ra) {
 		if (ra.$ === 'Ok') {
@@ -8827,6 +8860,16 @@ var $author$project$UIHelper$materialUpdate = F2(
 			},
 			A2($author$project$MaterialUI$MaterilaUI$update, msg, model.mui));
 	});
+var $author$project$Endpoint$newGame = function (mode) {
+	return A2(
+		$elm$url$Url$Builder$absolute,
+		_List_fromArray(
+			[
+				$author$project$Endpoint$modePreFix(mode),
+				'newGame'
+			]),
+		_List_Nil);
+};
 var $author$project$Page$Home$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -8842,11 +8885,7 @@ var $author$project$Page$Home$update = F2(
 									$author$project$Page$Home$ServerResponse,
 									$elm$core$Result$map($author$project$ServerResponse$TTTResponse$EnterLobbyResponse)),
 								$author$project$ServerResponse$EnterLobby$decoder),
-							url: A2(
-								$elm$url$Url$Builder$absolute,
-								_List_fromArray(
-									['ttt', 'newGame']),
-								_List_Nil)
+							url: $author$project$Endpoint$newGame($author$project$Game$TicTacToe)
 						}));
 			case 'JoinGame':
 				return _Utils_Tuple2(
@@ -8855,14 +8894,12 @@ var $author$project$Page$Home$update = F2(
 						{
 							expect: A2($elm$http$Http$expectJson, $author$project$Page$Home$ServerResponse, $author$project$ServerResponse$TTTResponse$decoder),
 							url: A2(
-								$elm$url$Url$Builder$absolute,
-								_List_fromArray(
-									[
-										'ttt',
-										'joinGame',
-										A2($elm$core$Debug$log, 'join game url', model.gameId)
-									]),
-								_List_Nil)
+								$author$project$Endpoint$joinGame,
+								$author$project$Game$TicTacToe,
+								A2(
+									$elm$core$Debug$log,
+									'join game url',
+									$author$project$Game$idFromString(model.gameId)))
 						}));
 			case 'GameId':
 				var gameId = msg.a;
@@ -8887,11 +8924,7 @@ var $author$project$Page$Home$update = F2(
 							A2(
 								$elm$browser$Browser$Navigation$pushUrl,
 								navKey,
-								A2(
-									$elm$url$Url$Builder$absolute,
-									_List_fromArray(
-										['ttt', 'game', lobby.gameId]),
-									_List_Nil)));
+								A2($author$project$Endpoint$game, $author$project$Game$TicTacToe, lobby.gameId)));
 					};
 					var a = A2($elm$core$Debug$log, 'response', response);
 					switch (response.$) {
@@ -8921,11 +8954,7 @@ var $author$project$Page$Home$update = F2(
 									A2(
 										$elm$browser$Browser$Navigation$pushUrl,
 										navKey,
-										A2(
-											$elm$url$Url$Builder$absolute,
-											_List_fromArray(
-												['ttt', 'game', game.gameId]),
-											_List_Nil)));
+										A2($author$project$Endpoint$game, $author$project$Game$TicTacToe, game.gameId)));
 							} else {
 								return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 							}
@@ -8955,6 +8984,7 @@ var $author$project$Page$Home$update = F2(
 					$elm$core$Platform$Cmd$none);
 		}
 	});
+var $author$project$Endpoint$home = A2($elm$url$Url$Builder$absolute, _List_Nil, _List_Nil);
 var $author$project$Page$NotFound$update = F2(
 	function (msg, model) {
 		return _Utils_Tuple2(
@@ -8963,7 +8993,7 @@ var $author$project$Page$NotFound$update = F2(
 				$elm$browser$Browser$Navigation$pushUrl,
 				$author$project$Session$navKey(
 					$author$project$Page$NotFound$toSession(model)),
-				A2($elm$url$Url$Builder$absolute, _List_Nil, _List_Nil)));
+				$author$project$Endpoint$home));
 	});
 var $elm$url$Url$Builder$QueryParameter = F2(
 	function (a, b) {
@@ -9021,11 +9051,7 @@ var $author$project$Page$Rematch$update = F2(
 					A2(
 						$elm$browser$Browser$Navigation$pushUrl,
 						$author$project$Session$navKey(session),
-						A2(
-							$elm$url$Url$Builder$absolute,
-							_List_fromArray(
-								['ttt', 'game', lobby.gameId]),
-							_List_Nil)));
+						A2($author$project$Endpoint$game, $author$project$Game$TicTacToe, lobby.gameId)));
 			} else {
 				var error = response.a;
 				return _Utils_Tuple2(
@@ -9068,9 +9094,14 @@ var $author$project$Page$TTT$InGame$init = F2(
 	function (session, game) {
 		return _Utils_Tuple2(
 			{game: game, session: session},
-			$author$project$Websocket$connect(game.gameId));
+			A2($author$project$Websocket$connect, $author$project$Game$TicTacToe, game.gameId));
 	});
+var $author$project$Endpoint$rematch = $author$project$Endpoint$endpointHelper('rematch');
 var $author$project$Websocket$send = _Platform_outgoingPort('send', $elm$core$Basics$identity);
+var $author$project$Game$encodeId = function (id) {
+	return $elm$json$Json$Encode$string(
+		$author$project$Game$idToString(id));
+};
 var $elm$json$Json$Encode$int = _Json_wrap;
 var $author$project$ServerRequest$JsonHelper$remoteMsg = F2(
 	function (type_, content) {
@@ -9096,7 +9127,7 @@ var $author$project$ServerRequest$InGame$setPiece = F3(
 						$elm$json$Json$Encode$string(playerId)),
 						_Utils_Tuple2(
 						'gameId',
-						$elm$json$Json$Encode$string(gameId)),
+						$author$project$Game$encodeId(gameId)),
 						_Utils_Tuple2(
 						'index',
 						$elm$json$Json$Encode$int(index))
@@ -9120,18 +9151,11 @@ var $author$project$Page$TTT$InGame$update = F2(
 					A2(
 						$elm$browser$Browser$Navigation$pushUrl,
 						navKey,
-						A2(
-							$elm$url$Url$Builder$absolute,
-							_List_fromArray(
-								['ttt', 'joinRematch', game.gameId]),
-							_List_Nil)));
+						A2($author$project$Endpoint$rematch, $author$project$Game$TicTacToe, game.gameId)));
 			default:
 				return _Utils_Tuple2(
 					model,
-					A2(
-						$elm$browser$Browser$Navigation$pushUrl,
-						navKey,
-						A2($elm$url$Url$Builder$absolute, _List_Nil, _List_Nil)));
+					A2($elm$browser$Browser$Navigation$pushUrl, navKey, $author$project$Endpoint$home));
 		}
 	});
 var $author$project$ServerRequest$InLobby$header = F2(
@@ -9140,7 +9164,7 @@ var $author$project$ServerRequest$InLobby$header = F2(
 			[
 				_Utils_Tuple2(
 				'gameId',
-				$elm$json$Json$Encode$string(gameId)),
+				$author$project$Game$encodeId(gameId)),
 				_Utils_Tuple2(
 				'playerId',
 				$elm$json$Json$Encode$string(player.id))
@@ -9372,11 +9396,7 @@ var $author$project$Page$TTT$Lobby$update = F2(
 						_List_fromArray(
 							[
 								$author$project$ClipBoard$copyToClipBoard(
-								A2(
-									$elm$url$Url$Builder$absolute,
-									_List_fromArray(
-										['ttt', 'game', model.lobby.gameId]),
-									_List_Nil)),
+								A2($author$project$Endpoint$game, $author$project$Game$TicTacToe, model.lobby.gameId)),
 								effects
 							])));
 			default:
@@ -9657,7 +9677,7 @@ var $author$project$Page$Home$GameId = function (a) {
 	return {$: 'GameId', a: a};
 };
 var $author$project$Page$Home$JoinGame = {$: 'JoinGame'};
-var $author$project$Page$Home$Misery = {$: 'Misery'};
+var $author$project$Game$Misery = {$: 'Misery'};
 var $author$project$Page$Home$ModeSelected = function (a) {
 	return {$: 'ModeSelected', a: a};
 };
@@ -18211,8 +18231,8 @@ var $author$project$Page$Home$view = function (model) {
 										index: 'modeSelect',
 										items: _List_fromArray(
 											[
-												$author$project$MaterialUI$Select$item($author$project$Page$Home$TicTacToe),
-												$author$project$MaterialUI$Select$item($author$project$Page$Home$Misery)
+												$author$project$MaterialUI$Select$item($author$project$Game$TicTacToe),
+												$author$project$MaterialUI$Select$item($author$project$Game$Misery)
 											]),
 										label: 'Mode',
 										onClick: $author$project$Page$Home$ModeSelected,
@@ -19747,7 +19767,7 @@ var $author$project$Page$TTT$Lobby$view = function (model) {
 												$author$project$UIHelper$materialText,
 												_List_fromArray(
 													[$mdgriffith$elm_ui$Element$Font$alignLeft, $mdgriffith$elm_ui$Element$alignLeft]),
-												model.lobby.gameId,
+												$author$project$Game$idToString(model.lobby.gameId),
 												$author$project$MaterialUI$Theme$Body1,
 												theme)
 											])),

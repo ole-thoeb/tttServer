@@ -2,6 +2,8 @@ module Page.TTT.Game exposing (Model, toSession, fromLobby, Msg, update, view, s
 
 import Browser.Navigation as Nav
 import Element
+import Endpoint
+import Game
 import Game.Lobby as Lobby
 import Html
 import Http
@@ -43,7 +45,7 @@ toSession model =
             session
 
 
-fromLobby : Session -> String -> Maybe Lobby.Lobby -> ( Model, Cmd Msg )
+fromLobby : Session -> Game.Id -> Maybe Lobby.Lobby -> ( Model, Cmd Msg )
 fromLobby session gameId maybeLobby =
     case maybeLobby of
         Just lobby ->
@@ -53,7 +55,7 @@ fromLobby session gameId maybeLobby =
         Nothing ->
             ( Loading session
             , Http.get
-                { url = (Url.Builder.absolute [ "ttt", "joinGame", gameId ] [])
+                { url = Endpoint.joinGame Game.TicTacToe gameId
                 , expect = Http.expectJson JoinResponse TTTResponse.decoder
                 }
             )

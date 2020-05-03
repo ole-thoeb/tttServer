@@ -108,7 +108,7 @@ data class JoinGame(val id: String) {
 }
 
 @KtorExperimentalLocationsAPI
-@Location("/rematch/{id}")
+@Location("/joinRematch/{id}")
 data class Rematch(val id: String) {
     val oldGameId: GameId = GameId(id)
 }

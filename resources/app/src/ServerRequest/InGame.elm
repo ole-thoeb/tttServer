@@ -1,15 +1,16 @@
 module ServerRequest.InGame exposing (..)
 
 
+import Game
 import Json.Encode as Encode
 import ServerRequest.JsonHelper exposing (remoteMsg)
 
 
-setPiece : String -> String -> Int -> Encode.Value
+setPiece : Game.Id -> String -> Int -> Encode.Value
 setPiece gameId playerId index =
     Encode.object
         [ ( "playerId", Encode.string playerId )
-        , ( "gameId", Encode.string gameId )
+        , ( "gameId", Game.encodeId gameId )
         , ( "index", Encode.int index )
         ]
         |> remoteMsg "tttSetPiece"

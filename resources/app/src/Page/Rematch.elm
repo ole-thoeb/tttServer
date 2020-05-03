@@ -2,6 +2,8 @@ module Page.Rematch exposing (Model, init, toSession, update, Msg, view, subscri
 
 import Browser.Navigation as Nav
 import Element
+import Endpoint
+import Game
 import Html
 import Http
 import Page.Home as Home
@@ -16,13 +18,13 @@ type Model =
     Loading Session
 
 
-init : Session -> String -> ( Model, Cmd Msg )
+init : Session -> Game.Id -> ( Model, Cmd Msg )
 init session oldGameId =
     ( Loading session
     , Cmd.batch
         [ Websocket.disconnect
         , Http.get
-            { url = (Url.Builder.absolute [ "ttt", "rematch", oldGameId ] [])
+            { url = Endpoint.joinRematch Game.TicTacToe oldGameId
             , expect = Http.expectJson ServerResponse EnterLobby.decoder
             }
         ]
@@ -55,11 +57,7 @@ update msg model =
                         EnterLobby.LobbyState lobby ->
                             ( model
                             , Nav.pushUrl (session |> Session.navKey)
-                                <| Url.Builder.absolute
-                                    [ "ttt"
-                                    , "game"
-                                    , lobby.gameId
-                                    ] []
+                                <| Endpoint.game Game.TicTacToe lobby.gameId
                             )
 
                         EnterLobby.Error error ->

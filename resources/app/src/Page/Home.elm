@@ -1,6 +1,8 @@
 module Page.Home exposing (Msg, view, update, subscriptions, toSession, init, Model, JoinError(..), joinErrorToQueryParam, joinErrorQueryParser)
 
 import Browser.Navigation as Nav
+import Endpoint
+import Game
 import Game.Lobby exposing (Lobby)
 import Http
 import MaterialUI.Internal.TextField.Model as TextField
@@ -35,7 +37,7 @@ type alias Model =
     { session: Session
     , gameId: String
     , error: Maybe JoinError
-    , mode : GameMode
+    , mode : Game.Mode
     , lobby: Maybe Lobby
     , mui : MaterialUI.Model Session.CustomColor Msg
     }
@@ -46,17 +48,13 @@ type JoinError
     | ConnectionError (Maybe Http.Error)
 
 
-type GameMode
-    = TicTacToe
-    | Misery
-
 
 init : Session -> Maybe JoinError -> ( Model, Cmd Msg )
 init session maybeError =
     ( { session = session
     , gameId = ""
     , error = maybeError
-    , mode = TicTacToe
+    , mode = Game.TicTacToe
     , lobby = Nothing
     , mui = MaterialUI.defaultModel Mui (Session.theme session)
     }
@@ -78,7 +76,7 @@ type Msg
     | GameId String
     | ServerResponse (Result Http.Error TTTResponse.Response)
     | Mui MaterialUI.Msg
-    | ModeSelected GameMode
+    | ModeSelected Game.Mode
 
 
 update: Msg -> Model -> ( Model, Cmd Msg )
@@ -87,7 +85,7 @@ update msg model =
         NewTTTGame ->
             ( model
             , Http.get
-                { url = (Url.Builder.absolute [ "ttt", "newGame" ] [])
+                { url = Endpoint.newGame Game.TicTacToe
                 , expect = Http.expectJson (ServerResponse << Result.map TTTResponse.EnterLobbyResponse) EnterLobbyResponse.decoder
                 }
             )
@@ -95,7 +93,7 @@ update msg model =
         JoinGame ->
             ( model
             , Http.get
-                { url = (Url.Builder.absolute [ "ttt", "joinGame", Debug.log "join game url" model.gameId ] [])
+                { url = Endpoint.joinGame Game.TicTacToe (Debug.log "join game url" <| Game.idFromString model.gameId)
                 , expect = Http.expectJson ServerResponse TTTResponse.decoder
                 }
             )
@@ -112,11 +110,7 @@ update msg model =
                         navigateToLobby lobby =
                             ( { model | lobby = Just lobby }
                             , Nav.pushUrl navKey
-                                <| Url.Builder.absolute
-                                    [ "ttt"
-                                    , "game"
-                                    , lobby.gameId
-                                    ] []
+                                <| Endpoint.game Game.TicTacToe lobby.gameId
                             )
                     in
                     case response of
@@ -132,11 +126,7 @@ update msg model =
                         TTTResponse.InGameResponse (InGameResponse.GameState game) ->
                             ( model
                             , Nav.pushUrl navKey
-                                <| Url.Builder.absolute
-                                    [ "ttt"
-                                    , "game"
-                                    , game.gameId
-                                    ] []
+                                <| Endpoint.game Game.TicTacToe game.gameId
                             )
 
                         TTTResponse.InGameResponse (InGameResponse.PlayerDisc _) ->
@@ -209,12 +199,12 @@ view model =
                     , color = Select.defaultColorPrimary
                     , label = "Mode"
                     , items =
-                        [ Select.item TicTacToe
-                        , Select.item Misery
+                        [ Select.item Game.TicTacToe
+                        , Select.item Game.Misery
                         ]
                     , toItem = \mode -> case mode of
-                        TicTacToe -> { text = "Tic Tac Toe" }
-                        Misery -> { text = "Misery" }
+                        Game.TicTacToe -> { text = "Tic Tac Toe" }
+                        Game.Misery -> { text = "Misery" }
                     , onClick = ModeSelected
                     , selectedItem = Just model.mode
                     }
