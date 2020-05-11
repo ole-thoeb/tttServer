@@ -5547,12 +5547,10 @@ var $author$project$Game$TTTGame$cellDecoder = A2(
 	},
 	$elm$json$Json$Decode$string);
 var $author$project$Game$TTTGame$boardDecoder = $elm$json$Json$Decode$array($author$project$Game$TTTGame$cellDecoder);
-var $author$project$Game$TTTGamePlayer$Player = F4(
-	function (name, color, symbol, playerRef) {
-		return {color: color, name: name, playerRef: playerRef, symbol: symbol};
+var $author$project$Game$TTTGamePlayer$Player = F3(
+	function (name, symbol, playerRef) {
+		return {name: name, playerRef: playerRef, symbol: symbol};
 	});
-var $author$project$Game$TTTGamePlayer$colorDecoder = A2($elm$json$Json$Decode$field, 'color', $elm$json$Json$Decode$string);
-var $elm$json$Json$Decode$map4 = _Json_map4;
 var $author$project$Game$TTTGamePlayer$nameDecoder = A2($elm$json$Json$Decode$field, 'name', $elm$json$Json$Decode$string);
 var $author$project$Game$TTTGamePlayer$P1 = {$: 'P1'};
 var $author$project$Game$TTTGamePlayer$P2 = {$: 'P2'};
@@ -5584,26 +5582,24 @@ var $author$project$Game$TTTGamePlayer$symbolDecoder = A2(
 		}
 	},
 	A2($elm$json$Json$Decode$field, 'symbol', $elm$json$Json$Decode$string));
-var $author$project$Game$TTTGamePlayer$decoder = A5(
-	$elm$json$Json$Decode$map4,
+var $author$project$Game$TTTGamePlayer$decoder = A4(
+	$elm$json$Json$Decode$map3,
 	$author$project$Game$TTTGamePlayer$Player,
 	$author$project$Game$TTTGamePlayer$nameDecoder,
-	$author$project$Game$TTTGamePlayer$colorDecoder,
 	$author$project$Game$TTTGamePlayer$symbolDecoder,
 	A2($elm$json$Json$Decode$field, 'playerRef', $author$project$Game$TTTGamePlayer$playerRefDecoder));
 var $elm$json$Json$Decode$map6 = _Json_map6;
-var $author$project$Game$TTTGamePlayer$PlayerMe = F5(
-	function (id, name, color, symbol, playerRef) {
-		return {color: color, id: id, name: name, playerRef: playerRef, symbol: symbol};
+var $author$project$Game$TTTGamePlayer$PlayerMe = F4(
+	function (id, name, symbol, playerRef) {
+		return {id: id, name: name, playerRef: playerRef, symbol: symbol};
 	});
 var $author$project$Game$TTTGamePlayer$idDecoder = A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$string);
-var $elm$json$Json$Decode$map5 = _Json_map5;
-var $author$project$Game$TTTGamePlayer$meDecoder = A6(
-	$elm$json$Json$Decode$map5,
+var $elm$json$Json$Decode$map4 = _Json_map4;
+var $author$project$Game$TTTGamePlayer$meDecoder = A5(
+	$elm$json$Json$Decode$map4,
 	$author$project$Game$TTTGamePlayer$PlayerMe,
 	$author$project$Game$TTTGamePlayer$idDecoder,
 	$author$project$Game$TTTGamePlayer$nameDecoder,
-	$author$project$Game$TTTGamePlayer$colorDecoder,
 	$author$project$Game$TTTGamePlayer$symbolDecoder,
 	A2($elm$json$Json$Decode$field, 'playerRef', $author$project$Game$TTTGamePlayer$playerRefDecoder));
 var $author$project$Game$TTTGame$Draw = {$: 'Draw'};
@@ -18555,7 +18551,7 @@ var $elm$core$Array$get = F2(
 			A3($elm$core$Array$getHelp, startShift, index, tree)));
 	});
 var $author$project$Game$TTTGamePlayer$meAsPlayer = function (playerMe) {
-	return {color: playerMe.color, name: playerMe.name, playerRef: playerMe.playerRef, symbol: playerMe.symbol};
+	return {name: playerMe.name, playerRef: playerMe.playerRef, symbol: playerMe.symbol};
 };
 var $author$project$Game$TTTGame$playerOfSymbol = F2(
 	function (game, symbol) {

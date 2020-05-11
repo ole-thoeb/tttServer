@@ -236,7 +236,7 @@ type Alignment
 playerHeader : Theme Session.CustomColor  ->
     { player
     | name : String
-    , color : String
+    --, color : String
     , symbol : Symbol
     , playerRef : TTTGamePlayer.PlayerRef
     } ->

@@ -9,7 +9,7 @@ type Symbol = X | O
 type alias PlayerMe =
     { id : String
     , name : String
-    , color : String
+    --, color : String
     , symbol : Symbol
     , playerRef : PlayerRef
     }
@@ -17,7 +17,7 @@ type alias PlayerMe =
 
 type alias Player =
     { name : String
-    , color : String
+    --, color : String
     , symbol : Symbol
     , playerRef : PlayerRef
     }
@@ -30,7 +30,7 @@ meAsPlayer : PlayerMe -> Player
 meAsPlayer playerMe =
     { name = playerMe.name
     , symbol =  playerMe.symbol
-    , color = playerMe.color
+    --, color = playerMe.color
     , playerRef = playerMe.playerRef
     }
 
@@ -40,12 +40,12 @@ meAsPlayer playerMe =
 
 decoder : Decoder Player
 decoder =
-    Decode.map4 Player nameDecoder colorDecoder symbolDecoder (Decode.field "playerRef" playerRefDecoder)
+    Decode.map3 Player nameDecoder {-colorDecoder-} symbolDecoder (Decode.field "playerRef" playerRefDecoder)
 
 
 meDecoder : Decoder PlayerMe
 meDecoder =
-    Decode.map5 PlayerMe idDecoder nameDecoder colorDecoder symbolDecoder (Decode.field "playerRef" playerRefDecoder)
+    Decode.map4 PlayerMe idDecoder nameDecoder {-colorDecoder-} symbolDecoder (Decode.field "playerRef" playerRefDecoder)
 
 
 idDecoder : Decoder String

@@ -4,44 +4,50 @@ import GameId
 import Messages
 import MessagesOf
 import arrow.core.Tuple2
+import arrow.core.constant
 import json.JsonSerializable
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import noSuchGame
 import java.util.concurrent.ConcurrentHashMap
 
-interface SynchronizedGameRegistry<GAME : Game> {
+interface SynchronizedGameRegistry<L : Game.LobbyImpl, G : Game.InGameImpl> {
 
-    suspend fun <MSG : JsonSerializable> updateGame(gameId: GameId, update: suspend (GAME) -> Tuple2<GAME, MessagesOf<MSG>>): Messages
-    suspend fun add(game: GAME): GAME
-    suspend fun <R> trySynchronize(gameId: GameId, failure: suspend () -> R, success: suspend (GAME) -> R): R
+    suspend fun <T> updateGame(gameId: GameId, default: T, update: suspend (Game<L, G>) -> Tuple2<Game<L, G>, T>): T
+    suspend fun add(game: Game<L, G>): Game<L, G>
+    suspend fun <R> trySynchronize(gameId: GameId, failure: suspend () -> R, success: suspend (Game<L, G>) -> R): R
 
-    suspend fun removeUnlocked(gameId: GameId): GAME?
-    suspend fun updateUnlocked(game: GAME): GAME
+    suspend fun removeUnlocked(gameId: GameId): Game<L, G>?
+    suspend fun updateUnlocked(game: Game<L, G>): Game<L, G>
 
-    suspend fun GameServer.AsyncActionContext.asyncUpdateGame(gameId: GameId, update: suspend (GAME) -> Tuple2<GAME, Messages>)
+    suspend fun GameServer.AsyncActionContext.asyncUpdateGame(gameId: GameId, update: suspend (Game<L, G>) -> Tuple2<Game<L, G>, Messages>)
 }
 
-suspend fun <GAME : Game, R> SynchronizedGameRegistry<GAME>.withGame(gameId: GameId, action: suspend (GAME?) -> R): R {
+suspend fun <L : Game.LobbyImpl, G : Game.InGameImpl, R> SynchronizedGameRegistry<L, G>.withGame(gameId: GameId, action: suspend (Game<L, G>?) -> R): R {
     return trySynchronize(gameId, { action(null) }, action)
 }
 
-data class LockingSynchronizedGameRegistry<GAME : Game>(
-        private val games: ConcurrentHashMap<GameId, GAME> = ConcurrentHashMap(),
-        private val locks: ConcurrentHashMap<GameId, Mutex> = ConcurrentHashMap()
-) : SynchronizedGameRegistry<GAME> {
+suspend fun <MSG: JsonSerializable, L : Game.LobbyImpl, G : Game.InGameImpl> SynchronizedGameRegistry<L, G>.updateGame(
+        gameId: GameId,
+        update: suspend (Game<L, G>) -> Tuple2<Game<L, G>, MessagesOf<MSG>>
+): Messages = updateGame(gameId, noSuchGame(gameId), update)
 
-    override suspend fun <MSG : JsonSerializable> updateGame(gameId: GameId, update: suspend (GAME) -> Tuple2<GAME, MessagesOf<MSG>>): Messages {
-        return trySynchronize(gameId, { noSuchGame(gameId) }) { game ->
-            val (updatedGame, msgs) = update(game)
+data class LockingSynchronizedGameRegistry<L : Game.LobbyImpl, G : Game.InGameImpl>(
+        private val games: ConcurrentHashMap<GameId, Game<L, G>> = ConcurrentHashMap(),
+        private val locks: ConcurrentHashMap<GameId, Mutex> = ConcurrentHashMap()
+) : SynchronizedGameRegistry<L, G> {
+
+    override suspend fun <T> updateGame(gameId: GameId, default: T, update: suspend (Game<L, G>) -> Tuple2<Game<L, G>, T>): T {
+        return trySynchronize(gameId, { default }) { game ->
+            val (updatedGame, t) = update(game)
             games[gameId] = updatedGame
-            msgs
+            t
         }
     }
 
-    override suspend fun add(game: GAME): GAME = updateUnlocked(game)
+    override suspend fun add(game: Game<L, G>): Game<L, G> = updateUnlocked(game)
 
-    override suspend fun <R> trySynchronize(gameId: GameId, failure: suspend () -> R, success: suspend (GAME) -> R): R {
+    override suspend fun <R> trySynchronize(gameId: GameId, failure: suspend () -> R, success: suspend (Game<L, G>) -> R): R {
         val mutex = locks[gameId] ?: return failure()
         mutex.withLock {
             val game = games[gameId] ?: return failure()
@@ -49,25 +55,25 @@ data class LockingSynchronizedGameRegistry<GAME : Game>(
         }
     }
 
-    override suspend fun removeUnlocked(gameId: GameId): GAME? {
+    override suspend fun removeUnlocked(gameId: GameId): Game<L, G>? {
         locks.remove(gameId)
         return games.remove(gameId)
     }
 
-    override suspend fun updateUnlocked(game: GAME): GAME {
+    override suspend fun updateUnlocked(game: Game<L, G>): Game<L, G> {
         val lock = locks[game.id] ?: Mutex()
         locks[game.id] = lock
         games[game.id] = game
         return game
     }
 
-    override suspend fun GameServer.AsyncActionContext.asyncUpdateGame(gameId: GameId, update: suspend (GAME) -> Tuple2<GAME, Messages>) {
+    override suspend fun GameServer.AsyncActionContext.asyncUpdateGame(gameId: GameId, update: suspend (Game<L, G>) -> Tuple2<Game<L, G>, Messages>) {
         trySynchronize(gameId, { null }) { game ->
             val (updatedGame, msgs) = update(game)
             games[gameId] = updatedGame
             msgs
         }?.let { msgs ->
-            messageChanel.send(msgs)
+            messageChannel.send(msgs)
         }
     }
 }

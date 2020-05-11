@@ -1,7 +1,6 @@
 package messages.responses
 
-import LobbyError
-import game.ttt.TTTGame
+import game.*
 import json.JsonSerializable
 import json.JsonTypeDeserializer
 import json.packageJson
@@ -9,10 +8,10 @@ import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 
-sealed class LobbyResponse : JsonSerializable {
+sealed class DefaultLobbyResponse : JsonSerializable {
     
     @Serializable
-    data class State(val content: Content) : LobbyResponse() {
+    data class State(val content: Content) : DefaultLobbyResponse() {
         val type = TYPE
     
         override fun toJson(): JsonElement {
@@ -25,21 +24,22 @@ sealed class LobbyResponse : JsonSerializable {
         }
         
         companion object : JsonTypeDeserializer<State, Content> {
-            override val typeConstructor: (Content) -> State = LobbyResponse::State
+            override val typeConstructor: (Content) -> State = DefaultLobbyResponse::State
             override val contentDeserializer: DeserializationStrategy<Content> = Content.serializer()
             override val TYPE: String = "lobbyState"
             
-            fun forPlayer(lobby: TTTGame.Lobby, player: TTTGame.Lobby.Player.Human): State {
-                return Content(lobby.id.asString(),
-                        lobby.players.filter { it != player }.map { Player(it.name, it.isReady) },
-                        PlayerMe(player.technical.playerId.asString(), player.name, player.isReady)
-                ).toMsg()
-            }
+            fun <G: InGameImplWithPlayer<*, *>> forPlayer(
+                    lobby: LobbyDefaultLobby<G>,
+                    player: DefaultLobbyHuman
+            ): State = Content(lobby.id.asString(),
+                    lobby.players.filter { it.playerId != player.playerId }.map { Player(it.name, it.isReady) },
+                    PlayerMe(player.technical.playerId.asString(), player.name, player.isReady)
+            ).toMsg()
         }
     }
     
     @Serializable
-    data class Full(val content: Content) : LobbyResponse() {
+    data class Full(val content: Content) : DefaultLobbyResponse() {
         val type = TYPE
     
         override fun toJson(): JsonElement {
@@ -52,7 +52,7 @@ sealed class LobbyResponse : JsonSerializable {
         }
         
         companion object : JsonTypeDeserializer<Full, Content> {
-            override val typeConstructor: (Content) -> Full = LobbyResponse::Full
+            override val typeConstructor: (Content) -> Full = DefaultLobbyResponse::Full
             override val contentDeserializer: DeserializationStrategy<Content> = Content.serializer()
             override val TYPE: String = "lobbyFull"
             
@@ -61,7 +61,7 @@ sealed class LobbyResponse : JsonSerializable {
     }
     
     @Serializable
-    data class GameAlreadyStarted(val content: Content) : LobbyResponse() {
+    data class GameAlreadyStarted(val content: Content) : DefaultLobbyResponse() {
         val type = TYPE
 
         constructor(gameId: String) : this(Content(gameId))
@@ -74,7 +74,7 @@ sealed class LobbyResponse : JsonSerializable {
         data class Content(val gameId: String)
         
         companion object : JsonTypeDeserializer<GameAlreadyStarted, Content> {
-            override val typeConstructor: (Content) -> GameAlreadyStarted = LobbyResponse::GameAlreadyStarted
+            override val typeConstructor: (Content) -> GameAlreadyStarted = DefaultLobbyResponse::GameAlreadyStarted
             override val contentDeserializer: DeserializationStrategy<Content> = Content.serializer()
             override val TYPE: String = "gameAlreadyStarted"
         }

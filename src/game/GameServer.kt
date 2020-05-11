@@ -14,10 +14,10 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import org.slf4j.Logger
 
-interface GameServer<out GAME : Game> {
+interface GameServer<out L: Game.LobbyImpl, out G: Game.InGameImpl> {
 
     val application: Application
-    suspend fun newGame(): GAME
+    suspend fun newGame(): Game<L, G>
     suspend fun clientJoined(sessionId: SessionId, gameId: GameId, websocket: WebSocketSession): JsonSerializable
     suspend fun clientLeft(sessionId: SessionId, gameId: GameId, websocket: WebSocketSession)
     suspend fun handleJsonRequest(session: SessionId, request: JsonString): Messages
@@ -29,7 +29,7 @@ interface GameServer<out GAME : Game> {
     data class DirectResponse(val calleeResponse: JsonSerializable, val otherResponses: Messages)
 
     data class AsyncActionContext(
-            val messageChanel: Channel<Messages>,
+            val messageChannel: Channel<Messages>,
             val log: Logger,
             val scope: CoroutineScope
     ) : CoroutineScope by scope
@@ -37,4 +37,4 @@ interface GameServer<out GAME : Game> {
     fun launchAsyncAction(block: suspend AsyncActionContext.() -> Unit): Job
 }
 
-val <GAME : Game> GameServer<GAME>.log get() = application.log
+val GameServer<*, *>.log get() = application.log

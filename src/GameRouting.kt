@@ -1,5 +1,6 @@
 import game.Game
 import game.GameServer
+import game.id
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
@@ -24,7 +25,10 @@ import kotlinx.coroutines.launch
 import messages.responses.TTTResponse
 
 @KtorExperimentalLocationsAPI
-fun <GAME : Game> Application.installGameRouting(gameServer: GameServer<GAME>, gamePreFix: String) {
+fun <L: Game.LobbyImpl, G: Game.InGameImpl> Application.installGameRouting(
+        gameServer: GameServer<L, G>,
+        gamePreFix: String
+) {
 
     launch {
         for (messages in gameServer.asyncMessages) {
@@ -89,9 +93,9 @@ fun <GAME : Game> Application.installGameRouting(gameServer: GameServer<GAME>, g
     }
 }
 
-private suspend fun <GAME : Game> PipelineContext<*, ApplicationCall>.addPlayerToGame(
+private suspend fun <L: Game.LobbyImpl, G: Game.InGameImpl> PipelineContext<*, ApplicationCall>.addPlayerToGame(
         gameId: GameId,
-        gameServer: GameServer<GAME>,
+        gameServer: GameServer<L, G>,
         paramSessionId: SessionId? = null
 ) {
     val sessionId = paramSessionId ?: call.sessions.get<SessionId>()
