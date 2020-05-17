@@ -5,17 +5,20 @@ import Element
 import Endpoint
 import Game
 import Game.Lobby as Lobby
+import Game.MiseryGame exposing (MiseryGame)
+import Game.TTTGame exposing (TTTGame)
 import Html
 import Http
 import Json.Decode as Decode exposing (Decoder)
-import Page.Blank
 import Page.Home as Home
-import Page.TTT.InGame as InGame
+import Page.TTT.TTTInGame as TTTGame
+import Page.TTT.MiseryInGame as MiseryGame
 import Page.TTT.Lobby as Lobby
 import ServerResponse.EnterLobby as EnterLobbyResponse
-import ServerResponse.InGame as InGameResponse
+import ServerResponse.TTTInGame as TTTResponse
+import ServerResponse.MiseryInGame as MiseryResponse
 import ServerResponse.InLobby as InLobbyResponse
-import ServerResponse.TTTResponse as TTTResponse
+import ServerResponse.GameResponse as GameResponse
 import Session exposing (Session)
 import UIHelper
 import Url.Builder
@@ -28,8 +31,13 @@ import Websocket
 
 type Model
     = Lobby Lobby.Model
-    | InGame InGame.Model
-    | Loading Session
+    | InGame InGameModel
+    | Loading Session Game.Mode
+
+
+type InGameModel
+    = TTTGame TTTGame.Model
+    | MiseryGame MiseryGame.Model
 
 
 toSession : Model -> Session
@@ -38,25 +46,45 @@ toSession model =
         Lobby lobby ->
             Lobby.toSession lobby
 
-        InGame inGame ->
-            InGame.toSession inGame
+        InGame (TTTGame inGame) ->
+            TTTGame.toSession inGame
 
-        Loading session ->
+        InGame (MiseryGame inGame) ->
+            MiseryGame.toSession inGame
+
+        Loading session _->
             session
 
 
-fromLobby : Session -> Game.Id -> Maybe Lobby.Lobby -> ( Model, Cmd Msg )
-fromLobby session gameId maybeLobby =
+getGameMode : Model -> Game.Mode
+getGameMode model =
+    case model of
+        Lobby lobby ->
+            Lobby.getGameMode lobby
+
+        InGame (TTTGame _) ->
+            Game.TicTacToe
+
+        InGame (MiseryGame _) ->
+            Game.Misery
+
+        Loading _ mode ->
+            mode
+
+
+
+fromLobby : Session -> Game.Id -> Game.Mode -> Maybe Lobby.Lobby -> ( Model, Cmd Msg )
+fromLobby session gameId gameMode maybeLobby =
     case maybeLobby of
         Just lobby ->
-            Lobby.init session lobby
+            Lobby.init session gameMode lobby
                 |> updateWith Lobby GotLobbyMsg
 
         Nothing ->
-            ( Loading session
+            ( Loading session gameMode
             , Http.get
-                { url = Endpoint.joinGame Game.TicTacToe gameId
-                , expect = Http.expectJson JoinResponse TTTResponse.decoder
+                { url = Endpoint.joinGame gameMode gameId
+                , expect = Http.expectJson JoinResponse (GameResponse.decoder GameResponse.defaultInGameDecoder)
                 }
             )
 
@@ -66,9 +94,14 @@ fromLobby session gameId maybeLobby =
 
 type Msg
     = GotLobbyMsg Lobby.Msg
-    | GotInGameMsg InGame.Msg
-    | JoinResponse (Result Http.Error TTTResponse.Response)
+    | GotInGameMsg InGameMsg
+    | JoinResponse (Result Http.Error (GameResponse.Response GameResponse.DefaultInGame))
     | WebSocketIn String
+
+
+type InGameMsg
+    = TTTMsg TTTGame.Msg
+    | MiseryMsg MiseryGame.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -81,32 +114,38 @@ update msg model =
             Lobby.update subMsg lobby
                 |> updateWith Lobby GotLobbyMsg
 
-        ( GotInGameMsg subMsg, InGame inGame ) ->
-            InGame.update subMsg inGame
-                |> updateWith InGame GotInGameMsg
+        ( GotInGameMsg (TTTMsg subMsg), InGame (TTTGame inGame) ) ->
+            TTTGame.update subMsg inGame
+                |> updateWith (InGame << TTTGame) (GotInGameMsg << TTTMsg)
 
-        ( JoinResponse result, Loading _ ) ->
+        ( GotInGameMsg (MiseryMsg subMsg), InGame (MiseryGame inGame) ) ->
+            MiseryGame.update subMsg inGame
+                 |> updateWith (InGame << MiseryGame) (GotInGameMsg << MiseryMsg)
+
+        ( JoinResponse result, Loading _ gameMode ) ->
             case result of
                 Ok response ->
                     case response of
-                        TTTResponse.EnterLobbyResponse (EnterLobbyResponse.LobbyState lobby) ->
-                            Lobby.init session lobby
+                        GameResponse.EnterLobbyResponse (EnterLobbyResponse.LobbyState lobby) ->
+                            Lobby.init session gameMode lobby
                                 |> updateWith Lobby GotLobbyMsg
 
-                        TTTResponse.EnterLobbyResponse (EnterLobbyResponse.Error error) ->
+                        GameResponse.EnterLobbyResponse (EnterLobbyResponse.Error error) ->
                             ( model
                             , Nav.pushUrl (Session.navKey session) (Url.Builder.absolute [] (Home.joinErrorToQueryParam <| Home.LobbyError error))
                             )
 
-                        TTTResponse.InLobbyResponse (InLobbyResponse.LobbyState lobby) ->
-                            Lobby.init session lobby
+                        GameResponse.InLobbyResponse (InLobbyResponse.LobbyState lobby) ->
+                            Lobby.init session gameMode lobby
                                 |> updateWith Lobby GotLobbyMsg
 
-                        TTTResponse.InGameResponse (InGameResponse.GameState game) ->
-                            InGame.init session game
-                                |> updateWith InGame GotInGameMsg
+                        GameResponse.InGameResponse (GameResponse.TTTResponse (TTTResponse.GameState game)) ->
+                            startTTTGame session game
 
-                        TTTResponse.InGameResponse (InGameResponse.PlayerDisc _) ->
+                        GameResponse.InGameResponse (GameResponse.MiseryResponse (MiseryResponse.GameState game)) ->
+                            startMiseryGame session game
+
+                        _ ->
                             ( model, Cmd.none )
 
                 Err error ->
@@ -122,10 +161,12 @@ update msg model =
                                 |> updateWith Lobby GotLobbyMsg
 
                         Err _ ->
-                            case Decode.decodeString InGameResponse.decoder message of
-                                Ok (InGameResponse.GameState game) ->
-                                    InGame.init session game
-                                        |> updateWith InGame GotInGameMsg
+                            case Decode.decodeString GameResponse.defaultInGameDecoder message of
+                                Ok (GameResponse.TTTResponse (TTTResponse.GameState game)) ->
+                                    startTTTGame session game
+
+                                Ok (GameResponse.MiseryResponse (MiseryResponse.GameState game)) ->
+                                    startMiseryGame session game
 
                                 Err error ->
                                     ( Debug.log ("json error lobby" ++ (Decode.errorToString error)) model, Cmd.none )
@@ -134,20 +175,38 @@ update msg model =
                                     ( model, Cmd.none)
 
                 InGame inGame ->
-                    case Decode.decodeString InGameResponse.decoder message of
-                        Ok response ->
-                            InGame.updateFromWebsocket response inGame
-                                |> updateWith InGame GotInGameMsg
+                    case ( Decode.decodeString GameResponse.defaultInGameDecoder message, inGame ) of
+                        ( Ok (GameResponse.TTTResponse response), TTTGame tttGame ) ->
+                            TTTGame.updateFromWebsocket response tttGame
+                                |> updateWith (InGame << TTTGame) (GotInGameMsg << TTTMsg)
 
-                        Err error ->
+                        ( Ok (GameResponse.MiseryResponse response), MiseryGame miseryGame ) ->
+                            MiseryGame.updateFromWebsocket response miseryGame
+                                |> updateWith (InGame << MiseryGame) (GotInGameMsg << MiseryMsg)
+
+                        ( Err error, _ ) ->
                             ( dummy (Debug.log "json error inGame" error) model, Cmd.none )
 
-                Loading _ ->
+                        ( _, _ ) ->
+                            ( model, Cmd.none )
+
+                Loading _ _ ->
                     ( model, Cmd.none )
 
         ( _, _ ) ->
             ( model, Cmd.none )
 
+
+startTTTGame : Session -> TTTGame -> ( Model, Cmd Msg )
+startTTTGame session game =
+    TTTGame.init session game
+        |> updateWith (InGame << TTTGame) (GotInGameMsg << TTTMsg)
+
+
+startMiseryGame : Session -> MiseryGame -> ( Model, Cmd Msg )
+startMiseryGame session game =
+    MiseryGame.init session game
+        |> updateWith (InGame << MiseryGame) (GotInGameMsg << MiseryMsg)
 
 -- VIEW
 
@@ -158,10 +217,13 @@ view model =
         Lobby lobby ->
             viewFragment GotLobbyMsg (Lobby.view lobby)
 
-        InGame inGame ->
-            viewFragment GotInGameMsg (InGame.view inGame)
+        InGame (TTTGame inGame) ->
+            viewFragment (GotInGameMsg << TTTMsg) (TTTGame.view inGame)
 
-        Loading session ->
+        InGame (MiseryGame inGame) ->
+            viewFragment (GotInGameMsg << MiseryMsg) (MiseryGame.view inGame)
+
+        Loading session _ ->
             { title = "TTT"
             , body = Element.layout [] (UIHelper.loading <| Session.theme session)
             }
@@ -189,7 +251,7 @@ subscriptions model =
         InGame session ->
             Websocket.receive WebSocketIn
 
-        Loading session ->
+        Loading _ _ ->
             Sub.none
 
 

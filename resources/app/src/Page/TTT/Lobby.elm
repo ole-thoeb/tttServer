@@ -1,4 +1,4 @@
-module Page.TTT.Lobby exposing (Model, init, toSession, Msg, update, view, updateFromWebsocket, subscriptions)
+module Page.TTT.Lobby exposing (Model, init, toSession, Msg, update, view, updateFromWebsocket, subscriptions, getGameMode)
 
 import ClipBoard
 import Endpoint
@@ -35,25 +35,31 @@ import Websocket
 
 type alias Model =
     { session: Session
+    , gameMode: Game.Mode
     , lobby: Lobby
     , mui : MaterialUI.Model Session.CustomColor Msg
     }
 
 
-init : Session -> Lobby -> ( Model, Cmd Msg )
-init session lobby =
+init : Session -> Game.Mode -> Lobby -> ( Model, Cmd Msg )
+init session gameMode lobby =
     ( { session = session
+    , gameMode = gameMode
     , lobby = lobby
     , mui = MaterialUI.defaultModel Mui (Session.theme session)
     }
-    , Websocket.connect Game.TicTacToe lobby.gameId
+    , Websocket.connect gameMode lobby.gameId
     )
 
 
 toSession : Model -> Session
-toSession model =
-    model.session
+toSession =
+    .session
 
+
+getGameMode : Model -> Game.Mode
+getGameMode =
+    .gameMode
 
 -- UPDATE
 
@@ -101,7 +107,7 @@ update msg model =
             in
             ( { model | mui = newMui }
             , Cmd.batch
-                [ ClipBoard.copyToClipBoard <| Endpoint.game Game.TicTacToe model.lobby.gameId
+                [ ClipBoard.copyToClipBoard <| Endpoint.game model.gameMode model.lobby.gameId
                 , effects
                 ]
             )

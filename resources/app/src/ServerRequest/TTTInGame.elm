@@ -1,4 +1,4 @@
-module ServerRequest.InGame exposing (..)
+module ServerRequest.TTTInGame exposing (..)
 
 
 import Game

@@ -10,9 +10,10 @@ import MaterialUI.MaterilaUI as MaterialUI
 import MaterialUI.Select as Select
 import MaterialUI.TextFieldM as TextField
 import ServerResponse.EnterLobby as EnterLobbyResponse exposing (Error(..))
-import ServerResponse.InGame as InGameResponse
+import ServerResponse.TTTInGame as TTTGameResponse
+import ServerResponse.MiseryInGame as MiseryGameResponse
 import ServerResponse.InLobby as InLobbyResponse
-import ServerResponse.TTTResponse as TTTResponse
+import ServerResponse.GameResponse as GameResponse
 import Session exposing (Session)
 import UIHelper exposing (..)
 
@@ -74,7 +75,7 @@ type Msg
     = NewTTTGame
     | JoinGame
     | GameId String
-    | ServerResponse (Result Http.Error TTTResponse.Response)
+    | ServerResponse (Result Http.Error (GameResponse.Response GameResponse.DefaultInGame))
     | Mui MaterialUI.Msg
     | ModeSelected Game.Mode
 
@@ -85,16 +86,16 @@ update msg model =
         NewTTTGame ->
             ( model
             , Http.get
-                { url = Endpoint.newGame Game.TicTacToe
-                , expect = Http.expectJson (ServerResponse << Result.map TTTResponse.EnterLobbyResponse) EnterLobbyResponse.decoder
+                { url = Endpoint.newGame model.mode
+                , expect = Http.expectJson (ServerResponse << Result.map GameResponse.EnterLobbyResponse) EnterLobbyResponse.decoder
                 }
             )
 
         JoinGame ->
             ( model
             , Http.get
-                { url = Endpoint.joinGame Game.TicTacToe (Debug.log "join game url" <| Game.idFromString model.gameId)
-                , expect = Http.expectJson ServerResponse TTTResponse.decoder
+                { url = Endpoint.joinGame model.mode (Debug.log "join game url" <| Game.idFromString model.gameId)
+                , expect = Http.expectJson ServerResponse (GameResponse.decoder GameResponse.defaultInGameDecoder)
                 }
             )
 
@@ -110,26 +111,32 @@ update msg model =
                         navigateToLobby lobby =
                             ( { model | lobby = Just lobby }
                             , Nav.pushUrl navKey
-                                <| Endpoint.game Game.TicTacToe lobby.gameId
+                                <| Endpoint.game model.mode lobby.gameId
                             )
                     in
                     case response of
-                        TTTResponse.EnterLobbyResponse (EnterLobbyResponse.LobbyState lobby) ->
+                        GameResponse.EnterLobbyResponse (EnterLobbyResponse.LobbyState lobby) ->
                             navigateToLobby lobby
 
-                        TTTResponse.EnterLobbyResponse (EnterLobbyResponse.Error error) ->
+                        GameResponse.EnterLobbyResponse (EnterLobbyResponse.Error error) ->
                             ( { model | error = Just (LobbyError error) }, Cmd.none )
 
-                        TTTResponse.InLobbyResponse (InLobbyResponse.LobbyState lobby) ->
+                        GameResponse.InLobbyResponse (InLobbyResponse.LobbyState lobby) ->
                             navigateToLobby lobby
 
-                        TTTResponse.InGameResponse (InGameResponse.GameState game) ->
+                        GameResponse.InGameResponse (GameResponse.TTTResponse (TTTGameResponse.GameState game)) ->
                             ( model
                             , Nav.pushUrl navKey
-                                <| Endpoint.game Game.TicTacToe game.gameId
+                                <| Endpoint.game model.mode game.gameId
                             )
 
-                        TTTResponse.InGameResponse (InGameResponse.PlayerDisc _) ->
+                        GameResponse.InGameResponse (GameResponse.MiseryResponse (MiseryGameResponse.GameState game)) ->
+                            ( model
+                            , Nav.pushUrl navKey
+                                <| Endpoint.game model.mode game.gameId
+                            )
+
+                        GameResponse.InGameResponse _ ->
                             ( model, Cmd.none )
 
                 Err httpError ->

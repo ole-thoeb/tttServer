@@ -1,16 +1,16 @@
-module Page.TTT.InGame exposing (Model, init, toSession, Msg, update, updateFromWebsocket, view)
+module Page.TTT.TTTInGame exposing (Model, init, toSession, Msg, update, updateFromWebsocket, view)
 
 
 import Array exposing (Array)
 import Browser.Navigation as Nav
-import Color
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
-import Element.Events as Events
 import Element.Font as Font
 import Endpoint
 import Game
+import Game.Game as GameStatus
+import Game.GamePlayer as GamePlayer
 import Game.TTTGame as TTTGame exposing (CellState, TTTGame)
 import Game.TTTGamePlayer as TTTGamePlayer exposing (Symbol)
 import Html
@@ -19,13 +19,11 @@ import MaterialUI.Icon as Icon exposing (Icon)
 import MaterialUI.Icons.Navigation as Navigation
 import MaterialUI.Icons.Toggle as Toggle
 import MaterialUI.Theme as Theme exposing (Theme)
-import Page.TTT.SvgSymbol as SvgSymbol
-import ServerRequest.InGame as InGameRequest
-import ServerResponse.InGame as InGameResponse
+import Page.TTT.Board as Board
+import ServerRequest.TTTInGame as InGameRequest
+import ServerResponse.TTTInGame as InGameResponse
 import Session exposing (Session)
-import Svg exposing (Svg)
 import UIHelper exposing (materialText)
-import Url.Builder
 import Websocket
 
 
@@ -111,43 +109,20 @@ view model =
                 , spacing 16
                 ]
                 [ header model
-                , column
-                    [ centerX
-                    , width (fill |> maximum 500)
-                    ]
-                    [ row
-                        [ spaceEvenly
-                        , width fill
-                        ]
-                        [ boardCell theme 0 game
-                        , hLine theme
-                        , boardCell theme 1 game
-                        , hLine theme
-                        , boardCell theme 2 game
-                        ]
-                    , vLine theme
-                    , row
-                        [ spaceEvenly
-                        , width fill
-                        ]
-                        [ boardCell theme 3 game
-                        , hLine theme
-                        , boardCell theme 4 game
-                        , hLine theme
-                        , boardCell theme 5 game
-                        ]
-                    , vLine theme
-                    , row
-                        [ spaceEvenly
-                        , width fill
-                        ]
-                        [ boardCell theme 6 game
-                        , hLine theme
-                        , boardCell theme 7 game
-                        , hLine theme
-                        , boardCell theme 8 game
-                        ]
-                    ]
+                , Board.view theme
+                    { onClick = CellClicked
+                    , cells = game.board |> Array.map (\symbol ->
+                        case symbol of
+                            TTTGame.X -> Board.X
+                            TTTGame.O -> Board.O
+                            TTTGame.Empty -> Board.Empty
+                    )
+                    , line = case game.status of
+                        GameStatus.OnGoing -> Nothing
+                        GameStatus.Draw -> Nothing
+                        GameStatus.Win _ f1 f2 f3 -> Just ( f1, f2, f3 )
+                    , symbolColor = Board.defaultSymbolColor
+                    }
                 ]
     }
 
@@ -159,7 +134,7 @@ header model =
         theme = model |> toSession |> Session.theme
     in
     case game.status of
-        TTTGame.OnGoing ->
+        GameStatus.OnGoing ->
             row
                 [ spaceEvenly
                 , width fill
@@ -168,7 +143,7 @@ header model =
                 , (playerHeader theme game.opponent (not game.meTurn) Right)
                 ]
 
-        TTTGame.Draw ->
+        GameStatus.Draw ->
             row
                 [ width fill
                 , spacing 8
@@ -183,7 +158,7 @@ header model =
                 , headerButtonColumn theme
                 ]
 
-        TTTGame.Win winner field1 filed2 field3 ->
+        GameStatus.Win winner _ _ _ ->
             row
                 [ width fill
                 , spacing 8
@@ -238,7 +213,7 @@ playerHeader : Theme Session.CustomColor  ->
     | name : String
     --, color : String
     , symbol : Symbol
-    , playerRef : TTTGamePlayer.PlayerRef
+    , playerRef : GamePlayer.PlayerRef
     } ->
     Bool ->
     Alignment ->
@@ -246,8 +221,8 @@ playerHeader : Theme Session.CustomColor  ->
 playerHeader theme player highlight alignment =
     let
         playerColor = Theme.Alternative <| case player.playerRef of
-                TTTGamePlayer.P1 -> Session.Player1Color
-                TTTGamePlayer.P2 -> Session.Player2Color
+                GamePlayer.P1 -> Session.Player1Color
+                GamePlayer.P2 -> Session.Player2Color
 
 
         borderColor = if highlight then Theme.getColor playerColor theme else theme.color.onBackground
@@ -284,69 +259,3 @@ playerHeader theme player highlight alignment =
         , Icon.view theme playerColor 20 symbolIcon
         ]
 
-
-boardCell : Theme (Session.CustomColor) -> Int -> TTTGame -> Element Msg
-boardCell theme cellNumber game =
-    let
-        board = game.board
-        toCssString color = Element.toRgb color
-            |> Color.fromRgba
-            |> Color.toCssString
-
-        colorKeyForSymbol symbol = Theme.Alternative <| case  TTTGame.playerOfSymbol game symbol |> .playerRef of
-            TTTGamePlayer.P1 -> Session.Player1Color
-            TTTGamePlayer.P2 -> Session.Player2Color
-
-        svgIcon = SvgSymbol.toHtml <| gameStatusToLine game.status cellNumber ++ case Array.get cellNumber board of
-            Just TTTGame.X ->
-               SvgSymbol.cross (Theme.getColor (colorKeyForSymbol TTTGamePlayer.X) theme |> toCssString)
-
-            Just TTTGame.O ->
-                SvgSymbol.circle (Theme.getColor (colorKeyForSymbol TTTGamePlayer.O) theme |> toCssString)
-
-            _ -> SvgSymbol.empty
-    in
-    el
-        [ width fill
-        , Events.onClick (CellClicked cellNumber)
-        ]
-        (html svgIcon)
-
-
-gameStatusToLine : TTTGame.Status -> Int-> List (Svg msg)
-gameStatusToLine status cellNumber =
-    case status of
-        TTTGame.OnGoing -> []
-        TTTGame.Draw -> []
-        TTTGame.Win _ f1 f2 f3 ->
-            if Debug.log "cNum" cellNumber == f1 || cellNumber == f2 || cellNumber == f3 then
-                if f1 + 1 == f2 && f2 + 1 == f3 then
-                    [ SvgSymbol.lineHor "white" ]
-                else if  f1 + 3 == f2 && f2 + 3 == f3 then
-                    [ SvgSymbol.lineVert "white" ]
-                else if f1 + 4 == f2 && f2 + 4 == f3 then
-                    [ SvgSymbol.lineDiaTopBot "white" ]
-                else if f1 + 2 == f2 && f2 + 2 == f3 then
-                    [ SvgSymbol.lineDiaBotTop "white" ]
-                else Debug.log "no sequence match" []
-            else Debug.log "no field match" []
-
-
-vLine : Theme a -> Element Msg
-vLine theme =
-    el
-        [ width fill
-        , height <| px 2
-        , Background.color <| Theme.setAlpha 0.3 theme.color.onBackground
-        ]
-        none
-
-
-hLine : Theme a -> Element Msg
-hLine theme =
-    el
-        [ width <| px 2
-        , height fill
-        , Background.color <| Theme.setAlpha 0.3 theme.color.onBackground
-        ]
-        none

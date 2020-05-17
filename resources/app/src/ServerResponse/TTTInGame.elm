@@ -1,4 +1,4 @@
-module ServerResponse.InGame exposing (Response(..), decoder)
+module ServerResponse.TTTInGame exposing (Response(..), decoder)
 
 import Game.TTTGame as TTTGame exposing (TTTGame)
 import Json.Decode as Decode exposing (Decoder)

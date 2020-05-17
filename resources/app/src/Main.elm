@@ -69,13 +69,13 @@ changeRouteTo route model =
             Home.init session maybeError
                 |> updateWith Home GotHomeMsg
 
-        Route.Game gameId ->
+        Route.Game gameMode gameId ->
             let
                 lobby = case model of
                      Home home -> home.lobby
                      _ -> Nothing
             in
-            Game.fromLobby session gameId lobby
+            Game.fromLobby session gameId gameMode lobby
                 |> updateWith Game GotGameMsg
 
         Route.Rematch oldGameId ->
