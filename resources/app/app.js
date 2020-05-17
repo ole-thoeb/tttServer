@@ -6725,17 +6725,18 @@ var $author$project$Page$NotFound$init = function (session) {
 		{session: session},
 		$elm$core$Platform$Cmd$none);
 };
-var $author$project$Page$Rematch$Loading = function (a) {
-	return {$: 'Loading', a: a};
-};
+var $author$project$Page$Rematch$Loading = F2(
+	function (a, b) {
+		return {$: 'Loading', a: a, b: b};
+	});
 var $author$project$Page$Rematch$ServerResponse = function (a) {
 	return {$: 'ServerResponse', a: a};
 };
 var $author$project$Endpoint$joinRematch = $author$project$Endpoint$endpointHelper('joinRematch');
-var $author$project$Page$Rematch$init = F2(
-	function (session, oldGameId) {
+var $author$project$Page$Rematch$init = F3(
+	function (session, oldGameId, gameMode) {
 		return _Utils_Tuple2(
-			$author$project$Page$Rematch$Loading(session),
+			A2($author$project$Page$Rematch$Loading, session, gameMode),
 			$elm$core$Platform$Cmd$batch(
 				_List_fromArray(
 					[
@@ -6743,7 +6744,7 @@ var $author$project$Page$Rematch$init = F2(
 						$elm$http$Http$get(
 						{
 							expect: A2($elm$http$Http$expectJson, $author$project$Page$Rematch$ServerResponse, $author$project$ServerResponse$EnterLobby$decoder),
-							url: A2($author$project$Endpoint$joinRematch, $author$project$Game$TicTacToe, oldGameId)
+							url: A2($author$project$Endpoint$joinRematch, gameMode, oldGameId)
 						})
 					])));
 	});
@@ -6831,12 +6832,13 @@ var $author$project$Main$changeRouteTo = F2(
 					$author$project$Main$GotGameMsg,
 					A4($author$project$Page$TTT$Game$fromLobby, session, gameId, gameMode, lobby));
 			case 'Rematch':
-				var oldGameId = route.a;
+				var gameMode = route.a;
+				var oldGameId = route.b;
 				return A3(
 					$author$project$Util$updateWith,
 					$author$project$Main$Rematch,
 					$author$project$Main$GotRematchMsg,
-					A2($author$project$Page$Rematch$init, session, oldGameId));
+					A3($author$project$Page$Rematch$init, session, oldGameId, gameMode));
 			default:
 				return A3(
 					$author$project$Util$updateWith,
@@ -7279,9 +7281,10 @@ var $author$project$Route$Game = F2(
 var $author$project$Route$Home = function (a) {
 	return {$: 'Home', a: a};
 };
-var $author$project$Route$Rematch = function (a) {
-	return {$: 'Rematch', a: a};
-};
+var $author$project$Route$Rematch = F2(
+	function (a, b) {
+		return {$: 'Rematch', a: a, b: b};
+	});
 var $elm$url$Url$Parser$Parser = function (a) {
 	return {$: 'Parser', a: a};
 };
@@ -7580,7 +7583,7 @@ var $author$project$Route$parser = $elm$url$Url$Parser$oneOf(
 			$author$project$Route$Rematch,
 			A2(
 				$elm$url$Url$Parser$slash,
-				$elm$url$Url$Parser$s('ttt'),
+				$author$project$Route$modeParser,
 				A2(
 					$elm$url$Url$Parser$slash,
 					$elm$url$Url$Parser$s('rematch'),
@@ -9169,6 +9172,10 @@ var $author$project$Page$Home$joinErrorToQueryParam = function (error) {
 var $author$project$Page$Rematch$update = F2(
 	function (msg, model) {
 		var session = $author$project$Page$Rematch$toSession(model);
+		var gameMode = function () {
+			var mode = model.b;
+			return mode;
+		}();
 		var result = msg.a;
 		if (result.$ === 'Ok') {
 			var response = result.a;
@@ -9179,7 +9186,7 @@ var $author$project$Page$Rematch$update = F2(
 					A2(
 						$elm$browser$Browser$Navigation$pushUrl,
 						$author$project$Session$navKey(session),
-						A2($author$project$Endpoint$game, $author$project$Game$TicTacToe, lobby.gameId)));
+						A2($author$project$Endpoint$game, gameMode, lobby.gameId)));
 			} else {
 				var error = response.a;
 				return _Utils_Tuple2(
@@ -20284,9 +20291,6 @@ var $author$project$Page$TTT$TTTInGame$header = function (model) {
 					]));
 		default:
 			var winner = _v0.a;
-			var field1 = _v0.b;
-			var filed2 = _v0.c;
-			var field3 = _v0.d;
 			return A2(
 				$mdgriffith$elm_ui$Element$row,
 				_List_fromArray(

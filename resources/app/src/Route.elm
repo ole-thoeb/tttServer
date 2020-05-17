@@ -9,7 +9,7 @@ import Url.Parser as Parser exposing ((</>), (<?>), Parser, oneOf, s, string)
 type Route
     = Home (Maybe Home.JoinError)
     | Game Game.Mode Game.Id
-    | Rematch Game.Id
+    | Rematch Game.Mode Game.Id
     | NotFound
 
 
@@ -18,7 +18,7 @@ parser =
     oneOf
         [ Parser.map Home (Parser.top <?> Home.joinErrorQueryParser)
         , Parser.map Game (modeParser </> s "game" </> idParser)
-        , Parser.map Rematch (s "ttt" </> s "rematch" </> idParser)
+        , Parser.map Rematch (modeParser </> s "rematch" </> idParser)
         ]
 
 

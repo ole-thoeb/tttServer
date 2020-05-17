@@ -78,8 +78,8 @@ changeRouteTo route model =
             Game.fromLobby session gameId gameMode lobby
                 |> updateWith Game GotGameMsg
 
-        Route.Rematch oldGameId ->
-            Rematch.init session oldGameId
+        Route.Rematch gameMode oldGameId ->
+            Rematch.init session oldGameId gameMode
                 |> updateWith Rematch GotRematchMsg
 
         Route.NotFound ->

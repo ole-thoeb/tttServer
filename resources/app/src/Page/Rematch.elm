@@ -15,16 +15,16 @@ import Websocket
 
 
 type Model =
-    Loading Session
+    Loading Session Game.Mode
 
 
-init : Session -> Game.Id -> ( Model, Cmd Msg )
-init session oldGameId =
-    ( Loading session
+init : Session -> Game.Id -> Game.Mode -> ( Model, Cmd Msg )
+init session oldGameId gameMode =
+    ( Loading session gameMode
     , Cmd.batch
         [ Websocket.disconnect
         , Http.get
-            { url = Endpoint.joinRematch Game.TicTacToe oldGameId
+            { url = Endpoint.joinRematch gameMode oldGameId
             , expect = Http.expectJson ServerResponse EnterLobby.decoder
             }
         ]
@@ -34,7 +34,7 @@ init session oldGameId =
 toSession : Model -> Session
 toSession model =
     case model of
-        Loading session -> session
+        Loading session _ -> session
 
 
 -- UPDATE
@@ -48,6 +48,9 @@ update: Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
         session = model |> toSession
+        gameMode = case model of
+            Loading _ mode ->
+                mode
     in
     case msg of
         ServerResponse result ->
@@ -57,7 +60,7 @@ update msg model =
                         EnterLobby.LobbyState lobby ->
                             ( model
                             , Nav.pushUrl (session |> Session.navKey)
-                                <| Endpoint.game Game.TicTacToe lobby.gameId
+                                <| Endpoint.game gameMode lobby.gameId
                             )
 
                         EnterLobby.Error error ->
