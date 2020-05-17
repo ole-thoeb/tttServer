@@ -1,31 +1,21 @@
 package game
 
 import GameId
-import Messages
 import PlayerId
 import SessionId
-import arrow.core.Predicate
-import arrow.core.k
-import arrow.core.toT
+import arrow.core.*
 import io.ktor.http.cio.websocket.WebSocketSession
-import isCouldNotMatchGame
 import json.JsonSerializable
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import limit
+import messages.*
+import messages.requests.LobbyRequest
 import messages.responses.DefaultLobbyResponse
-import messages.responses.TTTResponse
-import noMessages
-import noSuchGame
+import messages.responses.GameResponse
 
 const val DISCONNECT_JOB = "job.disconnect"
 const val CLIENT_TIME_OUT = 1000 * 5L
-
-fun <G : InGameImplWithPlayer<*, *>> LobbyDefaultLobby<G>.updateTechnical(
-        predicate: Predicate<Player.Human<*>>,
-        update: (TechnicalPlayer) -> TechnicalPlayer
-): LobbyDefaultLobby<G> = update {
-    DefaultLobby.technical<G>(predicate).modify(this, update)
-}
 
 suspend inline fun <S, H : Player.HumanImpl, G : InGameImplWithPlayer<H, *>> S.clientJoined(
         sessionId: SessionId,
@@ -74,7 +64,7 @@ suspend inline fun <S, H : Player.HumanImpl, G : InGameImplWithPlayer<H, *>> S.c
 
         val player = lockedGame.humanPlayersG.firstOrNull {
             it.technical.sessionId == sessionId
-        } ?: return@updateGame lockedGame toT noMessages<JsonSerializable>()
+        } ?: return@updateGame lockedGame toT noMessages()
 
         val updateTechnical = { technical: TechnicalPlayer ->
             technical.removeSocket(websocket).addJob(DISCONNECT_JOB,
@@ -86,7 +76,41 @@ suspend inline fun <S, H : Player.HumanImpl, G : InGameImplWithPlayer<H, *>> S.c
                 updateTechnicalInGame(playerWith(player.playerId), updateTechnical)
             }
         }
-        return@updateGame updatedGame toT noMessages<JsonSerializable>()
+        return@updateGame updatedGame toT noMessages()
+    }
+}
+
+inline fun <G: InGameImplWithPlayer<*, *>> SynchronizedGameRegistry<*, G>.handleTwoPlayerGameDisconnect(
+        gameId: GameId,
+        crossinline getter: (G) -> TwoPlayerGame
+): suspend GameServer.AsyncActionContext.(G) -> Unit {
+    return { handleTwoPlayerGameDisconnect(gameId)(getter(it)) }
+}
+
+fun SynchronizedGameRegistry<*, *>.handleTwoPlayerGameDisconnect(
+        gameId: GameId
+): suspend GameServer.AsyncActionContext.(TwoPlayerGame) -> Unit {
+    return { twoPlayerGame ->
+        val player1 = twoPlayerGame.player1
+        val player2 = twoPlayerGame.player2
+        when (player1) {
+            is Player.Human -> when (player2) {
+                is Player.Human -> when {
+                    player1.hasNoSockets() && player2.hasNoSockets() -> removeUnlocked(gameId)
+                    player1.hasNoSockets() -> messageChannel.send(
+                            mapOf(player2.technical to GameResponse.PlayerDisconnected(player1.name))
+                    )
+                    player2.hasNoSockets() -> messageChannel.send(
+                            mapOf(player1.technical to GameResponse.PlayerDisconnected(player2.name))
+                    )
+                }
+                is Player.Bot -> if (player1.hasNoSockets()) removeUnlocked(gameId)
+            }
+            is Player.Bot -> when (player2) {
+                is Player.Human -> if (player2.hasNoSockets()) removeUnlocked(gameId)
+                is Player.Bot -> removeUnlocked(gameId)
+            }
+        }
     }
 }
 
@@ -120,6 +144,130 @@ inline fun <S, G : InGameImplWithPlayer<*, *>> S.startDisconnectJob(
     }
 }
 
+suspend inline fun <H : Player.HumanImpl, G : InGameImplWithPlayer<H, *>, S> S.joinLobby(
+        gameId: GameId,
+        sessionId: SessionId,
+        crossinline inGameState: (Game.InGame<G>, Player.Human<H>) -> JsonSerializable,
+        crossinline update: (LobbyDefaultLobby<G>) -> Either<LobbyError, LobbyDefaultLobby<G>>
+): Messages where S : GameServer<DefaultLobby<G>, G>, S : SynchronizedGameRegistry<DefaultLobby<G>, G> =
+        updateGame(gameId) { game ->
+            when (game) {
+                is Game.Lobby -> {
+                    val joinedPlayer = game.humanPlayers[sessionId]
+                    if (joinedPlayer != null) {
+                        game toT lobbyStateMsgs(game)
+                    } else {
+                        update(game).fold(
+                                { error -> game toT handleLobbyError(sessionId)(error) },
+                                { updatedLobby -> updatedLobby toT lobbyStateMsgs(updatedLobby) }
+                        )
+                    }
+                }
+                is Game.InGame -> {
+                    val joinedPlayer = game.humanPlayers[sessionId]
+                    if (joinedPlayer != null) {
+                        game toT mapOf(joinedPlayer.technical to inGameState(game, joinedPlayer))
+                    } else {
+                        game toT mapOf(TechnicalPlayer(sessionId = sessionId) to DefaultLobbyResponse.GameAlreadyStarted(gameId.asString()))
+                    }
+                }
+            }
+        }
+
+suspend inline fun <E, H : Player.HumanImpl, G : InGameImplWithPlayer<H, *>, S> S.updateLobby(
+        gameId: GameId,
+        crossinline inGameState: (Game.InGame<G>, Player.Human<H>) -> JsonSerializable,
+        crossinline update: (LobbyDefaultLobby<G>) -> Either<E, LobbyDefaultLobby<G>>
+): Either<E, Messages> where S : GameServer<DefaultLobby<G>, G>, S : SynchronizedGameRegistry<DefaultLobby<G>, G> =
+        updateGame(gameId, Right(noSuchGame(gameId))) { game ->
+            when (game) {
+                is Game.Lobby -> {
+                    update(game).fold(
+                            { error -> game toT Left(error) },
+                            { upLobby -> upLobby toT Right(lobbyStateMsgs(upLobby)) }
+                    )
+                }
+                is Game.InGame -> game toT Right(inGameStateMsgs(game, inGameState))
+            }
+        }
+
+
+suspend fun <H : Player.HumanImpl, G : InGameImplWithPlayer<H, *>, S> S.handleLobbyRequest(
+        lobbyRequest: LobbyRequest,
+        inGameState: (Game.InGame<G>, Player.Human<H>) -> JsonSerializable
+): Messages where S : GameServer<DefaultLobby<G>, G>, S : SynchronizedGameRegistry<DefaultLobby<G>, G> =
+        updateGame(lobbyRequest.gameId) { game ->
+            when (game) {
+                is Game.InGame -> game toT inGameStateMsgs(game, inGameState)
+                is Game.Lobby -> handleLobbyRequest(game, lobbyRequest, inGameState)
+            }
+        }
+
+private inline fun <H : Player.HumanImpl, G : InGameImplWithPlayer<H, *>> GameServer<DefaultLobby<G>, G>.handleLobbyRequest(
+        wrappedLobby: LobbyDefaultLobby<G>,
+        lobbyRequest: LobbyRequest,
+        inGameState: (Game.InGame<G>, Player.Human<H>) -> JsonSerializable
+): Tuple2<GameDefaultLobby<G>, Messages> {
+    val lobby = wrappedLobby.impl
+    val updatedLobby = when (lobbyRequest) {
+        is LobbyRequest.Ready -> {
+            val modifiedLobby = DefaultLobby.player<G> { it.technical.playerId == lobbyRequest.playerId }
+                    .modify(lobby) {
+                        it.copy(isReady = lobbyRequest.content.isReady)
+                    }
+            if (modifiedLobby.players.size == lobby.maxPlayer && modifiedLobby.players.all { it.isReady }) {
+                val inGame = lobby.startGame(this, modifiedLobby)
+                return inGame toT inGameStateMsgs(inGame, inGameState)
+            } else {
+                modifiedLobby
+            }
+        }
+        is LobbyRequest.Name -> {
+            DefaultLobby.player<G> { it.technical.playerId == lobbyRequest.playerId }.modify(lobby) {
+                it.copy(name = lobbyRequest.content.name.limit(20))
+            }
+        }
+        is LobbyRequest.AddBot -> {
+            val botNames = listOf("Skynet", "Terminator", "Wall-e", "RoboCop", "\uD83E\uDD16")
+            val bot = Player.Bot(DefaultLobby.Bot(
+                    botNames.random(), PlayerId.create()
+            ))
+            val modifiedLobby = lobby.addPlayer(bot).getOrElse { lobby }
+
+            if (modifiedLobby.players.size == lobby.maxPlayer && modifiedLobby.players.all { it.isReady }) {
+                val inGame = lobby.startGame(this, modifiedLobby)
+                return inGame toT inGameStateMsgs(inGame, inGameState)
+            } else {
+                modifiedLobby
+            }
+        }
+    }
+    val wrapped = wrappedLobby.update(updatedLobby)
+    return wrapped toT lobbyStateMsgs(wrapped)
+}
+
+
+suspend inline fun <H : Player.HumanImpl, G: InGameImplWithPlayer<H, *>, S> S.rematch(
+        rematchManager: RematchManager<DefaultLobby<G>, G>,
+        sessionId: SessionId,
+        oldGameId: GameId,
+        crossinline inGameState: (Game.InGame<G>, Player.Human<H>) -> JsonSerializable
+): GameServer.DirectResponse where S : GameServer<DefaultLobby<G>, G>, S : SynchronizedGameRegistry<DefaultLobby<G>, G> {
+    return rematchManager.rematch(sessionId, oldGameId) { rematchId, oldPlayerName ->
+        if (oldPlayerName != null) {
+            val technical = TechnicalPlayer(sessionId = sessionId)
+            val player = DefaultLobby.Human(oldPlayerName, false, technical)
+            joinLobby(rematchId, sessionId, inGameState) { lobby ->
+                lobby.addNewPlayer(Player.Human(player))
+            }
+        } else {
+            joinLobby(rematchId, sessionId, inGameState) { lobby ->
+                lobby.addNewPlayer(sessionId)
+            }
+        }
+    }
+}
+
 fun playerWith(id: PlayerId): Predicate<Player<*, *>> = { it.playerId == id }
 
 fun handleLobbyError(sessionId: SessionId): (LobbyError) -> Messages = { error: LobbyError ->
@@ -130,11 +278,21 @@ fun handleLobbyError(sessionId: SessionId): (LobbyError) -> Messages = { error: 
 
 fun messagesToDircect(sessionId: SessionId, gameId: GameId, messages: Messages): GameServer.DirectResponse {
     return if (messages.isCouldNotMatchGame()) {
-        GameServer.DirectResponse(TTTResponse.NoSuchGame(gameId.asString()), noMessages())
+        GameServer.DirectResponse(GameResponse.NoSuchGame(gameId.asString()), noMessages())
     } else {
         val respondMsg = messages.entries.firstOrNull {
             it.key.sessionId == sessionId
         } ?: throw IllegalStateException("no join response was produced")
         GameServer.DirectResponse(respondMsg.value, messages)
     }
+}
+
+fun <G : InGameImplWithPlayer<*, *>> lobbyStateMsgs(lobby: LobbyDefaultLobby<G>): MessagesOf<DefaultLobbyResponse.State> =
+        lobby.humanPlayers.associate { it.technical to DefaultLobbyResponse.State.forPlayer(lobby, it) }
+
+inline fun <H : Player.HumanImpl, G : InGameImplWithPlayer<H, *>> inGameStateMsgs(
+        inGame: Game.InGame<G>,
+        inGameState: (Game.InGame<G>, Player.Human<H>) -> JsonSerializable
+): Messages = inGame.humanPlayers.associate { player ->
+    player.technical to inGameState(inGame, player)
 }

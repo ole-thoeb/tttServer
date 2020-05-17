@@ -1,7 +1,6 @@
 package game.ttt
 
 import GameId
-import Messages
 import SessionId
 import arrow.core.Either
 import arrow.core.Predicate
@@ -20,11 +19,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.launch
-import messages.requests.GameRequest
+import messages.Messages
+import messages.noMessages
+import messages.requests.TTTGameRequest
 import messages.requests.LobbyRequest
 import messages.responses.TTTInGameResponse
-import messages.responses.TTTResponse
-import noMessages
 import java.util.concurrent.atomic.AtomicInteger
 
 class TTTGameServer(
@@ -49,19 +48,7 @@ class TTTGameServer(
     }
 
     override suspend fun rematch(sessionId: SessionId, oldGameId: GameId): GameServer.DirectResponse {
-        return rematchManager.rematch(sessionId, oldGameId) { rematchId, oldPlayerName ->
-            if (oldPlayerName != null) {
-                val technical = TechnicalPlayer(sessionId = sessionId)
-                val player = DefaultLobby.Human(oldPlayerName, false, technical)
-                joinLobby(rematchId, sessionId, TTTInGameResponse.State.Companion::forPlayer) { lobby ->
-                    lobby.addNewPlayer(Player.Human(player))
-                }
-            } else {
-                joinLobby(rematchId, sessionId, TTTInGameResponse.State.Companion::forPlayer) { lobby ->
-                    lobby.addNewPlayer(sessionId)
-                }
-            }
-        }
+        return rematch(rematchManager, sessionId, oldGameId, TTTInGameResponse.State.Companion::forPlayer)
     }
 
     override suspend fun clientJoined(sessionId: SessionId, gameId: GameId, websocket: WebSocketSession): JsonSerializable {
@@ -69,32 +56,12 @@ class TTTGameServer(
     }
 
     override suspend fun clientLeft(sessionId: SessionId, gameId: GameId, websocket: WebSocketSession) {
-        clientLeft(sessionId, gameId, websocket, CLIENT_TIME_OUT, TTTInGame::updateTechnical) { tttGame: TTTInGame ->
-            val player1 = tttGame.twoPlayerGame.player1
-            val player2 = tttGame.twoPlayerGame.player2
-            when (player1) {
-                is Player.Human -> when (player2) {
-                    is Player.Human -> when {
-                        player1.hasNoSockets() && player2.hasNoSockets() -> removeUnlocked(gameId)
-                        player1.hasNoSockets() -> messageChannel.send(
-                                mapOf(player2.technical to TTTResponse.PlayerDisconnected(player1.name))
-                        )
-                        player2.hasNoSockets() -> messageChannel.send(
-                                mapOf(player1.technical to TTTResponse.PlayerDisconnected(player2.name))
-                        )
-                    }
-                    is Player.Bot -> if (player1.hasNoSockets()) removeUnlocked(gameId)
-                }
-                is Player.Bot -> when (player2) {
-                    is Player.Human -> if (player2.hasNoSockets()) removeUnlocked(gameId)
-                    is Player.Bot -> removeUnlocked(gameId)
-                }
-            }
-        }
+        clientLeft(sessionId, gameId, websocket, CLIENT_TIME_OUT, TTTInGame::updateTechnical,
+                handleTwoPlayerGameDisconnect(gameId) { it.twoPlayerGame })
     }
 
     override suspend fun handleJsonRequest(session: SessionId, request: JsonString): Messages {
-        val deserializers = LobbyRequest.deserializers + GameRequest.deserializers
+        val deserializers = LobbyRequest.deserializers + TTTGameRequest.deserializers
         return jsonParser.parsRequest(request, deserializers.k()).fix().fold(
                 { error ->
                     log.info("failed to parse JSON request! session=$session, error=$error")
@@ -103,7 +70,7 @@ class TTTGameServer(
                 { parsedRequest ->
                     when (parsedRequest) {
                         is LobbyRequest -> handleLobbyRequest(parsedRequest, TTTInGameResponse.State.Companion::forPlayer)
-                        is GameRequest -> handleGameRequest(parsedRequest)
+                        is TTTGameRequest -> handleGameRequest(parsedRequest)
                         else -> {
                             log.info("unknown parsed request type. parsedRequest=$parsedRequest")
                             noMessages()

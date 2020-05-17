@@ -79,10 +79,10 @@ sealed class DefaultLobbyResponse : JsonSerializable {
             override val TYPE: String = "gameAlreadyStarted"
         }
     }
+
+    @Serializable
+    data class Player(val name: String, val isReady: Boolean)
+
+    @Serializable
+    data class PlayerMe(val id: String, val name: String, val isReady: Boolean)
 }
-
-@Serializable
-data class Player(val name: String, val isReady: Boolean)
-
-@Serializable
-data class PlayerMe(val id: String, val name: String, val isReady: Boolean)

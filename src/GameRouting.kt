@@ -22,7 +22,7 @@ import io.ktor.sessions.sessions
 import io.ktor.util.pipeline.PipelineContext
 import io.ktor.websocket.webSocket
 import kotlinx.coroutines.launch
-import messages.responses.TTTResponse
+import messages.responses.GameResponse
 
 @KtorExperimentalLocationsAPI
 fun <L: Game.LobbyImpl, G: Game.InGameImpl> Application.installGameRouting(
@@ -77,7 +77,7 @@ fun <L: Game.LobbyImpl, G: Game.InGameImpl> Application.installGameRouting(
                 val newGame = gameServer.newGame()
                 addPlayerToGame(newGame.id, gameServer, sessionId)
             }
-            get("/joinGame") { call.respondJson(TTTResponse.NoSuchGame("")) }
+            get("/joinGame") { call.respondJson(GameResponse.NoSuchGame("")) }
             get<JoinGame> { joinGame ->
                 addPlayerToGame(joinGame.gameId, gameServer)
             }

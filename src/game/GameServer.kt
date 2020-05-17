@@ -1,7 +1,6 @@
 package game
 
 import GameId
-import Messages
 import SessionId
 import io.ktor.application.Application
 import io.ktor.application.log
@@ -12,6 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
+import messages.Messages
 import org.slf4j.Logger
 
 interface GameServer<out L: Game.LobbyImpl, out G: Game.InGameImpl> {

@@ -15,23 +15,8 @@ typealias TTTGame = GameDefaultLobby<TTTInGame>
 
 fun newTTTGame(gameId: GameId): TTTGame {
     return Game.Lobby(DefaultLobby(gameId, 2, ListK.empty()) { lobby ->
-        val (p1, p2) = lobby.players.shuffled()
-        val toInGamePlayer = { player: DefaultLobbyPlayer, ref: PlayerRef ->
-            val (defName, color) = when (ref) {
-                PlayerRef.P1 -> "Player 1" to "#FF0000"
-                PlayerRef.P2 -> "Player 2" to "#00FF00"
-            }
-            when (player) {
-                is Player.Human -> player.map {
-                    Player.Human(TwoPlayerGame.Human(name.ifBlank { defName }, ref, technical))
-                }
-                is Player.Bot -> player.map {
-                    Player.Bot(TwoPlayerGame.Bot(name, PlayerId.create(), ref))
-                }
-            }
-        }
         val inGame = TTTInGame(
-                TwoPlayerGame(lobby.id, toInGamePlayer(p1, PlayerRef.P1), toInGamePlayer(p2, PlayerRef.P2), PlayerRef.P1, Status.OnGoing),
+                lobby.toTwoPlayerGame(),
                 List(9) { TTTInGame.CellState.EMPTY }.k()
         )
 

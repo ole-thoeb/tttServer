@@ -10,6 +10,7 @@ import io.ktor.sessions.get
 import io.ktor.sessions.sessions
 import json.JsonSerializable
 import json.JsonString
+import messages.Messages
 
 suspend fun Application.sendViaWebsocket(msgs: Messages) {
     msgs.forEach { (player, msg) ->

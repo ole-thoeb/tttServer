@@ -7,7 +7,7 @@ import arrow.typeclasses.ApplicativeError
 import arrow.typeclasses.MonadError
 import game.TechnicalPlayer
 import json.JsonSerializable
-import messages.responses.TTTResponse
+import messages.responses.GameResponse
 import kotlin.reflect.KClass
 
 inline fun <F, A, E> MonadError<F, E>.tryCatch(fe: (Throwable) -> E, f: () -> A): Kind<F, A> = try {
@@ -50,14 +50,3 @@ fun <T> Iterable<T>.allEqual(): Boolean {
 }
 
 fun String.limit(n: Int) = if (length > n) slice(0 until n) else this
-
-typealias MessagesOf<MSG> = Map<TechnicalPlayer, MSG>
-
-typealias Messages = MessagesOf<JsonSerializable>
-
-fun Messages.isCouldNotMatchGame(): Boolean = size == 1 && this[TechnicalPlayer.DUMMY] is TTTResponse.NoSuchGame
-
-fun <T: JsonSerializable> noMessages(): MessagesOf<T> = emptyMap()
-
-fun noSuchGame(unknownGameId: GameId): Messages =
-        mapOf(TechnicalPlayer.DUMMY to TTTResponse.NoSuchGame(unknownGameId.asString()))

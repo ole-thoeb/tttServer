@@ -1,11 +1,11 @@
 package game
 
 import GameId
-import Messages
 import SessionId
+import messages.Messages
 import java.util.concurrent.ConcurrentHashMap
 
-data class RematchManager<L: LobbyImplWithPlayer<*, *>, G: InGameImplWithPlayer<*, *>>(
+data class RematchManager<L : LobbyImplWithPlayer<*, *>, G : InGameImplWithPlayer<*, *>>(
         val gameRegistry: SynchronizedGameRegistry<L, G>,
         val gameServer: GameServer<L, G>,
         private val rematchMap: ConcurrentHashMap<GameId, GameId> = ConcurrentHashMap()

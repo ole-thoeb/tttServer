@@ -1,14 +1,14 @@
 package game
 
 import GameId
-import Messages
-import MessagesOf
 import arrow.core.Tuple2
 import arrow.core.constant
 import json.JsonSerializable
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import noSuchGame
+import messages.Messages
+import messages.MessagesOf
+import messages.noSuchGame
 import java.util.concurrent.ConcurrentHashMap
 
 interface SynchronizedGameRegistry<L : Game.LobbyImpl, G : Game.InGameImpl> {
