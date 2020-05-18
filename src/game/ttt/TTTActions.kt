@@ -12,7 +12,8 @@ import messages.noMessages
 import messages.requests.TTTGameRequest
 import messages.responses.TTTInGameResponse
 import skynet.TTTBoard
-import skynet.bestMove
+import skynet.TTTStrategy
+import skynet.minMax
 import kotlin.random.Random
 
 suspend fun TTTGameServer.handleGameRequest(gameRequest: TTTGameRequest): Messages = updateGame(gameRequest.gameId) { game ->
@@ -57,17 +58,13 @@ fun GameServer<*, *>.playBotTurn(game: Game.InGame<TTTInGame>): Game.InGame<TTTI
         log.warn("[PlayBotTurn] but current player is not a bot")
         return game
     } else {
-        val turnPlayerMappedRef = when (turnPlayer.ref) {
-            TwoPlayerGame.PlayerRef.P1 -> TTTBoard.Player.P1
-            TwoPlayerGame.PlayerRef.P2 -> TTTBoard.Player.P2
-        }
-        val bestMoveIndex = bestMove(TTTBoard(board.map { state ->
+        val bestMoveIndex = TTTStrategy.minMax(TTTBoard(board.map { state ->
             when (state) {
                 TTTInGame.CellState.P1 -> TTTBoard.CellState.P1
                 TTTInGame.CellState.P2 -> TTTBoard.CellState.P2
                 TTTInGame.CellState.EMPTY -> TTTBoard.CellState.EMPTY
             }
-        }), turnPlayerMappedRef).index
+        })).move
 
         setPiece(bestMoveIndex, turnPlayer.playerId).fold(
                 { e ->
