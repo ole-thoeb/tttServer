@@ -256,10 +256,11 @@ playerHeader theme player highlight alignment =
 
         borderColor =
             if highlight then
-                Theme.getColor playerColor theme
+                Theme.setAlpha 0.6 (Theme.getColor playerColor theme)
 
             else
-                theme.color.onBackground
+                Theme.setAlpha 0.3 (theme.color.onBackground)
+
 
         ( fontAlign, align ) =
             case alignment of

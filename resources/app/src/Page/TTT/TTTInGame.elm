@@ -225,7 +225,13 @@ playerHeader theme player highlight alignment =
                 GamePlayer.P2 -> Session.Player2Color
 
 
-        borderColor = if highlight then Theme.getColor playerColor theme else theme.color.onBackground
+        borderColor =
+            if highlight then
+                Theme.setAlpha 0.8 (Theme.getColor playerColor theme)
+
+            else
+                Theme.setAlpha 0.3 (theme.color.onBackground)
+
         symbolIcon = case player.symbol of
             TTTGamePlayer.X ->
                 Navigation.close
@@ -242,7 +248,7 @@ playerHeader theme player highlight alignment =
     in
     row
         [ width shrink
-        , Border.color <| Theme.setAlpha 0.3 borderColor
+        , Border.color <| borderColor
         , Border.width 2
         , Border.rounded 6
         , spacing 8

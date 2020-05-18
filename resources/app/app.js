@@ -19571,7 +19571,10 @@ var $author$project$Page$TTT$MiseryInGame$playerHeader = F4(
 					return $author$project$Session$Player2Color;
 				}
 			}());
-		var borderColor = highlight ? A2($author$project$MaterialUI$Theme$getColor, playerColor, theme) : theme.color.onBackground;
+		var borderColor = highlight ? A2(
+			$author$project$MaterialUI$Theme$setAlpha,
+			0.6,
+			A2($author$project$MaterialUI$Theme$getColor, playerColor, theme)) : A2($author$project$MaterialUI$Theme$setAlpha, 0.3, theme.color.onBackground);
 		var _v0 = function () {
 			if (alignment.$ === 'Left') {
 				return _Utils_Tuple2($mdgriffith$elm_ui$Element$Font$alignLeft, $mdgriffith$elm_ui$Element$alignLeft);
@@ -20209,7 +20212,10 @@ var $author$project$Page$TTT$TTTInGame$playerHeader = F4(
 					return $author$project$Session$Player2Color;
 				}
 			}());
-		var borderColor = highlight ? A2($author$project$MaterialUI$Theme$getColor, playerColor, theme) : theme.color.onBackground;
+		var borderColor = highlight ? A2(
+			$author$project$MaterialUI$Theme$setAlpha,
+			0.6,
+			A2($author$project$MaterialUI$Theme$getColor, playerColor, theme)) : A2($author$project$MaterialUI$Theme$setAlpha, 0.3, theme.color.onBackground);
 		var _v0 = function () {
 			if (alignment.$ === 'Left') {
 				return _Utils_Tuple2($mdgriffith$elm_ui$Element$Font$alignLeft, $mdgriffith$elm_ui$Element$alignLeft);
@@ -20224,8 +20230,7 @@ var $author$project$Page$TTT$TTTInGame$playerHeader = F4(
 			_List_fromArray(
 				[
 					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-					$mdgriffith$elm_ui$Element$Border$color(
-					A2($author$project$MaterialUI$Theme$setAlpha, 0.3, borderColor)),
+					$mdgriffith$elm_ui$Element$Border$color(borderColor),
 					$mdgriffith$elm_ui$Element$Border$width(2),
 					$mdgriffith$elm_ui$Element$Border$rounded(6),
 					$mdgriffith$elm_ui$Element$spacing(8),
