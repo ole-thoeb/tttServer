@@ -13,6 +13,9 @@ import messages.*
 import messages.requests.LobbyRequest
 import messages.responses.DefaultLobbyResponse
 import messages.responses.GameResponse
+import skynet.MinMaxStrategy
+import skynet.minMax
+import skynet.randomMove
 
 const val DISCONNECT_JOB = "job.disconnect"
 const val CLIENT_TIME_OUT = 1000 * 5L
@@ -278,6 +281,14 @@ fun playerWith(id: PlayerId): Predicate<Player<*, *>> = { it.playerId == id }
 fun handleLobbyError(sessionId: SessionId): (LobbyError) -> Messages = { error: LobbyError ->
     when (error) {
         is LobbyError.Full -> mapOf(TechnicalPlayer(sessionId = sessionId) to DefaultLobbyResponse.Full.fromError(error))
+    }
+}
+
+fun <S, M> MinMaxStrategy<S, M>.withDifficulty(difficulty: DefaultLobby.Difficulty): (S) -> M {
+    return when (difficulty) {
+        DefaultLobby.Difficulty.CHILDS_PLAY -> this::randomMove
+        DefaultLobby.Difficulty.CHALLENGE -> { state -> minMax(state, 2).move }
+        DefaultLobby.Difficulty.NIGHTMARE -> { state -> minMax(state).move }
     }
 }
 

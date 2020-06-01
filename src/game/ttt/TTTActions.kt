@@ -58,13 +58,13 @@ fun GameServer<*, *>.playBotTurn(game: Game.InGame<TTTInGame>): Game.InGame<TTTI
         log.warn("[PlayBotTurn] but current player is not a bot")
         return game
     } else {
-        val bestMoveIndex = TTTStrategy.minMax(TTTBoard(board.map { state ->
+        val bestMoveIndex = TTTStrategy.withDifficulty(turnPlayer.impl.difficulty)(TTTBoard(board.map { state ->
             when (state) {
                 TTTInGame.CellState.P1 -> TTTBoard.CellState.P1
                 TTTInGame.CellState.P2 -> TTTBoard.CellState.P2
                 TTTInGame.CellState.EMPTY -> TTTBoard.CellState.EMPTY
             }
-        })).move
+        }))
 
         setPiece(bestMoveIndex, turnPlayer.playerId).fold(
                 { e ->

@@ -1,15 +1,20 @@
 module Game.LobbyPlayer exposing
-    ( Difficulty(..)
+    ( BotR
+    , Difficulty(..)
+    , HumanR
     , Player(..)
     , PlayerMe
     , decoder
+    , encodeDifficulty
+    , isReady
     , meDecoder
     , name
     , nameOfPlayerMe
     , readyOfPlayerMe
-    , isReady)
+    )
 
 import Json.Decode as Decode exposing (Decoder)
+import Json.Encode as Encode
 import Monocle.Lens as Lens exposing (Lens)
 
 
@@ -107,6 +112,19 @@ difficultyDecoder =
                     _ ->
                         Decode.fail ("Unknown difficulty state " ++ stateStr)
             )
+
+
+encodeDifficulty : Difficulty -> Encode.Value
+encodeDifficulty difficulty =
+    case difficulty of
+        ChildsPlay ->
+            Encode.string "CHILDS_PLAY"
+
+        Challenge ->
+            Encode.string "CHALLENGE"
+
+        Nightmare ->
+            Encode.string "NIGHTMARE"
 
 
 

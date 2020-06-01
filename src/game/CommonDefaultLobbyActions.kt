@@ -51,7 +51,7 @@ fun <G: InGameImplWithPlayer<*, *>> DefaultLobby<G>.toTwoPlayerGame(): TwoPlayer
                 Player.Human(TwoPlayerGame.Human(name.ifBlank { defName }, ref, technical))
             }
             is Player.Bot -> player.map {
-                Player.Bot(TwoPlayerGame.Bot(name, PlayerId.create(), ref))
+                Player.Bot(TwoPlayerGame.Bot(name, PlayerId.create(), player.impl.difficulty, ref))
             }
         }
     }

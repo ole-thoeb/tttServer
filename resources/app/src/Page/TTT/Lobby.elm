@@ -10,6 +10,7 @@ import MaterialUI.Icons.Content as Content
 import MaterialUI.Icon as Icon
 import MaterialUI.Internal.TextField.Model as TextField
 import MaterialUI.MaterilaUI as MaterialUI
+import MaterialUI.Select as Select
 import MaterialUI.Snackbar as Snackbar
 import MaterialUI.TextFieldM as TextField
 import Monocle.Lens as Lens exposing (Lens)
@@ -69,6 +70,7 @@ type Msg
     | Ready
     | AddBot
     | CopyGameId
+    | DifficultySelected String LobbyPlayer.Difficulty
     | Mui MaterialUI.Msg
 
 
@@ -111,6 +113,9 @@ update msg model =
                 , effects
                 ]
             )
+
+        DifficultySelected botId difficulty ->
+            ( model, InLobbyRequest.setBotDifficulty lobby.gameId lobby.playerMe botId difficulty |> Websocket.send )
 
         Mui subMsg ->
             materialUpdate subMsg model
@@ -227,40 +232,85 @@ view model =
                 }
                 theme
             ]
-        ] ++ (Lobby.allPlayers model.lobby |> List.map (playerRow theme))
+        ] ++ (Lobby.allPlayers model.lobby |> List.map (playerRow model.mui))
         ++ [ Snackbar.view model.mui "snackbar" ]
     }
 
 
-playerRow : Theme a  -> Player -> Element Msg
-playerRow theme player =
+playerRow : MaterialUI.Model Session.CustomColor Msg -> Player -> Element Msg
+playerRow mui player =
+    let
+        theme = mui.theme
+    in
     row
         [ width fill
         , paddingEach { top = 4, bottom = 4, left = 0, right = 0 }
-        , Border.color <| Theme.setAlpha 0.3 theme.color.onBackground
-        , Border.width 2
-        , Border.rounded 6
+        --, Border.color <| Theme.setAlpha 0.3 theme.color.onBackground
+        --, Border.width 2
+        --, Border.rounded 6
+        , spaceEvenly
         ]
         [ materialText
             [ Font.alignLeft
             , Font.color theme.color.onBackground
             , alignLeft
+            , width fill
             , padding 10
             ]
             (LobbyPlayer.name player)
             Theme.Body1
             theme
-        , materialText
-            [ Font.alignRight
-            , Font.color theme.color.onBackground
-            , Font.italic
-            , alignRight
-            , padding 10
-            ]
-            (if LobbyPlayer.isReady player then "Ready" else "Not Ready")
-            Theme.Body1
-            theme
+        , case player of
+            LobbyPlayer.Human human ->
+                humanRowRight theme human
+
+            LobbyPlayer.Bot bot ->
+                botRowRight mui bot
         ]
+
+
+humanRowRight : Theme a  -> LobbyPlayer.HumanR -> Element Msg
+humanRowRight theme player =
+    materialText
+        [ Font.alignRight
+        , Font.color theme.color.onBackground
+        , Font.italic
+        , alignRight
+        , width fill
+        , padding 10
+        ]
+        (if player.isReady then "Ready" else "Not Ready")
+        Theme.Body1
+        theme
+
+
+botRowRight : MaterialUI.Model Session.CustomColor Msg -> LobbyPlayer.BotR -> Element Msg
+botRowRight mui bot =
+    el
+        [ padding 10
+        , width fill
+        ]
+        <| Select.outlined
+            mui
+            [ alignRight
+            , width fill
+            ]
+            { index = "difficultySelect"
+            , color = Select.defaultColorPrimary
+            , label = "Difficulty"
+            , items =
+                [ Select.item LobbyPlayer.ChildsPlay
+                , Select.item LobbyPlayer.Challenge
+                , Select.item LobbyPlayer.Nightmare
+                ]
+            , toItem = \mode -> case mode of
+                LobbyPlayer.ChildsPlay -> { text = "Child's Play" }
+                LobbyPlayer.Challenge -> { text = "Challenge" }
+                LobbyPlayer.Nightmare -> { text = "Nightmare" }
+            , onClick = DifficultySelected bot.id
+            , selectedItem = Just bot.difficulty
+            }
+
 
 
 -- SUBSCRIPTIONS

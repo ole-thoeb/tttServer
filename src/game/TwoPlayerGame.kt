@@ -64,6 +64,7 @@ data class TwoPlayerGame(
     data class Bot(
             override val name: String,
             override val playerId: PlayerId,
+            val difficulty: DefaultLobby.Difficulty,
             val ref: PlayerRef
     ) : Player.BotImpl
 

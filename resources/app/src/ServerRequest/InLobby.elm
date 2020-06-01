@@ -1,8 +1,8 @@
-module ServerRequest.InLobby exposing (nameChangedMsg, readyChangedMsg, addBotMsg)
+module ServerRequest.InLobby exposing (nameChangedMsg, readyChangedMsg, addBotMsg, setBotDifficulty)
 
 
 import Game
-import Game.LobbyPlayer exposing (PlayerMe)
+import Game.LobbyPlayer exposing (PlayerMe, Difficulty, encodeDifficulty)
 import Json.Encode as Encode
 import ServerRequest.JsonHelper exposing (remoteMsg)
 
@@ -28,6 +28,16 @@ addBotMsg gameId requestingPlayer =
     Encode.object
         (header gameId requestingPlayer)
         |> remoteMsg "addBot"
+
+
+setBotDifficulty : Game.Id -> PlayerMe -> String -> Difficulty -> Encode.Value
+setBotDifficulty gameId requestingPlayer botId difficulty=
+    Encode.object
+        ( (header gameId requestingPlayer) ++
+        [ ( "botDifficulty", encodeDifficulty difficulty )
+        , ( "botId", Encode.string botId )
+        ] )
+        |> remoteMsg "setBotDifficulty"
 
 
 header : Game.Id -> PlayerMe -> List ( String, Encode.Value )

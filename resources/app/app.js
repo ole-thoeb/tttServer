@@ -9518,6 +9518,34 @@ var $author$project$MaterialUI$Snackbar$set = F3(
 				}),
 			$author$project$MaterialUI$Snackbar$dismissCurrent);
 	});
+var $author$project$Game$LobbyPlayer$encodeDifficulty = function (difficulty) {
+	switch (difficulty.$) {
+		case 'ChildsPlay':
+			return $elm$json$Json$Encode$string('CHILDS_PLAY');
+		case 'Challenge':
+			return $elm$json$Json$Encode$string('CHALLENGE');
+		default:
+			return $elm$json$Json$Encode$string('NIGHTMARE');
+	}
+};
+var $author$project$ServerRequest$InLobby$setBotDifficulty = F4(
+	function (gameId, requestingPlayer, botId, difficulty) {
+		return A2(
+			$author$project$ServerRequest$JsonHelper$remoteMsg,
+			'setBotDifficulty',
+			$elm$json$Json$Encode$object(
+				_Utils_ap(
+					A2($author$project$ServerRequest$InLobby$header, gameId, requestingPlayer),
+					_List_fromArray(
+						[
+							_Utils_Tuple2(
+							'botDifficulty',
+							$author$project$Game$LobbyPlayer$encodeDifficulty(difficulty)),
+							_Utils_Tuple2(
+							'botId',
+							$elm$json$Json$Encode$string(botId))
+						]))));
+	});
 var $author$project$MaterialUI$Internal$Snackbar$Model$Short = {$: 'Short'};
 var $author$project$MaterialUI$Snackbar$short = $author$project$MaterialUI$Internal$Snackbar$Model$Short;
 var $author$project$Page$TTT$Lobby$update = F2(
@@ -9566,6 +9594,13 @@ var $author$project$Page$TTT$Lobby$update = F2(
 								A2($author$project$Endpoint$game, model.gameMode, model.lobby.gameId)),
 								effects
 							])));
+			case 'DifficultySelected':
+				var botId = msg.a;
+				var difficulty = msg.b;
+				return _Utils_Tuple2(
+					model,
+					$author$project$Websocket$send(
+						A4($author$project$ServerRequest$InLobby$setBotDifficulty, lobby.gameId, lobby.playerMe, botId, difficulty)));
 			default:
 				var subMsg = msg.a;
 				return A2($author$project$UIHelper$materialUpdate, subMsg, model);
@@ -18976,16 +19011,69 @@ var $author$project$MaterialUI$ColorStateList$defaultBackgroundOnBackground = {
 	idle: $author$project$MaterialUI$ColorStateList$transparent,
 	mouseDown: A2($author$project$MaterialUI$ColorStateList$Color, 0.2, $author$project$MaterialUI$Theme$OnBackground)
 };
-var $author$project$Game$LobbyPlayer$isReady = function (player) {
-	if (player.$ === 'Human') {
-		var humanR = player.a;
-		return humanR.isReady;
-	} else {
-		var botR = player.a;
-		return botR.isReady;
-	}
-};
+var $author$project$Page$TTT$Lobby$DifficultySelected = F2(
+	function (a, b) {
+		return {$: 'DifficultySelected', a: a, b: b};
+	});
+var $author$project$Page$TTT$Lobby$botRowRight = F2(
+	function (mui, bot) {
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$padding(10),
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+				]),
+			A3(
+				$author$project$MaterialUI$Select$outlined,
+				mui,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$alignRight,
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+					]),
+				{
+					color: $author$project$MaterialUI$Select$defaultColorPrimary,
+					index: 'difficultySelect',
+					items: _List_fromArray(
+						[
+							$author$project$MaterialUI$Select$item($author$project$Game$LobbyPlayer$ChildsPlay),
+							$author$project$MaterialUI$Select$item($author$project$Game$LobbyPlayer$Challenge),
+							$author$project$MaterialUI$Select$item($author$project$Game$LobbyPlayer$Nightmare)
+						]),
+					label: 'Difficulty',
+					onClick: $author$project$Page$TTT$Lobby$DifficultySelected(bot.id),
+					selectedItem: $elm$core$Maybe$Just(bot.difficulty),
+					toItem: function (mode) {
+						switch (mode.$) {
+							case 'ChildsPlay':
+								return {text: 'Child\'s Play'};
+							case 'Challenge':
+								return {text: 'Challenge'};
+							default:
+								return {text: 'Nightmare'};
+						}
+					}
+				}));
+	});
 var $mdgriffith$elm_ui$Element$Font$italic = $mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.italic);
+var $author$project$Page$TTT$Lobby$humanRowRight = F2(
+	function (theme, player) {
+		return A4(
+			$author$project$UIHelper$materialText,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$Font$alignRight,
+					$mdgriffith$elm_ui$Element$Font$color(theme.color.onBackground),
+					$mdgriffith$elm_ui$Element$Font$italic,
+					$mdgriffith$elm_ui$Element$alignRight,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$padding(10)
+				]),
+			player.isReady ? 'Ready' : 'Not Ready',
+			$author$project$MaterialUI$Theme$Body1,
+			theme);
+	});
 var $author$project$Game$LobbyPlayer$name = function (player) {
 	if (player.$ === 'Human') {
 		var humanR = player.a;
@@ -18995,8 +19083,10 @@ var $author$project$Game$LobbyPlayer$name = function (player) {
 		return botR.name;
 	}
 };
+var $mdgriffith$elm_ui$Element$spaceEvenly = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$spacing, $mdgriffith$elm_ui$Internal$Style$classes.spaceEvenly);
 var $author$project$Page$TTT$Lobby$playerRow = F2(
-	function (theme, player) {
+	function (mui, player) {
+		var theme = mui.theme;
 		return A2(
 			$mdgriffith$elm_ui$Element$row,
 			_List_fromArray(
@@ -19004,10 +19094,7 @@ var $author$project$Page$TTT$Lobby$playerRow = F2(
 					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 					$mdgriffith$elm_ui$Element$paddingEach(
 					{bottom: 4, left: 0, right: 0, top: 4}),
-					$mdgriffith$elm_ui$Element$Border$color(
-					A2($author$project$MaterialUI$Theme$setAlpha, 0.3, theme.color.onBackground)),
-					$mdgriffith$elm_ui$Element$Border$width(2),
-					$mdgriffith$elm_ui$Element$Border$rounded(6)
+					$mdgriffith$elm_ui$Element$spaceEvenly
 				]),
 			_List_fromArray(
 				[
@@ -19018,24 +19105,21 @@ var $author$project$Page$TTT$Lobby$playerRow = F2(
 							$mdgriffith$elm_ui$Element$Font$alignLeft,
 							$mdgriffith$elm_ui$Element$Font$color(theme.color.onBackground),
 							$mdgriffith$elm_ui$Element$alignLeft,
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 							$mdgriffith$elm_ui$Element$padding(10)
 						]),
 					$author$project$Game$LobbyPlayer$name(player),
 					$author$project$MaterialUI$Theme$Body1,
 					theme),
-					A4(
-					$author$project$UIHelper$materialText,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$Font$alignRight,
-							$mdgriffith$elm_ui$Element$Font$color(theme.color.onBackground),
-							$mdgriffith$elm_ui$Element$Font$italic,
-							$mdgriffith$elm_ui$Element$alignRight,
-							$mdgriffith$elm_ui$Element$padding(10)
-						]),
-					$author$project$Game$LobbyPlayer$isReady(player) ? 'Ready' : 'Not Ready',
-					$author$project$MaterialUI$Theme$Body1,
-					theme)
+					function () {
+					if (player.$ === 'Human') {
+						var human = player.a;
+						return A2($author$project$Page$TTT$Lobby$humanRowRight, theme, human);
+					} else {
+						var bot = player.a;
+						return A2($author$project$Page$TTT$Lobby$botRowRight, mui, bot);
+					}
+				}()
 				]));
 	});
 var $author$project$MaterialUI$Internal$Snackbar$Model$Clicked = {$: 'Clicked'};
@@ -19554,7 +19638,7 @@ var $author$project$Page$TTT$Lobby$view = function (model) {
 				_Utils_ap(
 					A2(
 						$elm$core$List$map,
-						$author$project$Page$TTT$Lobby$playerRow(theme),
+						$author$project$Page$TTT$Lobby$playerRow(model.mui),
 						$author$project$Game$Lobby$allPlayers(model.lobby)),
 					_List_fromArray(
 						[
@@ -19670,7 +19754,6 @@ var $author$project$Page$TTT$MiseryInGame$playerHeader = F4(
 				$author$project$MaterialUI$Theme$Body1,
 				theme));
 	});
-var $mdgriffith$elm_ui$Element$spaceEvenly = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$spacing, $mdgriffith$elm_ui$Internal$Style$classes.spaceEvenly);
 var $author$project$Page$TTT$MiseryInGame$header = function (model) {
 	var theme = $author$project$Session$theme(
 		$author$project$Page$TTT$MiseryInGame$toSession(model));

@@ -59,12 +59,12 @@ fun GameServer<*, *>.playBotTurn(game: Game.InGame<MiseryInGame>): Game.InGame<M
         log.warn("[PlayBotTurn] but current player is not a bot")
         return game
     } else {
-        val index = MiseryStrategy.minMax(MiseryBoard(board.map { state ->
+        val index = MiseryStrategy.withDifficulty(turnPlayer.impl.difficulty)(MiseryBoard(board.map { state ->
             when (state) {
                 MiseryInGame.CellState.X -> MiseryBoard.CellState.X
                 MiseryInGame.CellState.EMPTY -> MiseryBoard.CellState.EMPTY
             }
-        }, lastPlayer = MinMaxPlayer.MIN)).move
+        }, lastPlayer = MinMaxPlayer.MIN))
         setPiece(index, turnPlayer.playerId).fold(
                 { e ->
                     log.error("[PlayBotTurn] failed to set piece with error $e")
