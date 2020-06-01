@@ -1,5 +1,7 @@
 package skynet
 
+import game.DefaultLobby
+import game.withDifficulty
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
@@ -34,10 +36,10 @@ fun main() {
 //    println("Going second")
 //    fuzz(TTTStrategy, MinMaxPlayer.MIN, TTTBoard.empty(), 500, analyseTTT)
 
-    println("Going first")
-    fuzz(MiseryStrategy, MinMaxPlayer.MAX, MiseryBoard.empty(), 500, analyseMisery)
-    println("Going second")
-    fuzz(MiseryStrategy, MinMaxPlayer.MIN, MiseryBoard.empty(), 500, analyseMisery)
+//    println("Going first")
+//    fuzz(MiseryStrategy, MinMaxPlayer.MAX, MiseryBoard.empty(), 500, analyseMisery)
+//    println("Going second")
+//    fuzz(MiseryStrategy, MinMaxPlayer.MIN, MiseryBoard.empty(), 500, analyseMisery)
 //    val b = listOf(
 //            MiseryBoard.CellState.X, MiseryBoard.CellState.X, MiseryBoard.CellState.EMPTY,
 //            MiseryBoard.CellState.EMPTY, MiseryBoard.CellState.EMPTY, MiseryBoard.CellState.EMPTY,
@@ -45,6 +47,13 @@ fun main() {
 //    )
 //    val move = MiseryStrategy.minMax(MiseryBoard.empty())
 //    println("best move: $move")
+
+    val b = listOf(
+            TTTBoard.CellState.EMPTY, TTTBoard.CellState.EMPTY, TTTBoard.CellState.EMPTY,
+            TTTBoard.CellState.P1, TTTBoard.CellState.P2, TTTBoard.CellState.EMPTY,
+            TTTBoard.CellState.EMPTY, TTTBoard.CellState.P2, TTTBoard.CellState.EMPTY
+    )
+    println(TTTStrategy.withDifficulty(DefaultLobby.Difficulty.CHALLENGE)(TTTBoard(b)))
 }
 
 data class Analyse(val wins: Int = 0, val draws: Int = 0, val losses: Int = 0)

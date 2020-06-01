@@ -20,8 +20,8 @@ object TTTStrategy : MinMaxStrategy<TTTBoard, Int> {
 
     override fun TTTBoard.score(player: MinMaxPlayer): Int {
         return when (status) {
-            TTTBoard.Status.P1_WON -> if (player == MinMaxPlayer.MAX) 1 else -1
-            TTTBoard.Status.P2_WON -> if (player == MinMaxPlayer.MIN) 1 else -1
+            TTTBoard.Status.P1_WON -> if (player == MinMaxPlayer.MAX) 2 else -1
+            TTTBoard.Status.P2_WON -> if (player == MinMaxPlayer.MIN) 2 else -1
             TTTBoard.Status.DRAW -> 0
             TTTBoard.Status.ONGOING -> 0
         }

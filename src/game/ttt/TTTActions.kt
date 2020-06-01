@@ -11,6 +11,7 @@ import messages.Messages
 import messages.noMessages
 import messages.requests.TTTGameRequest
 import messages.responses.TTTInGameResponse
+import skynet.MinMaxPlayer
 import skynet.TTTBoard
 import skynet.TTTStrategy
 import skynet.minMax
@@ -58,10 +59,15 @@ fun GameServer<*, *>.playBotTurn(game: Game.InGame<TTTInGame>): Game.InGame<TTTI
         log.warn("[PlayBotTurn] but current player is not a bot")
         return game
     } else {
+        val (p1State, p2State) = if (turnPlayer.ref == TwoPlayerGame.PlayerRef.P1) {
+            TTTBoard.CellState.P1 to TTTBoard.CellState.P2
+        } else {
+            TTTBoard.CellState.P2 to TTTBoard.CellState.P1
+        }
         val bestMoveIndex = TTTStrategy.withDifficulty(turnPlayer.impl.difficulty)(TTTBoard(board.map { state ->
             when (state) {
-                TTTInGame.CellState.P1 -> TTTBoard.CellState.P1
-                TTTInGame.CellState.P2 -> TTTBoard.CellState.P2
+                TTTInGame.CellState.P1 -> p1State
+                TTTInGame.CellState.P2 -> p2State
                 TTTInGame.CellState.EMPTY -> TTTBoard.CellState.EMPTY
             }
         }))
