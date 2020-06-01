@@ -241,6 +241,11 @@ private inline fun <H : Player.HumanImpl, G : InGameImplWithPlayer<H, *>> GameSe
                 modifiedLobby
             }
         }
+        is LobbyRequest.SetBotDifficulty -> {
+            DefaultLobby.bot<G> { it.playerId == lobbyRequest.botId }.modify(lobby) {
+                it.copy(difficulty = lobbyRequest.content.botDifficulty)
+            }
+        }
     }
     val wrapped = wrappedLobby.update(updatedLobby)
     return wrapped toT lobbyStateMsgs(wrapped)

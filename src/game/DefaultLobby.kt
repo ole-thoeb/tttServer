@@ -10,6 +10,8 @@ import arrow.optics.Lens
 import arrow.optics.PLens
 import arrow.optics.PSetter
 import arrow.optics.Setter
+import kotlinx.serialization.Serializable
+import messages.responses.DefaultLobbyResponse
 
 typealias DefaultLobbyPlayer = Player<DefaultLobby.Human, DefaultLobby.Bot>
 typealias DefaultLobbyHuman = Player.Human<DefaultLobby.Human>
@@ -46,7 +48,14 @@ data class DefaultLobby<G : InGameImplWithPlayer<*, *>>(
         }
     }
 
-    data class Bot(override val name: String, override val playerId: PlayerId) : Player.BotImpl
+    @Serializable
+    enum class Difficulty { CHILDS_PLAY, CHALLENGE, NIGHTMARE }
+
+    data class Bot(
+            override val name: String,
+            override val playerId: PlayerId,
+            val difficulty: Difficulty = Difficulty.NIGHTMARE
+    ) : Player.BotImpl
 
     companion object {
         fun <G : InGameImplWithPlayer<*, *>> players(): Lens<DefaultLobby<G>, ListK<DefaultLobbyPlayer>> = PLens(
@@ -57,6 +66,12 @@ data class DefaultLobby<G : InGameImplWithPlayer<*, *>>(
         fun <G : InGameImplWithPlayer<*, *>> player(predicate: Predicate<DefaultLobbyHuman>): Setter<DefaultLobby<G>, Human> = PSetter { lobby, playerUpdate ->
             lobby.copy(players = lobby.players.map {
                 if (it is Player.Human && predicate(it)) it.update(playerUpdate) else it
+            }.k())
+        }
+
+        fun <G : InGameImplWithPlayer<*, *>> bot(predicate: Predicate<DefaultLobbyBot>): Setter<DefaultLobby<G>, Bot> = PSetter { lobby, playerUpdate ->
+            lobby.copy(players = lobby.players.map {
+                if (it is Player.Bot && predicate(it)) it.update(playerUpdate) else it
             }.k())
         }
 

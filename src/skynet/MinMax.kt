@@ -21,11 +21,11 @@ enum class MinMaxPlayer {
 
 data class ScoredMove<M>(val score: Int, val move: M)
 
-fun <M, S> MinMaxStrategy<S, M>.minMax(state : S): ScoredMove<M> {
+fun <M, S> MinMaxStrategy<S, M>.minMax(state : S, maxLevel: Int = -1): ScoredMove<M> {
 
     val weightedMoves = state.possibleMoves().map { move ->
         val newState = state.doMove(move, MinMaxPlayer.MAX)
-        ScoredMove(-minMaxEval(newState, MinMaxPlayer.MIN), move)
+        ScoredMove(-minMaxEval(newState, MinMaxPlayer.MIN, maxLevel, 0), move)
     }
 //    val weightList = MutableList(9) { 55 }
 //    weightedMoves.forEach { weightList[it.move as Int] = it.score }
@@ -34,16 +34,20 @@ fun <M, S> MinMaxStrategy<S, M>.minMax(state : S): ScoredMove<M> {
     return weightedMoves.allMaxsBy { it.score }.random()
 }
 
-private fun <S, M> MinMaxStrategy<S, M>.minMaxEval(state : S, player: MinMaxPlayer): Int {
-    return if (state.isTerminal) {
+private fun <S, M> MinMaxStrategy<S, M>.minMaxEval(state : S, player: MinMaxPlayer, maxLevel: Int, currentLevel: Int): Int {
+    return if (state.isTerminal || maxLevel == currentLevel) {
         state.score(player)
     } else {
         val scores = state.possibleMoves().map { move ->
             val newState = state.doMove(move, player)
-            -minMaxEval(newState, !player)
+            -minMaxEval(newState, !player, maxLevel, currentLevel + 1)
         }
         scores.max()!!
     }
+}
+
+fun <M, S> MinMaxStrategy<S, M>.randomMove(state : S): M {
+    return state.possibleMoves().toList().random()
 }
 
 private fun <T, C : Comparable<C>> List<T>.allMaxsBy(selector: (T) -> C): List<T> {

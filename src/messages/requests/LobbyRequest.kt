@@ -5,6 +5,7 @@ import PlayerId
 import arrow.Kind
 import arrow.core.k
 import arrow.typeclasses.MonadError
+import game.DefaultLobby
 import json.JsonError
 import json.JsonTypeDeserializer
 import kotlinx.serialization.DeserializationStrategy
@@ -67,9 +68,32 @@ sealed class LobbyRequest {
             override val contentDeserializer: DeserializationStrategy<Content> = Content.serializer()
         }
     }
+
+    @Serializable
+    data class SetBotDifficulty(val content: Content) : LobbyRequest() {
+        val type: String = TYPE
+
+        @Transient override val gameId = GameId(content.gameId)
+        @Transient override val playerId = PlayerId(content.playerId)
+        @Transient val botId = PlayerId(content.botId)
+
+        @Serializable
+        data class Content(
+                val playerId: String,
+                val gameId: String,
+                val botId: String,
+                val botDifficulty: DefaultLobby.Difficulty
+        )
+
+        companion object : JsonTypeDeserializer<SetBotDifficulty, Content> {
+            override val typeConstructor = LobbyRequest::SetBotDifficulty
+            override val TYPE: String = "setBotDifficulty"
+            override val contentDeserializer: DeserializationStrategy<Content> = Content.serializer()
+        }
+    }
     
     companion object {
-        val deserializers = listOf(Ready, Name, AddBot).k()
+        val deserializers = listOf(Ready, Name, AddBot, SetBotDifficulty).k()
         
         fun <F> fromJson(type: String, jsonObj: JsonObject, ME: MonadError<F, JsonError>): Kind<F, LobbyRequest> = when {
             type.equals("ready", true) -> Ready.fromContentJson(jsonObj, ME)

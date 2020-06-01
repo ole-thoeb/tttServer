@@ -5466,14 +5466,61 @@ var $author$project$Game$Lobby$Lobby = F3(
 	function (gameId, players, playerMe) {
 		return {gameId: gameId, playerMe: playerMe, players: players};
 	});
-var $author$project$Game$LobbyPlayer$Player = F2(
-	function (name, isReady) {
-		return {isReady: isReady, name: name};
+var $author$project$Game$LobbyPlayer$Bot = function (a) {
+	return {$: 'Bot', a: a};
+};
+var $author$project$Game$LobbyPlayer$BotR = F4(
+	function (name, id, isReady, difficulty) {
+		return {difficulty: difficulty, id: id, isReady: isReady, name: name};
 	});
+var $author$project$Game$LobbyPlayer$Challenge = {$: 'Challenge'};
+var $author$project$Game$LobbyPlayer$ChildsPlay = {$: 'ChildsPlay'};
+var $author$project$Game$LobbyPlayer$Nightmare = {$: 'Nightmare'};
+var $author$project$Game$LobbyPlayer$difficultyDecoder = A2(
+	$elm$json$Json$Decode$andThen,
+	function (stateStr) {
+		switch (stateStr) {
+			case 'CHILDS_PLAY':
+				return $elm$json$Json$Decode$succeed($author$project$Game$LobbyPlayer$ChildsPlay);
+			case 'CHALLENGE':
+				return $elm$json$Json$Decode$succeed($author$project$Game$LobbyPlayer$Challenge);
+			case 'NIGHTMARE':
+				return $elm$json$Json$Decode$succeed($author$project$Game$LobbyPlayer$Nightmare);
+			default:
+				return $elm$json$Json$Decode$fail('Unknown difficulty state ' + stateStr);
+		}
+	},
+	$elm$json$Json$Decode$string);
+var $author$project$Game$LobbyPlayer$idDecoder = A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$string);
+var $elm$json$Json$Decode$map4 = _Json_map4;
 var $author$project$Game$LobbyPlayer$nameDecoder = A2($elm$json$Json$Decode$field, 'name', $elm$json$Json$Decode$string);
 var $elm$json$Json$Decode$bool = _Json_decodeBool;
 var $author$project$Game$LobbyPlayer$readyDecoder = A2($elm$json$Json$Decode$field, 'isReady', $elm$json$Json$Decode$bool);
-var $author$project$Game$LobbyPlayer$decoder = A3($elm$json$Json$Decode$map2, $author$project$Game$LobbyPlayer$Player, $author$project$Game$LobbyPlayer$nameDecoder, $author$project$Game$LobbyPlayer$readyDecoder);
+var $author$project$Game$LobbyPlayer$botDecoder = A2(
+	$elm$json$Json$Decode$map,
+	$author$project$Game$LobbyPlayer$Bot,
+	A5(
+		$elm$json$Json$Decode$map4,
+		$author$project$Game$LobbyPlayer$BotR,
+		$author$project$Game$LobbyPlayer$nameDecoder,
+		$author$project$Game$LobbyPlayer$idDecoder,
+		$author$project$Game$LobbyPlayer$readyDecoder,
+		A2($elm$json$Json$Decode$field, 'difficulty', $author$project$Game$LobbyPlayer$difficultyDecoder)));
+var $author$project$Game$LobbyPlayer$Human = function (a) {
+	return {$: 'Human', a: a};
+};
+var $author$project$Game$LobbyPlayer$HumanR = F2(
+	function (name, isReady) {
+		return {isReady: isReady, name: name};
+	});
+var $author$project$Game$LobbyPlayer$humanDecoder = A2(
+	$elm$json$Json$Decode$map,
+	$author$project$Game$LobbyPlayer$Human,
+	A3($elm$json$Json$Decode$map2, $author$project$Game$LobbyPlayer$HumanR, $author$project$Game$LobbyPlayer$nameDecoder, $author$project$Game$LobbyPlayer$readyDecoder));
+var $elm$json$Json$Decode$oneOf = _Json_oneOf;
+var $author$project$Game$LobbyPlayer$decoder = $elm$json$Json$Decode$oneOf(
+	_List_fromArray(
+		[$author$project$Game$LobbyPlayer$botDecoder, $author$project$Game$LobbyPlayer$humanDecoder]));
 var $author$project$Game$Id = function (a) {
 	return {$: 'Id', a: a};
 };
@@ -5485,7 +5532,6 @@ var $author$project$Game$LobbyPlayer$PlayerMe = F3(
 	function (id, name, isReady) {
 		return {id: id, isReady: isReady, name: name};
 	});
-var $author$project$Game$LobbyPlayer$idDecoder = A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$string);
 var $author$project$Game$LobbyPlayer$meDecoder = A4($elm$json$Json$Decode$map3, $author$project$Game$LobbyPlayer$PlayerMe, $author$project$Game$LobbyPlayer$idDecoder, $author$project$Game$LobbyPlayer$nameDecoder, $author$project$Game$LobbyPlayer$readyDecoder);
 var $author$project$Game$Lobby$decoder = A4(
 	$elm$json$Json$Decode$map3,
@@ -5532,7 +5578,6 @@ var $author$project$ServerResponse$InLobby$responseDecoder = function (type_) {
 	}
 };
 var $author$project$ServerResponse$InLobby$decoder = A2($elm$json$Json$Decode$andThen, $author$project$ServerResponse$InLobby$responseDecoder, $author$project$ServerResponse$JsonHelper$typeDecoder);
-var $elm$json$Json$Decode$oneOf = _Json_oneOf;
 var $author$project$ServerResponse$GameResponse$decoder = function (inGameDecoder) {
 	return $elm$json$Json$Decode$oneOf(
 		_List_fromArray(
@@ -5615,7 +5660,6 @@ var $author$project$Game$Game$Win = F4(
 	function (a, b, c, d) {
 		return {$: 'Win', a: a, b: b, c: c, d: d};
 	});
-var $elm$json$Json$Decode$map4 = _Json_map4;
 var $author$project$Game$Game$winDecoder = A5(
 	$elm$json$Json$Decode$map4,
 	$author$project$Game$Game$Win,
@@ -9357,10 +9401,10 @@ var $author$project$Game$LobbyPlayer$nameOfPlayerMe = A2(
 		return $.name;
 	},
 	F2(
-		function (name, player) {
+		function (nameArg, player) {
 			return _Utils_update(
 				player,
-				{name: name});
+				{name: nameArg});
 		}));
 var $author$project$Game$Lobby$playerMeOfLobby = A2(
 	$arturopala$elm_monocle$Monocle$Lens$Lens,
@@ -18666,7 +18710,8 @@ var $mdgriffith$elm_ui$Element$Font$alignLeft = A2($mdgriffith$elm_ui$Internal$M
 var $author$project$Game$Lobby$allPlayers = function (lobby) {
 	return A2(
 		$elm$core$List$cons,
-		A2($author$project$Game$LobbyPlayer$Player, lobby.playerMe.name, lobby.playerMe.isReady),
+		$author$project$Game$LobbyPlayer$Human(
+			{isReady: lobby.playerMe.isReady, name: lobby.playerMe.name}),
 		lobby.players);
 };
 var $author$project$MaterialUI$Internal$Tooltip$Model$Bottom = {$: 'Bottom'};
@@ -18931,7 +18976,25 @@ var $author$project$MaterialUI$ColorStateList$defaultBackgroundOnBackground = {
 	idle: $author$project$MaterialUI$ColorStateList$transparent,
 	mouseDown: A2($author$project$MaterialUI$ColorStateList$Color, 0.2, $author$project$MaterialUI$Theme$OnBackground)
 };
+var $author$project$Game$LobbyPlayer$isReady = function (player) {
+	if (player.$ === 'Human') {
+		var humanR = player.a;
+		return humanR.isReady;
+	} else {
+		var botR = player.a;
+		return botR.isReady;
+	}
+};
 var $mdgriffith$elm_ui$Element$Font$italic = $mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.italic);
+var $author$project$Game$LobbyPlayer$name = function (player) {
+	if (player.$ === 'Human') {
+		var humanR = player.a;
+		return humanR.name;
+	} else {
+		var botR = player.a;
+		return botR.name;
+	}
+};
 var $author$project$Page$TTT$Lobby$playerRow = F2(
 	function (theme, player) {
 		return A2(
@@ -18957,7 +19020,7 @@ var $author$project$Page$TTT$Lobby$playerRow = F2(
 							$mdgriffith$elm_ui$Element$alignLeft,
 							$mdgriffith$elm_ui$Element$padding(10)
 						]),
-					player.name,
+					$author$project$Game$LobbyPlayer$name(player),
 					$author$project$MaterialUI$Theme$Body1,
 					theme),
 					A4(
@@ -18970,7 +19033,7 @@ var $author$project$Page$TTT$Lobby$playerRow = F2(
 							$mdgriffith$elm_ui$Element$alignRight,
 							$mdgriffith$elm_ui$Element$padding(10)
 						]),
-					player.isReady ? 'Ready' : 'Not Ready',
+					$author$project$Game$LobbyPlayer$isReady(player) ? 'Ready' : 'Not Ready',
 					$author$project$MaterialUI$Theme$Body1,
 					theme)
 				]));
@@ -20214,7 +20277,7 @@ var $author$project$Page$TTT$TTTInGame$playerHeader = F4(
 			}());
 		var borderColor = highlight ? A2(
 			$author$project$MaterialUI$Theme$setAlpha,
-			0.6,
+			0.8,
 			A2($author$project$MaterialUI$Theme$getColor, playerColor, theme)) : A2($author$project$MaterialUI$Theme$setAlpha, 0.3, theme.color.onBackground);
 		var _v0 = function () {
 			if (alignment.$ === 'Left') {

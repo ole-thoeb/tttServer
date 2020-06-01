@@ -4,7 +4,7 @@ import ClipBoard
 import Endpoint
 import Game
 import Game.Lobby as Lobby exposing (Lobby)
-import Game.LobbyPlayer exposing (Player)
+import Game.LobbyPlayer as LobbyPlayer exposing (Player)
 import MaterialUI.ColorStateList as ColorStateList
 import MaterialUI.Icons.Content as Content
 import MaterialUI.Icon as Icon
@@ -247,7 +247,7 @@ playerRow theme player =
             , alignLeft
             , padding 10
             ]
-            player.name
+            (LobbyPlayer.name player)
             Theme.Body1
             theme
         , materialText
@@ -257,7 +257,7 @@ playerRow theme player =
             , alignRight
             , padding 10
             ]
-            (if player.isReady then "Ready" else "Not Ready")
+            (if LobbyPlayer.isReady player then "Ready" else "Not Ready")
             Theme.Body1
             theme
         ]

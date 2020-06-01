@@ -24,7 +24,7 @@ decoder =
 
 allPlayers : Lobby -> List LobbyPlayer.Player
 allPlayers lobby =
-    (LobbyPlayer.Player lobby.playerMe.name lobby.playerMe.isReady) :: lobby.players
+    (LobbyPlayer.Human { name = lobby.playerMe.name, isReady = lobby.playerMe.isReady }) :: lobby.players
 
 
 -- LENS
