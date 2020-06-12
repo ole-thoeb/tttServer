@@ -14,6 +14,7 @@ import messages.requests.LobbyRequest
 import messages.responses.DefaultLobbyResponse
 import messages.responses.GameResponse
 import skynet.MinMaxStrategy
+import skynet.alphaBeta
 import skynet.minMax
 import skynet.randomMove
 
@@ -288,7 +289,7 @@ fun <S, M> MinMaxStrategy<S, M>.withDifficulty(difficulty: DefaultLobby.Difficul
     return when (difficulty) {
         DefaultLobby.Difficulty.CHILDS_PLAY -> this::randomMove
         DefaultLobby.Difficulty.CHALLENGE -> { state -> minMax(state, 2).move }
-        DefaultLobby.Difficulty.NIGHTMARE -> { state -> minMax(state).move }
+        DefaultLobby.Difficulty.NIGHTMARE -> { state -> alphaBeta(state, 12).move }
     }
 }
 

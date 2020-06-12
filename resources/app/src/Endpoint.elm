@@ -66,3 +66,6 @@ modePreFix mode =
 
         Game.Misery ->
             "misery"
+
+        Game.Stoplight ->
+            "stoplight"

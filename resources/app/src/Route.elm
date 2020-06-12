@@ -41,6 +41,9 @@ modeFromPrefix prefix =
         "misery" ->
             Just Game.Misery
 
+        "stoplight" ->
+            Just Game.Stoplight
+
         _ ->
             Nothing
 

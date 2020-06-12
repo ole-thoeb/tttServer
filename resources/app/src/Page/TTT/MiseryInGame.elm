@@ -15,6 +15,7 @@ import Html
 import MaterialUI.Button as Button
 import MaterialUI.Theme as Theme exposing (Theme)
 import Page.TTT.Board as Board
+import Page.TTT.SvgSymbol as SvgSymbol
 import ServerRequest.MiseryInGame as InGameRequest
 import ServerResponse.MiseryInGame as InGameResponse
 import Session exposing (Session)
@@ -117,28 +118,15 @@ view model =
                 [ header model
                 , Board.view theme
                     { onClick = CellClicked
-                    , cells =
-                        game.board
-                            |> Array.map
-                                (\symbol ->
-                                    case symbol of
-                                        MiseryGame.X ->
-                                            Board.X
+                    , cells = game.board
+                    , line = Board.lineFormGameStatus game.status
+                    , symbolView = \maybeSymbol -> case maybeSymbol of
+                         Just MiseryGame.X ->
+                             SvgSymbol.circle (Theme.getColor (Theme.Alternative Session.Player1Color) theme
+                                |> Board.toCssString)
 
-                                        MiseryGame.Empty ->
-                                            Board.Empty
-                                )
-                    , line =
-                        case game.status of
-                            GameState.OnGoing ->
-                                Nothing
-
-                            GameState.Draw ->
-                                Nothing
-
-                            GameState.Win _ f1 f2 f3 ->
-                                Just ( f1, f2, f3 )
-                    , symbolColor = Board.defaultSymbolColor
+                         _ ->
+                             SvgSymbol.empty
                     }
                 ]
     }

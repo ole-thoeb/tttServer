@@ -1,4 +1,5 @@
 import game.misery.MiseryGameServer
+import game.stoplight.StoplightGameServer
 import game.ttt.TTTGameServer
 import io.ktor.application.*
 import io.ktor.features.CallLogging
@@ -24,6 +25,8 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 fun Application.module(testing: Boolean = false) {
     val tttGameServer = TTTGameServer(this, testing)
     val miseryGameServer = MiseryGameServer(this, testing)
+    val stoplightGameServer = StoplightGameServer(this, testing)
+
     install(CallLogging) {
         level = Level.INFO
         filter { call -> call.request.path().startsWith("/") }
@@ -51,6 +54,7 @@ fun Application.module(testing: Boolean = false) {
 
     installGameRouting(tttGameServer, "ttt")
     installGameRouting(miseryGameServer, "misery")
+    installGameRouting(stoplightGameServer, "stoplight")
 
     routing {
         static {

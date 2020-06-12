@@ -40,17 +40,20 @@ fun <L: Game.LobbyImpl, G: Game.InGameImpl> Application.installGameRouting(
         route(gamePreFix) {
             //trace { application.log.trace(it.buildText()) }
             webSocket("/{gameId}/ws") {
-                val gameId = call.parameters["gameId"] ?: kotlin.run {
-                    close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "No gameId"))
-                    return@webSocket
-                }
-
                 // We check that we actually have a session. We should always have one,
                 // since we have defined an interceptor before to set one.
                 val session = call.sessions.get<SessionId>() ?: kotlin.run {
                     close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "No session"))
+                    log.info("closed because no session")
                     return@webSocket
                 }
+
+                val gameId = call.parameters["gameId"] ?: kotlin.run {
+                    close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "No gameId"))
+                    log.info("closed socket with $session because no game id was given")
+                    return@webSocket
+                }
+
 
                 val welcomeMsg = gameServer.clientJoined(session, GameId(gameId), this)
                 send(Frame.Text(welcomeMsg.stringify()))
@@ -65,6 +68,7 @@ fun <L: Game.LobbyImpl, G: Game.InGameImpl> Application.installGameRouting(
                         }
                     }
                 } finally {
+                    log.info("closed socket with $session")
                     gameServer.clientLeft(session, GameId(gameId), this)
                 }
             }

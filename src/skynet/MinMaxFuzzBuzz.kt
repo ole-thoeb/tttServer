@@ -35,7 +35,7 @@ fun main() {
 //    fuzz(TTTStrategy, MinMaxPlayer.MAX, TTTBoard.empty(), 500, analyseTTT)
 //    println("Going second")
 //    fuzz(TTTStrategy, MinMaxPlayer.MIN, TTTBoard.empty(), 500, analyseTTT)
-
+//
 //    println("Going first")
 //    fuzz(MiseryStrategy, MinMaxPlayer.MAX, MiseryBoard.empty(), 500, analyseMisery)
 //    println("Going second")
@@ -45,15 +45,21 @@ fun main() {
 //            MiseryBoard.CellState.EMPTY, MiseryBoard.CellState.EMPTY, MiseryBoard.CellState.EMPTY,
 //            MiseryBoard.CellState.EMPTY,MiseryBoard.CellState.EMPTY, MiseryBoard.CellState.EMPTY
 //    )
-//    val move = MiseryStrategy.minMax(MiseryBoard.empty())
+//    val move = MiseryStrategy.alphaBeta(MiseryBoard(b, lastPlayer = MinMaxPlayer.MIN), 10)
 //    println("best move: $move")
-
+//
+//    val b = listOf(
+//            TTTBoard.CellState.EMPTY, TTTBoard.CellState.EMPTY, TTTBoard.CellState.EMPTY,
+//            TTTBoard.CellState.P1, TTTBoard.CellState.P2, TTTBoard.CellState.EMPTY,
+//            TTTBoard.CellState.EMPTY, TTTBoard.CellState.P2, TTTBoard.CellState.EMPTY
+//    )
+//    println(TTTStrategy.withDifficulty(DefaultLobby.Difficulty.CHALLENGE)(TTTBoard(b)))
     val b = listOf(
-            TTTBoard.CellState.EMPTY, TTTBoard.CellState.EMPTY, TTTBoard.CellState.EMPTY,
-            TTTBoard.CellState.P1, TTTBoard.CellState.P2, TTTBoard.CellState.EMPTY,
-            TTTBoard.CellState.EMPTY, TTTBoard.CellState.P2, TTTBoard.CellState.EMPTY
+            StoplightBoard.CellState.EMPTY, StoplightBoard.CellState.EMPTY, StoplightBoard.CellState.EMPTY,
+            StoplightBoard.CellState.GREEN, StoplightBoard.CellState.YELLOW, StoplightBoard.CellState.EMPTY,
+            StoplightBoard.CellState.EMPTY, StoplightBoard.CellState.GREEN, StoplightBoard.CellState.EMPTY
     )
-    println(TTTStrategy.withDifficulty(DefaultLobby.Difficulty.CHALLENGE)(TTTBoard(b)))
+    println(StoplightStrategy.withDifficulty(DefaultLobby.Difficulty.NIGHTMARE)(StoplightBoard(b, lastPlayer = MinMaxPlayer.MIN)))
 }
 
 data class Analyse(val wins: Int = 0, val draws: Int = 0, val losses: Int = 0)
@@ -67,7 +73,7 @@ fun <S, M> fuzz(strategy: MinMaxStrategy<S, M>, startingPlayer: MinMaxPlayer, in
                 while (!state.isTerminal) {
                     state = when (cPlayer) {
                         MinMaxPlayer.MAX -> {
-                            val move = strategy.minMax(state)
+                            val move = strategy.alphaBeta(state, 10)
                             state.doMove(move.move, MinMaxPlayer.MAX)
                         }
                         MinMaxPlayer.MIN -> {

@@ -20,17 +20,22 @@ fun <C> List<C>.nonWinningStatus(empty: C): TwoPlayerGame.Status {
 
 fun <C> TwoPlayerGame.getPlayerForPiece(
         board: List<C>, empty: C,
-        status: TwoPlayerGame.Status,
         index: Int, playerId: PlayerId
 ): Either<TwoPlayerGameError, TwoPlayerGamePlayer> {
+    return validatePlayer(playerId).flatMap { player ->
+        if (index !in board.indices || board[index] != empty)
+            Left(TwoPlayerGameError.IllegalPlace(index))
+        else
+            Right(player)
+    }
+}
+
+fun TwoPlayerGame.validatePlayer(playerId: PlayerId): Either<TwoPlayerGameError, TwoPlayerGamePlayer> {
     if (status != TwoPlayerGame.Status.OnGoing) return Left(TwoPlayerGameError.IllegalStatus(status))
     val playerRef = getPlayerRef(playerId)
             ?: return Left(TwoPlayerGameError.WrongTurn(null, turn))
 
     if (playerRef != turn) return Left(TwoPlayerGameError.WrongTurn(playerRef, turn))
-
-    if (index !in board.indices || board[index] != empty)
-        return Left(TwoPlayerGameError.IllegalPlace(index))
 
     return Right(this[playerRef])
 }

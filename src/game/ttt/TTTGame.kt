@@ -40,7 +40,7 @@ data class TTTInGame(
         }
 
     fun setPiece(index: Int, playerId: PlayerId): Either<TwoPlayerGameError, TTTInGame> {
-        return twoPlayerGame.getPlayerForPiece(board, CellState.EMPTY, twoPlayerGame.status, index, playerId).map { player ->
+        return twoPlayerGame.getPlayerForPiece(board, CellState.EMPTY, index, playerId).map { player ->
             val updatedBoard = board.update(index, player.ref.cellState).k()
             val updatedTwoGame = twoPlayerGame.nextTurn().copy(status = checkStatus(updatedBoard))
             copy(

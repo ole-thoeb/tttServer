@@ -9,6 +9,9 @@ import MaterialUI.Themes.Default as DefaultTheme
 type CustomColor
     = Player1Color
     | Player2Color
+    | GreenColor
+    | YellowColor
+    | RedColor
 
 
 type Session =
@@ -50,6 +53,9 @@ defaultDarkTheme =
         , alternative =
             [ ( Player1Color, Element.rgb255 236 64 122 )
             , ( Player2Color, Element.rgb255 92 107 192 )
+            , ( GreenColor, Element.rgb255 102 187 106 )
+            , ( YellowColor, Element.rgb255 220 210 111 )
+            , ( RedColor, Element.rgb255 236 64 122 )
             ]
         }
     }

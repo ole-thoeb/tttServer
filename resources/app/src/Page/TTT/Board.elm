@@ -1,21 +1,22 @@
-module Page.TTT.Board exposing (Board, Symbol(..), defaultSymbolColor, view)
+module Page.TTT.Board exposing (Board, Symbol(..), defaultSymbolColor, view, lineFormGameStatus, toCssString)
 
 import Array exposing (Array)
 import Color
 import Element exposing (..)
 import Element.Background as Background
 import Element.Events as Events
+import Game.Game as GameState
 import MaterialUI.Theme as Theme exposing (Theme)
 import Page.TTT.SvgSymbol as SvgSymbol
 import Session
 import Svg exposing (Svg)
 
 
-type alias Board msg a =
+type alias Board msg s =
     { line : Maybe ( Int, Int, Int )
-    , cells : Array Symbol
+    , cells : Array s
     , onClick : Int -> msg
-    , symbolColor : Symbol -> Theme.Color a
+    , symbolView : Maybe s -> List (Svg msg)
     }
 
 
@@ -38,7 +39,27 @@ defaultSymbolColor symbol =
             Theme.Primary
 
 
-view : Theme a -> Board msg a -> Element msg
+toCssString : Color -> String
+toCssString color =
+    Element.toRgb color
+        |> Color.fromRgba
+        |> Color.toCssString
+
+
+lineFormGameStatus : GameState.Status -> Maybe ( Int, Int, Int )
+lineFormGameStatus status =
+    case status of
+        GameState.OnGoing ->
+            Nothing
+
+        GameState.Draw ->
+            Nothing
+
+        GameState.Win _ f1 f2 f3 ->
+            Just ( f1, f2, f3 )
+
+
+view : Theme a -> Board msg s -> Element msg
 view theme board =
     column
         [ centerX
@@ -48,58 +69,44 @@ view theme board =
             [ spaceEvenly
             , width fill
             ]
-            [ boardCell theme 0 board
+            [ boardCell 0 board
             , hLine theme
-            , boardCell theme 1 board
+            , boardCell 1 board
             , hLine theme
-            , boardCell theme 2 board
+            , boardCell 2 board
             ]
         , vLine theme
         , row
             [ spaceEvenly
             , width fill
             ]
-            [ boardCell theme 3 board
+            [ boardCell 3 board
             , hLine theme
-            , boardCell theme 4 board
+            , boardCell 4 board
             , hLine theme
-            , boardCell theme 5 board
+            , boardCell 5 board
             ]
         , vLine theme
         , row
             [ spaceEvenly
             , width fill
             ]
-            [ boardCell theme 6 board
+            [ boardCell 6 board
             , hLine theme
-            , boardCell theme 7 board
+            , boardCell 7 board
             , hLine theme
-            , boardCell theme 8 board
+            , boardCell 8 board
             ]
         ]
 
 
-boardCell : Theme a -> Int -> Board msg a -> Element msg
-boardCell theme cellNumber board =
+boardCell : Int -> Board msg s -> Element msg
+boardCell cellNumber board =
     let
-        toCssString color =
-            Element.toRgb color
-                |> Color.fromRgba
-                |> Color.toCssString
-
         svgIcon =
             SvgSymbol.toHtml <|
                 gameStatusToLine board.line cellNumber
-                    ++ (case Array.get cellNumber board.cells of
-                            Just X ->
-                                SvgSymbol.cross (Theme.getColor (board.symbolColor X) theme |> toCssString)
-
-                            Just O ->
-                                SvgSymbol.circle (Theme.getColor (board.symbolColor O) theme |> toCssString)
-
-                            _ ->
-                                SvgSymbol.empty
-                       )
+                    ++ (Array.get cellNumber board.cells |> board.symbolView)
     in
     el
         [ width fill

@@ -10,6 +10,7 @@ import MaterialUI.MaterilaUI as MaterialUI
 import MaterialUI.Select as Select
 import MaterialUI.TextFieldM as TextField
 import ServerResponse.EnterLobby as EnterLobbyResponse exposing (Error(..))
+import ServerResponse.StoplightInGame as StoplightGameResponse
 import ServerResponse.TTTInGame as TTTGameResponse
 import ServerResponse.MiseryInGame as MiseryGameResponse
 import ServerResponse.InLobby as InLobbyResponse
@@ -136,6 +137,12 @@ update msg model =
                                 <| Endpoint.game model.mode game.gameId
                             )
 
+                        GameResponse.InGameResponse (GameResponse.StoplightResponse (StoplightGameResponse.GameState game)) ->
+                            ( model
+                            , Nav.pushUrl navKey
+                                <| Endpoint.game model.mode game.gameId
+                            )
+
                         GameResponse.InGameResponse _ ->
                             ( model, Cmd.none )
 
@@ -208,10 +215,12 @@ view model =
                     , items =
                         [ Select.item Game.TicTacToe
                         , Select.item Game.Misery
+                        , Select.item Game.Stoplight
                         ]
                     , toItem = \mode -> case mode of
                         Game.TicTacToe -> { text = "Tic Tac Toe" }
                         Game.Misery -> { text = "Misery" }
+                        Game.Stoplight -> { text = "Stoplights" }
                     , onClick = ModeSelected
                     , selectedItem = Just model.mode
                     }

@@ -5590,6 +5590,9 @@ var $author$project$ServerResponse$GameResponse$decoder = function (inGameDecode
 var $author$project$ServerResponse$GameResponse$MiseryResponse = function (a) {
 	return {$: 'MiseryResponse', a: a};
 };
+var $author$project$ServerResponse$GameResponse$StoplightResponse = function (a) {
+	return {$: 'StoplightResponse', a: a};
+};
 var $author$project$ServerResponse$GameResponse$TTTResponse = function (a) {
 	return {$: 'TTTResponse', a: a};
 };
@@ -5712,6 +5715,83 @@ var $author$project$ServerResponse$MiseryInGame$responseDecoder = function (type
 	}
 };
 var $author$project$ServerResponse$MiseryInGame$decoder = A2($elm$json$Json$Decode$andThen, $author$project$ServerResponse$MiseryInGame$responseDecoder, $author$project$ServerResponse$JsonHelper$typeDecoder);
+var $author$project$ServerResponse$StoplightInGame$GameState = function (a) {
+	return {$: 'GameState', a: a};
+};
+var $author$project$Game$StoplightGame$StoplightGame = F6(
+	function (gameId, playerMe, opponent, meTurn, board, status) {
+		return {board: board, gameId: gameId, meTurn: meTurn, opponent: opponent, playerMe: playerMe, status: status};
+	});
+var $author$project$Game$StoplightGame$Empty = {$: 'Empty'};
+var $author$project$Game$StoplightGame$Green = {$: 'Green'};
+var $author$project$Game$StoplightGame$Red = {$: 'Red'};
+var $author$project$Game$StoplightGame$Yellow = {$: 'Yellow'};
+var $author$project$Game$StoplightGame$cellDecoder = A2(
+	$elm$json$Json$Decode$andThen,
+	function (stateStr) {
+		switch (stateStr) {
+			case 'GREEN':
+				return $elm$json$Json$Decode$succeed($author$project$Game$StoplightGame$Green);
+			case 'YELLOW':
+				return $elm$json$Json$Decode$succeed($author$project$Game$StoplightGame$Yellow);
+			case 'RED':
+				return $elm$json$Json$Decode$succeed($author$project$Game$StoplightGame$Red);
+			case 'EMPTY':
+				return $elm$json$Json$Decode$succeed($author$project$Game$StoplightGame$Empty);
+			default:
+				return $elm$json$Json$Decode$fail('Unknown cell state ' + stateStr);
+		}
+	},
+	$elm$json$Json$Decode$string);
+var $author$project$Game$StoplightGame$boardDecoder = $elm$json$Json$Decode$array($author$project$Game$StoplightGame$cellDecoder);
+var $author$project$Game$StoplightGamePlayer$Player = F2(
+	function (name, playerRef) {
+		return {name: name, playerRef: playerRef};
+	});
+var $author$project$Game$StoplightGamePlayer$decoder = A3(
+	$elm$json$Json$Decode$map2,
+	$author$project$Game$StoplightGamePlayer$Player,
+	$author$project$Game$GamePlayer$nameDecoder,
+	A2($elm$json$Json$Decode$field, 'playerRef', $author$project$Game$GamePlayer$playerRefDecoder));
+var $author$project$Game$StoplightGamePlayer$PlayerMe = F3(
+	function (id, name, playerRef) {
+		return {id: id, name: name, playerRef: playerRef};
+	});
+var $author$project$Game$StoplightGamePlayer$meDecoder = A4(
+	$elm$json$Json$Decode$map3,
+	$author$project$Game$StoplightGamePlayer$PlayerMe,
+	$author$project$Game$GamePlayer$idDecoder,
+	$author$project$Game$GamePlayer$nameDecoder,
+	A2($elm$json$Json$Decode$field, 'playerRef', $author$project$Game$GamePlayer$playerRefDecoder));
+var $author$project$Game$StoplightGame$decoder = A7(
+	$elm$json$Json$Decode$map6,
+	$author$project$Game$StoplightGame$StoplightGame,
+	A2($elm$json$Json$Decode$field, 'gameId', $author$project$Game$idDecoder),
+	A2($elm$json$Json$Decode$field, 'playerMe', $author$project$Game$StoplightGamePlayer$meDecoder),
+	A2($elm$json$Json$Decode$field, 'opponent', $author$project$Game$StoplightGamePlayer$decoder),
+	A2($elm$json$Json$Decode$field, 'meTurn', $elm$json$Json$Decode$bool),
+	A2($elm$json$Json$Decode$field, 'board', $author$project$Game$StoplightGame$boardDecoder),
+	A2($elm$json$Json$Decode$field, 'status', $author$project$Game$Game$statusDecoder));
+var $author$project$ServerResponse$StoplightInGame$gameStateDecoder = A2($elm$json$Json$Decode$map, $author$project$ServerResponse$StoplightInGame$GameState, $author$project$Game$StoplightGame$decoder);
+var $author$project$ServerResponse$StoplightInGame$PlayerDisc = function (a) {
+	return {$: 'PlayerDisc', a: a};
+};
+var $author$project$ServerResponse$StoplightInGame$playerDiscDecoder = A2(
+	$elm$json$Json$Decode$map,
+	$author$project$ServerResponse$StoplightInGame$PlayerDisc,
+	A2($elm$json$Json$Decode$field, 'discPlayerName', $elm$json$Json$Decode$string));
+var $author$project$ServerResponse$StoplightInGame$responseDecoder = function (type_) {
+	var _v0 = A2($elm$core$Debug$log, 'decoded type', type_);
+	switch (_v0) {
+		case 'playerDisconnected':
+			return $author$project$ServerResponse$JsonHelper$contentDecoder($author$project$ServerResponse$StoplightInGame$playerDiscDecoder);
+		case 'stoplightInGameState':
+			return $author$project$ServerResponse$JsonHelper$contentDecoder($author$project$ServerResponse$StoplightInGame$gameStateDecoder);
+		default:
+			return $elm$json$Json$Decode$fail('Unknown type \'' + (type_ + '\' to InGameResponse'));
+	}
+};
+var $author$project$ServerResponse$StoplightInGame$decoder = A2($elm$json$Json$Decode$andThen, $author$project$ServerResponse$StoplightInGame$responseDecoder, $author$project$ServerResponse$JsonHelper$typeDecoder);
 var $author$project$ServerResponse$TTTInGame$GameState = function (a) {
 	return {$: 'GameState', a: a};
 };
@@ -5807,7 +5887,8 @@ var $author$project$ServerResponse$GameResponse$defaultInGameDecoder = $elm$json
 	_List_fromArray(
 		[
 			A2($elm$json$Json$Decode$map, $author$project$ServerResponse$GameResponse$TTTResponse, $author$project$ServerResponse$TTTInGame$decoder),
-			A2($elm$json$Json$Decode$map, $author$project$ServerResponse$GameResponse$MiseryResponse, $author$project$ServerResponse$MiseryInGame$decoder)
+			A2($elm$json$Json$Decode$map, $author$project$ServerResponse$GameResponse$MiseryResponse, $author$project$ServerResponse$MiseryInGame$decoder),
+			A2($elm$json$Json$Decode$map, $author$project$ServerResponse$GameResponse$StoplightResponse, $author$project$ServerResponse$StoplightInGame$decoder)
 		]));
 var $elm$json$Json$Decode$decodeString = _Json_runOnString;
 var $elm$http$Http$BadStatus_ = F2(
@@ -6638,10 +6719,13 @@ var $author$project$Game$idToString = function (_v0) {
 	return string;
 };
 var $author$project$Endpoint$modePreFix = function (mode) {
-	if (mode.$ === 'TicTacToe') {
-		return 'ttt';
-	} else {
-		return 'misery';
+	switch (mode.$) {
+		case 'TicTacToe':
+			return 'ttt';
+		case 'Misery':
+			return 'misery';
+		default:
+			return 'stoplight';
 	}
 };
 var $author$project$Endpoint$websocket = F2(
@@ -6808,6 +6892,9 @@ var $author$project$Page$TTT$Lobby$toSession = function ($) {
 var $author$project$Page$TTT$MiseryInGame$toSession = function ($) {
 	return $.session;
 };
+var $author$project$Page$TTT$StoplightInGame$toSession = function ($) {
+	return $.session;
+};
 var $author$project$Page$TTT$TTTInGame$toSession = function ($) {
 	return $.session;
 };
@@ -6817,12 +6904,16 @@ var $author$project$Page$TTT$Game$toSession = function (model) {
 			var lobby = model.a;
 			return $author$project$Page$TTT$Lobby$toSession(lobby);
 		case 'InGame':
-			if (model.a.$ === 'TTTGame') {
-				var inGame = model.a.a;
-				return $author$project$Page$TTT$TTTInGame$toSession(inGame);
-			} else {
-				var inGame = model.a.a;
-				return $author$project$Page$TTT$MiseryInGame$toSession(inGame);
+			switch (model.a.$) {
+				case 'TTTGame':
+					var inGame = model.a.a;
+					return $author$project$Page$TTT$TTTInGame$toSession(inGame);
+				case 'MiseryGame':
+					var inGame = model.a.a;
+					return $author$project$Page$TTT$MiseryInGame$toSession(inGame);
+				default:
+					var inGame = model.a.a;
+					return $author$project$Page$TTT$StoplightInGame$toSession(inGame);
 			}
 		default:
 			var session = model.a;
@@ -6895,8 +6986,11 @@ var $author$project$Session$Guest = F2(
 	function (a, b) {
 		return {$: 'Guest', a: a, b: b};
 	});
+var $author$project$Session$GreenColor = {$: 'GreenColor'};
 var $author$project$Session$Player1Color = {$: 'Player1Color'};
 var $author$project$Session$Player2Color = {$: 'Player2Color'};
+var $author$project$Session$RedColor = {$: 'RedColor'};
+var $author$project$Session$YellowColor = {$: 'YellowColor'};
 var $author$project$MaterialUI$Theme$DarkVariant = function (a) {
 	return {$: 'DarkVariant', a: a};
 };
@@ -7186,7 +7280,16 @@ var $author$project$Session$defaultDarkTheme = function () {
 							A3($mdgriffith$elm_ui$Element$rgb255, 236, 64, 122)),
 							_Utils_Tuple2(
 							$author$project$Session$Player2Color,
-							A3($mdgriffith$elm_ui$Element$rgb255, 92, 107, 192))
+							A3($mdgriffith$elm_ui$Element$rgb255, 92, 107, 192)),
+							_Utils_Tuple2(
+							$author$project$Session$GreenColor,
+							A3($mdgriffith$elm_ui$Element$rgb255, 102, 187, 106)),
+							_Utils_Tuple2(
+							$author$project$Session$YellowColor,
+							A3($mdgriffith$elm_ui$Element$rgb255, 220, 210, 111)),
+							_Utils_Tuple2(
+							$author$project$Session$RedColor,
+							A3($mdgriffith$elm_ui$Element$rgb255, 236, 64, 122))
 						]),
 					primary: A3($mdgriffith$elm_ui$Element$rgb255, 102, 187, 106),
 					primaryVariant: A3($mdgriffith$elm_ui$Element$rgb255, 152, 238, 153),
@@ -7494,12 +7597,15 @@ var $author$project$Page$Home$joinErrorQueryParser = A2(
 		}
 	});
 var $author$project$Game$Misery = {$: 'Misery'};
+var $author$project$Game$Stoplight = {$: 'Stoplight'};
 var $author$project$Route$modeFromPrefix = function (prefix) {
 	switch (prefix) {
 		case 'ttt':
 			return $elm$core$Maybe$Just($author$project$Game$TicTacToe);
 		case 'misery':
 			return $elm$core$Maybe$Just($author$project$Game$Misery);
+		case 'stoplight':
+			return $elm$core$Maybe$Just($author$project$Game$Stoplight);
 		default:
 			return $elm$core$Maybe$Nothing;
 	}
@@ -9084,7 +9190,7 @@ var $author$project$Page$Home$update = F2(
 								A2($author$project$Endpoint$game, model.mode, lobby.gameId)));
 					};
 					var a = A2($elm$core$Debug$log, 'response', response);
-					_v2$5:
+					_v2$6:
 					while (true) {
 						switch (response.$) {
 							case 'EnterLobbyResponse':
@@ -9106,30 +9212,43 @@ var $author$project$Page$Home$update = F2(
 								var lobby = response.a.a;
 								return navigateToLobby(lobby);
 							default:
-								if (response.a.$ === 'TTTResponse') {
-									if (response.a.a.$ === 'GameState') {
-										var game = response.a.a.a;
-										return _Utils_Tuple2(
-											model,
-											A2(
-												$elm$browser$Browser$Navigation$pushUrl,
-												navKey,
-												A2($author$project$Endpoint$game, model.mode, game.gameId)));
-									} else {
-										break _v2$5;
-									}
-								} else {
-									if (response.a.a.$ === 'GameState') {
-										var game = response.a.a.a;
-										return _Utils_Tuple2(
-											model,
-											A2(
-												$elm$browser$Browser$Navigation$pushUrl,
-												navKey,
-												A2($author$project$Endpoint$game, model.mode, game.gameId)));
-									} else {
-										break _v2$5;
-									}
+								switch (response.a.$) {
+									case 'TTTResponse':
+										if (response.a.a.$ === 'GameState') {
+											var game = response.a.a.a;
+											return _Utils_Tuple2(
+												model,
+												A2(
+													$elm$browser$Browser$Navigation$pushUrl,
+													navKey,
+													A2($author$project$Endpoint$game, model.mode, game.gameId)));
+										} else {
+											break _v2$6;
+										}
+									case 'MiseryResponse':
+										if (response.a.a.$ === 'GameState') {
+											var game = response.a.a.a;
+											return _Utils_Tuple2(
+												model,
+												A2(
+													$elm$browser$Browser$Navigation$pushUrl,
+													navKey,
+													A2($author$project$Endpoint$game, model.mode, game.gameId)));
+										} else {
+											break _v2$6;
+										}
+									default:
+										if (response.a.a.$ === 'GameState') {
+											var game = response.a.a.a;
+											return _Utils_Tuple2(
+												model,
+												A2(
+													$elm$browser$Browser$Navigation$pushUrl,
+													navKey,
+													A2($author$project$Endpoint$game, model.mode, game.gameId)));
+										} else {
+											break _v2$6;
+										}
 								}
 						}
 					}
@@ -9271,6 +9390,12 @@ var $author$project$Page$TTT$Game$MiseryGame = function (a) {
 var $author$project$Page$TTT$Game$MiseryMsg = function (a) {
 	return {$: 'MiseryMsg', a: a};
 };
+var $author$project$Page$TTT$Game$StoplightGame = function (a) {
+	return {$: 'StoplightGame', a: a};
+};
+var $author$project$Page$TTT$Game$StoplightMsg = function (a) {
+	return {$: 'StoplightMsg', a: a};
+};
 var $author$project$Page$TTT$Game$TTTGame = function (a) {
 	return {$: 'TTTGame', a: a};
 };
@@ -9294,6 +9419,20 @@ var $author$project$Page$TTT$Game$startMiseryGame = F2(
 			A2($elm$core$Basics$composeL, $author$project$Page$TTT$Game$InGame, $author$project$Page$TTT$Game$MiseryGame),
 			A2($elm$core$Basics$composeL, $author$project$Page$TTT$Game$GotInGameMsg, $author$project$Page$TTT$Game$MiseryMsg),
 			A2($author$project$Page$TTT$MiseryInGame$init, session, game));
+	});
+var $author$project$Page$TTT$StoplightInGame$init = F2(
+	function (session, game) {
+		return _Utils_Tuple2(
+			{game: game, session: session},
+			A2($author$project$Websocket$connect, $author$project$Game$Stoplight, game.gameId));
+	});
+var $author$project$Page$TTT$Game$startStoplightGame = F2(
+	function (session, game) {
+		return A3(
+			$author$project$Util$updateWith,
+			A2($elm$core$Basics$composeL, $author$project$Page$TTT$Game$InGame, $author$project$Page$TTT$Game$StoplightGame),
+			A2($elm$core$Basics$composeL, $author$project$Page$TTT$Game$GotInGameMsg, $author$project$Page$TTT$Game$StoplightMsg),
+			A2($author$project$Page$TTT$StoplightInGame$init, session, game));
 	});
 var $author$project$Page$TTT$TTTInGame$init = F2(
 	function (session, game) {
@@ -9652,6 +9791,50 @@ var $author$project$Page$TTT$MiseryInGame$update = F2(
 					A2($elm$browser$Browser$Navigation$pushUrl, navKey, $author$project$Endpoint$home));
 		}
 	});
+var $author$project$ServerRequest$StoplightInGame$setPiece = F3(
+	function (gameId, playerId, index) {
+		return A2(
+			$author$project$ServerRequest$JsonHelper$remoteMsg,
+			'stoplightSetPiece',
+			$elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'playerId',
+						$elm$json$Json$Encode$string(playerId)),
+						_Utils_Tuple2(
+						'gameId',
+						$author$project$Game$encodeId(gameId)),
+						_Utils_Tuple2(
+						'index',
+						$elm$json$Json$Encode$int(index))
+					])));
+	});
+var $author$project$Page$TTT$StoplightInGame$update = F2(
+	function (msg, model) {
+		var navKey = $author$project$Session$navKey(
+			$author$project$Page$TTT$StoplightInGame$toSession(model));
+		var game = model.game;
+		switch (msg.$) {
+			case 'CellClicked':
+				var index = msg.a;
+				return _Utils_Tuple2(
+					model,
+					$author$project$Websocket$send(
+						A3($author$project$ServerRequest$StoplightInGame$setPiece, game.gameId, game.playerMe.id, index)));
+			case 'Rematch':
+				return _Utils_Tuple2(
+					model,
+					A2(
+						$elm$browser$Browser$Navigation$pushUrl,
+						navKey,
+						A2($author$project$Endpoint$rematch, $author$project$Game$Stoplight, game.gameId)));
+			default:
+				return _Utils_Tuple2(
+					model,
+					A2($elm$browser$Browser$Navigation$pushUrl, navKey, $author$project$Endpoint$home));
+		}
+	});
 var $author$project$ServerRequest$TTTInGame$setPiece = F3(
 	function (gameId, playerId, index) {
 		return A2(
@@ -9722,6 +9905,20 @@ var $author$project$Page$TTT$MiseryInGame$updateFromWebsocket = F2(
 				$elm$core$Platform$Cmd$none);
 		}
 	});
+var $author$project$Page$TTT$StoplightInGame$updateFromWebsocket = F2(
+	function (response, model) {
+		if (response.$ === 'PlayerDisc') {
+			var discPlayerName = response.a;
+			return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+		} else {
+			var tttGame = response.a;
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{game: tttGame}),
+				$elm$core$Platform$Cmd$none);
+		}
+	});
 var $author$project$Page$TTT$TTTInGame$updateFromWebsocket = F2(
 	function (response, model) {
 		if (response.$ === 'PlayerDisc') {
@@ -9740,7 +9937,7 @@ var $author$project$Page$TTT$Game$update = F2(
 	function (msg, model) {
 		var session = $author$project$Page$TTT$Game$toSession(model);
 		var _v0 = _Utils_Tuple2(msg, model);
-		_v0$5:
+		_v0$6:
 		while (true) {
 			switch (_v0.a.$) {
 				case 'GotLobbyMsg':
@@ -9753,33 +9950,50 @@ var $author$project$Page$TTT$Game$update = F2(
 							$author$project$Page$TTT$Game$GotLobbyMsg,
 							A2($author$project$Page$TTT$Lobby$update, subMsg, lobby));
 					} else {
-						break _v0$5;
+						break _v0$6;
 					}
 				case 'GotInGameMsg':
-					if (_v0.a.a.$ === 'TTTMsg') {
-						if ((_v0.b.$ === 'InGame') && (_v0.b.a.$ === 'TTTGame')) {
-							var subMsg = _v0.a.a.a;
-							var inGame = _v0.b.a.a;
-							return A3(
-								$author$project$Util$updateWith,
-								A2($elm$core$Basics$composeL, $author$project$Page$TTT$Game$InGame, $author$project$Page$TTT$Game$TTTGame),
-								A2($elm$core$Basics$composeL, $author$project$Page$TTT$Game$GotInGameMsg, $author$project$Page$TTT$Game$TTTMsg),
-								A2($author$project$Page$TTT$TTTInGame$update, subMsg, inGame));
-						} else {
-							break _v0$5;
+					if (_v0.b.$ === 'InGame') {
+						switch (_v0.a.a.$) {
+							case 'TTTMsg':
+								if (_v0.b.a.$ === 'TTTGame') {
+									var subMsg = _v0.a.a.a;
+									var inGame = _v0.b.a.a;
+									return A3(
+										$author$project$Util$updateWith,
+										A2($elm$core$Basics$composeL, $author$project$Page$TTT$Game$InGame, $author$project$Page$TTT$Game$TTTGame),
+										A2($elm$core$Basics$composeL, $author$project$Page$TTT$Game$GotInGameMsg, $author$project$Page$TTT$Game$TTTMsg),
+										A2($author$project$Page$TTT$TTTInGame$update, subMsg, inGame));
+								} else {
+									break _v0$6;
+								}
+							case 'MiseryMsg':
+								if (_v0.b.a.$ === 'MiseryGame') {
+									var subMsg = _v0.a.a.a;
+									var inGame = _v0.b.a.a;
+									return A3(
+										$author$project$Util$updateWith,
+										A2($elm$core$Basics$composeL, $author$project$Page$TTT$Game$InGame, $author$project$Page$TTT$Game$MiseryGame),
+										A2($elm$core$Basics$composeL, $author$project$Page$TTT$Game$GotInGameMsg, $author$project$Page$TTT$Game$MiseryMsg),
+										A2($author$project$Page$TTT$MiseryInGame$update, subMsg, inGame));
+								} else {
+									break _v0$6;
+								}
+							default:
+								if (_v0.b.a.$ === 'StoplightGame') {
+									var subMsg = _v0.a.a.a;
+									var inGame = _v0.b.a.a;
+									return A3(
+										$author$project$Util$updateWith,
+										A2($elm$core$Basics$composeL, $author$project$Page$TTT$Game$InGame, $author$project$Page$TTT$Game$StoplightGame),
+										A2($elm$core$Basics$composeL, $author$project$Page$TTT$Game$GotInGameMsg, $author$project$Page$TTT$Game$StoplightMsg),
+										A2($author$project$Page$TTT$StoplightInGame$update, subMsg, inGame));
+								} else {
+									break _v0$6;
+								}
 						}
 					} else {
-						if ((_v0.b.$ === 'InGame') && (_v0.b.a.$ === 'MiseryGame')) {
-							var subMsg = _v0.a.a.a;
-							var inGame = _v0.b.a.a;
-							return A3(
-								$author$project$Util$updateWith,
-								A2($elm$core$Basics$composeL, $author$project$Page$TTT$Game$InGame, $author$project$Page$TTT$Game$MiseryGame),
-								A2($elm$core$Basics$composeL, $author$project$Page$TTT$Game$GotInGameMsg, $author$project$Page$TTT$Game$MiseryMsg),
-								A2($author$project$Page$TTT$MiseryInGame$update, subMsg, inGame));
-						} else {
-							break _v0$5;
-						}
+						break _v0$6;
 					}
 				case 'JoinResponse':
 					if (_v0.b.$ === 'Loading') {
@@ -9788,7 +10002,7 @@ var $author$project$Page$TTT$Game$update = F2(
 						var gameMode = _v1.b;
 						if (result.$ === 'Ok') {
 							var response = result.a;
-							_v3$5:
+							_v3$6:
 							while (true) {
 								switch (response.$) {
 									case 'EnterLobbyResponse':
@@ -9820,20 +10034,28 @@ var $author$project$Page$TTT$Game$update = F2(
 											$author$project$Page$TTT$Game$GotLobbyMsg,
 											A3($author$project$Page$TTT$Lobby$init, session, gameMode, lobby));
 									default:
-										if (response.a.$ === 'TTTResponse') {
-											if (response.a.a.$ === 'GameState') {
-												var game = response.a.a.a;
-												return A2($author$project$Page$TTT$Game$startTTTGame, session, game);
-											} else {
-												break _v3$5;
-											}
-										} else {
-											if (response.a.a.$ === 'GameState') {
-												var game = response.a.a.a;
-												return A2($author$project$Page$TTT$Game$startMiseryGame, session, game);
-											} else {
-												break _v3$5;
-											}
+										switch (response.a.$) {
+											case 'TTTResponse':
+												if (response.a.a.$ === 'GameState') {
+													var game = response.a.a.a;
+													return A2($author$project$Page$TTT$Game$startTTTGame, session, game);
+												} else {
+													break _v3$6;
+												}
+											case 'MiseryResponse':
+												if (response.a.a.$ === 'GameState') {
+													var game = response.a.a.a;
+													return A2($author$project$Page$TTT$Game$startMiseryGame, session, game);
+												} else {
+													break _v3$6;
+												}
+											default:
+												if (response.a.a.$ === 'GameState') {
+													var game = response.a.a.a;
+													return A2($author$project$Page$TTT$Game$startStoplightGame, session, game);
+												} else {
+													break _v3$6;
+												}
 										}
 								}
 							}
@@ -9853,7 +10075,7 @@ var $author$project$Page$TTT$Game$update = F2(
 												$elm$core$Maybe$Just(error))))));
 						}
 					} else {
-						break _v0$5;
+						break _v0$6;
 					}
 				default:
 					var message = _v0.a.a;
@@ -9870,23 +10092,31 @@ var $author$project$Page$TTT$Game$update = F2(
 									A2($author$project$Page$TTT$Lobby$updateFromWebsocket, response, lobby));
 							} else {
 								var _v6 = A2($elm$json$Json$Decode$decodeString, $author$project$ServerResponse$GameResponse$defaultInGameDecoder, message);
-								_v6$3:
+								_v6$4:
 								while (true) {
 									if (_v6.$ === 'Ok') {
-										if (_v6.a.$ === 'TTTResponse') {
-											if (_v6.a.a.$ === 'GameState') {
-												var game = _v6.a.a.a;
-												return A2($author$project$Page$TTT$Game$startTTTGame, session, game);
-											} else {
-												break _v6$3;
-											}
-										} else {
-											if (_v6.a.a.$ === 'GameState') {
-												var game = _v6.a.a.a;
-												return A2($author$project$Page$TTT$Game$startMiseryGame, session, game);
-											} else {
-												break _v6$3;
-											}
+										switch (_v6.a.$) {
+											case 'TTTResponse':
+												if (_v6.a.a.$ === 'GameState') {
+													var game = _v6.a.a.a;
+													return A2($author$project$Page$TTT$Game$startTTTGame, session, game);
+												} else {
+													break _v6$4;
+												}
+											case 'MiseryResponse':
+												if (_v6.a.a.$ === 'GameState') {
+													var game = _v6.a.a.a;
+													return A2($author$project$Page$TTT$Game$startMiseryGame, session, game);
+												} else {
+													break _v6$4;
+												}
+											default:
+												if (_v6.a.a.$ === 'GameState') {
+													var game = _v6.a.a.a;
+													return A2($author$project$Page$TTT$Game$startStoplightGame, session, game);
+												} else {
+													break _v6$4;
+												}
 										}
 									} else {
 										var error = _v6.a;
@@ -9905,33 +10135,46 @@ var $author$project$Page$TTT$Game$update = F2(
 							var _v7 = _Utils_Tuple2(
 								A2($elm$json$Json$Decode$decodeString, $author$project$ServerResponse$GameResponse$defaultInGameDecoder, message),
 								inGame);
-							_v7$3:
+							_v7$4:
 							while (true) {
 								if (_v7.a.$ === 'Ok') {
-									if (_v7.a.a.$ === 'TTTResponse') {
-										if (_v7.b.$ === 'TTTGame') {
-											var response = _v7.a.a.a;
-											var tttGame = _v7.b.a;
-											return A3(
-												$author$project$Util$updateWith,
-												A2($elm$core$Basics$composeL, $author$project$Page$TTT$Game$InGame, $author$project$Page$TTT$Game$TTTGame),
-												A2($elm$core$Basics$composeL, $author$project$Page$TTT$Game$GotInGameMsg, $author$project$Page$TTT$Game$TTTMsg),
-												A2($author$project$Page$TTT$TTTInGame$updateFromWebsocket, response, tttGame));
-										} else {
-											break _v7$3;
-										}
-									} else {
-										if (_v7.b.$ === 'MiseryGame') {
-											var response = _v7.a.a.a;
-											var miseryGame = _v7.b.a;
-											return A3(
-												$author$project$Util$updateWith,
-												A2($elm$core$Basics$composeL, $author$project$Page$TTT$Game$InGame, $author$project$Page$TTT$Game$MiseryGame),
-												A2($elm$core$Basics$composeL, $author$project$Page$TTT$Game$GotInGameMsg, $author$project$Page$TTT$Game$MiseryMsg),
-												A2($author$project$Page$TTT$MiseryInGame$updateFromWebsocket, response, miseryGame));
-										} else {
-											break _v7$3;
-										}
+									switch (_v7.a.a.$) {
+										case 'TTTResponse':
+											if (_v7.b.$ === 'TTTGame') {
+												var response = _v7.a.a.a;
+												var tttGame = _v7.b.a;
+												return A3(
+													$author$project$Util$updateWith,
+													A2($elm$core$Basics$composeL, $author$project$Page$TTT$Game$InGame, $author$project$Page$TTT$Game$TTTGame),
+													A2($elm$core$Basics$composeL, $author$project$Page$TTT$Game$GotInGameMsg, $author$project$Page$TTT$Game$TTTMsg),
+													A2($author$project$Page$TTT$TTTInGame$updateFromWebsocket, response, tttGame));
+											} else {
+												break _v7$4;
+											}
+										case 'MiseryResponse':
+											if (_v7.b.$ === 'MiseryGame') {
+												var response = _v7.a.a.a;
+												var miseryGame = _v7.b.a;
+												return A3(
+													$author$project$Util$updateWith,
+													A2($elm$core$Basics$composeL, $author$project$Page$TTT$Game$InGame, $author$project$Page$TTT$Game$MiseryGame),
+													A2($elm$core$Basics$composeL, $author$project$Page$TTT$Game$GotInGameMsg, $author$project$Page$TTT$Game$MiseryMsg),
+													A2($author$project$Page$TTT$MiseryInGame$updateFromWebsocket, response, miseryGame));
+											} else {
+												break _v7$4;
+											}
+										default:
+											if (_v7.b.$ === 'StoplightGame') {
+												var response = _v7.a.a.a;
+												var stoplightGame = _v7.b.a;
+												return A3(
+													$author$project$Util$updateWith,
+													A2($elm$core$Basics$composeL, $author$project$Page$TTT$Game$InGame, $author$project$Page$TTT$Game$StoplightGame),
+													A2($elm$core$Basics$composeL, $author$project$Page$TTT$Game$GotInGameMsg, $author$project$Page$TTT$Game$StoplightMsg),
+													A2($author$project$Page$TTT$StoplightInGame$updateFromWebsocket, response, stoplightGame));
+											} else {
+												break _v7$4;
+											}
 									}
 								} else {
 									var error = _v7.a.a;
@@ -18596,16 +18839,20 @@ var $author$project$Page$Home$view = function (model) {
 										items: _List_fromArray(
 											[
 												$author$project$MaterialUI$Select$item($author$project$Game$TicTacToe),
-												$author$project$MaterialUI$Select$item($author$project$Game$Misery)
+												$author$project$MaterialUI$Select$item($author$project$Game$Misery),
+												$author$project$MaterialUI$Select$item($author$project$Game$Stoplight)
 											]),
 										label: 'Mode',
 										onClick: $author$project$Page$Home$ModeSelected,
 										selectedItem: $elm$core$Maybe$Just(model.mode),
 										toItem: function (mode) {
-											if (mode.$ === 'TicTacToe') {
-												return {text: 'Tic Tac Toe'};
-											} else {
-												return {text: 'Misery'};
+											switch (mode.$) {
+												case 'TicTacToe':
+													return {text: 'Tic Tac Toe'};
+												case 'Misery':
+													return {text: 'Misery'};
+												default:
+													return {text: 'Stoplights'};
 											}
 										}
 									})),
@@ -19650,18 +19897,30 @@ var $author$project$Page$TTT$Lobby$view = function (model) {
 var $author$project$Page$TTT$MiseryInGame$CellClicked = function (a) {
 	return {$: 'CellClicked', a: a};
 };
-var $author$project$Page$TTT$Board$Empty = {$: 'Empty'};
-var $author$project$Page$TTT$Board$X = {$: 'X'};
-var $author$project$Page$TTT$Board$defaultSymbolColor = function (symbol) {
-	switch (symbol.$) {
-		case 'X':
-			return $author$project$MaterialUI$Theme$Alternative($author$project$Session$Player1Color);
-		case 'O':
-			return $author$project$MaterialUI$Theme$Alternative($author$project$Session$Player2Color);
-		default:
-			return $author$project$MaterialUI$Theme$Primary;
-	}
+var $elm$svg$Svg$circle = $elm$svg$Svg$trustedNode('circle');
+var $elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
+var $elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
+var $elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
+var $elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
+var $elm$svg$Svg$Attributes$strokeWidth = _VirtualDom_attribute('stroke-width');
+var $author$project$Page$TTT$SvgSymbol$circle = function (color) {
+	return _List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$circle,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$cx('60'),
+					$elm$svg$Svg$Attributes$cy('60'),
+					$elm$svg$Svg$Attributes$r('50'),
+					$elm$svg$Svg$Attributes$stroke(color),
+					$elm$svg$Svg$Attributes$strokeWidth('2'),
+					$elm$svg$Svg$Attributes$fill('none')
+				]),
+			_List_Nil)
+		]);
 };
+var $author$project$Page$TTT$SvgSymbol$empty = _List_Nil;
 var $author$project$Page$TTT$MiseryInGame$Left = {$: 'Left'};
 var $author$project$Page$TTT$MiseryInGame$Right = {$: 'Right'};
 var $author$project$Page$TTT$MiseryInGame$Leave = {$: 'Leave'};
@@ -19822,90 +20081,59 @@ var $author$project$Page$TTT$MiseryInGame$header = function (model) {
 					]));
 	}
 };
-var $elm$core$Elm$JsArray$map = _JsArray_map;
-var $elm$core$Array$map = F2(
-	function (func, _v0) {
-		var len = _v0.a;
-		var startShift = _v0.b;
-		var tree = _v0.c;
-		var tail = _v0.d;
-		var helper = function (node) {
-			if (node.$ === 'SubTree') {
-				var subTree = node.a;
-				return $elm$core$Array$SubTree(
-					A2($elm$core$Elm$JsArray$map, helper, subTree));
-			} else {
-				var values = node.a;
-				return $elm$core$Array$Leaf(
-					A2($elm$core$Elm$JsArray$map, func, values));
-			}
-		};
-		return A4(
-			$elm$core$Array$Array_elm_builtin,
-			len,
-			startShift,
-			A2($elm$core$Elm$JsArray$map, helper, tree),
-			A2($elm$core$Elm$JsArray$map, func, tail));
-	});
-var $author$project$Page$TTT$Board$O = {$: 'O'};
-var $elm$svg$Svg$circle = $elm$svg$Svg$trustedNode('circle');
-var $elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
-var $elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
-var $elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
-var $elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
-var $elm$svg$Svg$Attributes$strokeWidth = _VirtualDom_attribute('stroke-width');
-var $author$project$Page$TTT$SvgSymbol$circle = function (color) {
-	return _List_fromArray(
-		[
-			A2(
-			$elm$svg$Svg$circle,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$cx('60'),
-					$elm$svg$Svg$Attributes$cy('60'),
-					$elm$svg$Svg$Attributes$r('50'),
-					$elm$svg$Svg$Attributes$stroke(color),
-					$elm$svg$Svg$Attributes$strokeWidth('2'),
-					$elm$svg$Svg$Attributes$fill('none')
-				]),
-			_List_Nil)
-		]);
+var $author$project$Page$TTT$Board$lineFormGameStatus = function (status) {
+	switch (status.$) {
+		case 'OnGoing':
+			return $elm$core$Maybe$Nothing;
+		case 'Draw':
+			return $elm$core$Maybe$Nothing;
+		default:
+			var f1 = status.b;
+			var f2 = status.c;
+			var f3 = status.d;
+			return $elm$core$Maybe$Just(
+				_Utils_Tuple3(f1, f2, f3));
+	}
+};
+var $avh4$elm_color$Color$toCssString = function (_v0) {
+	var r = _v0.a;
+	var g = _v0.b;
+	var b = _v0.c;
+	var a = _v0.d;
+	var roundTo = function (x) {
+		return $elm$core$Basics$round(x * 1000) / 1000;
+	};
+	var pct = function (x) {
+		return $elm$core$Basics$round(x * 10000) / 100;
+	};
+	return $elm$core$String$concat(
+		_List_fromArray(
+			[
+				'rgba(',
+				$elm$core$String$fromFloat(
+				pct(r)),
+				'%,',
+				$elm$core$String$fromFloat(
+				pct(g)),
+				'%,',
+				$elm$core$String$fromFloat(
+				pct(b)),
+				'%,',
+				$elm$core$String$fromFloat(
+				roundTo(a)),
+				')'
+			]));
+};
+var $author$project$Page$TTT$Board$toCssString = function (color) {
+	return $avh4$elm_color$Color$toCssString(
+		$avh4$elm_color$Color$fromRgba(
+			$mdgriffith$elm_ui$Element$toRgb(color)));
 };
 var $elm$svg$Svg$line = $elm$svg$Svg$trustedNode('line');
 var $elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
 var $elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
 var $elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
 var $elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
-var $author$project$Page$TTT$SvgSymbol$cross = function (color) {
-	return _List_fromArray(
-		[
-			A2(
-			$elm$svg$Svg$line,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$stroke(color),
-					$elm$svg$Svg$Attributes$strokeWidth('2'),
-					$elm$svg$Svg$Attributes$x1('10'),
-					$elm$svg$Svg$Attributes$y1('10'),
-					$elm$svg$Svg$Attributes$x2('110'),
-					$elm$svg$Svg$Attributes$y2('110')
-				]),
-			_List_Nil),
-			A2(
-			$elm$svg$Svg$line,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$stroke(color),
-					$elm$svg$Svg$Attributes$strokeWidth('2'),
-					$elm$svg$Svg$Attributes$x1('110'),
-					$elm$svg$Svg$Attributes$y1('10'),
-					$elm$svg$Svg$Attributes$x2('10'),
-					$elm$svg$Svg$Attributes$y2('110')
-				]),
-			_List_Nil)
-		]);
-};
-var $author$project$Page$TTT$SvgSymbol$empty = _List_Nil;
 var $author$project$Page$TTT$SvgSymbol$lineDiaBotTop = function (color) {
 	return A2(
 		$elm$svg$Svg$line,
@@ -20027,35 +20255,6 @@ var $elm$core$Array$get = F2(
 			A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, tail)) : $elm$core$Maybe$Just(
 			A3($elm$core$Array$getHelp, startShift, index, tree)));
 	});
-var $avh4$elm_color$Color$toCssString = function (_v0) {
-	var r = _v0.a;
-	var g = _v0.b;
-	var b = _v0.c;
-	var a = _v0.d;
-	var roundTo = function (x) {
-		return $elm$core$Basics$round(x * 1000) / 1000;
-	};
-	var pct = function (x) {
-		return $elm$core$Basics$round(x * 10000) / 100;
-	};
-	return $elm$core$String$concat(
-		_List_fromArray(
-			[
-				'rgba(',
-				$elm$core$String$fromFloat(
-				pct(r)),
-				'%,',
-				$elm$core$String$fromFloat(
-				pct(g)),
-				'%,',
-				$elm$core$String$fromFloat(
-				pct(b)),
-				'%,',
-				$elm$core$String$fromFloat(
-				roundTo(a)),
-				')'
-			]));
-};
 var $elm$svg$Svg$Attributes$preserveAspectRatio = _VirtualDom_attribute('preserveAspectRatio');
 var $author$project$Page$TTT$SvgSymbol$toHtml = $elm$svg$Svg$svg(
 	_List_fromArray(
@@ -20064,47 +20263,13 @@ var $author$project$Page$TTT$SvgSymbol$toHtml = $elm$svg$Svg$svg(
 			$elm$svg$Svg$Attributes$preserveAspectRatio('xMinYMin'),
 			$elm$svg$Svg$Attributes$viewBox('0 0 120 120')
 		]));
-var $author$project$Page$TTT$Board$boardCell = F3(
-	function (theme, cellNumber, board) {
-		var toCssString = function (color) {
-			return $avh4$elm_color$Color$toCssString(
-				$avh4$elm_color$Color$fromRgba(
-					$mdgriffith$elm_ui$Element$toRgb(color)));
-		};
+var $author$project$Page$TTT$Board$boardCell = F2(
+	function (cellNumber, board) {
 		var svgIcon = $author$project$Page$TTT$SvgSymbol$toHtml(
 			_Utils_ap(
 				A2($author$project$Page$TTT$Board$gameStatusToLine, board.line, cellNumber),
-				function () {
-					var _v0 = A2($elm$core$Array$get, cellNumber, board.cells);
-					_v0$2:
-					while (true) {
-						if (_v0.$ === 'Just') {
-							switch (_v0.a.$) {
-								case 'X':
-									var _v1 = _v0.a;
-									return $author$project$Page$TTT$SvgSymbol$cross(
-										toCssString(
-											A2(
-												$author$project$MaterialUI$Theme$getColor,
-												board.symbolColor($author$project$Page$TTT$Board$X),
-												theme)));
-								case 'O':
-									var _v2 = _v0.a;
-									return $author$project$Page$TTT$SvgSymbol$circle(
-										toCssString(
-											A2(
-												$author$project$MaterialUI$Theme$getColor,
-												board.symbolColor($author$project$Page$TTT$Board$O),
-												theme)));
-								default:
-									break _v0$2;
-							}
-						} else {
-							break _v0$2;
-						}
-					}
-					return $author$project$Page$TTT$SvgSymbol$empty;
-				}()));
+				board.symbolView(
+					A2($elm$core$Array$get, cellNumber, board.cells))));
 		return A2(
 			$mdgriffith$elm_ui$Element$el,
 			_List_fromArray(
@@ -20162,11 +20327,11 @@ var $author$project$Page$TTT$Board$view = F2(
 						]),
 					_List_fromArray(
 						[
-							A3($author$project$Page$TTT$Board$boardCell, theme, 0, board),
+							A2($author$project$Page$TTT$Board$boardCell, 0, board),
 							$author$project$Page$TTT$Board$hLine(theme),
-							A3($author$project$Page$TTT$Board$boardCell, theme, 1, board),
+							A2($author$project$Page$TTT$Board$boardCell, 1, board),
 							$author$project$Page$TTT$Board$hLine(theme),
-							A3($author$project$Page$TTT$Board$boardCell, theme, 2, board)
+							A2($author$project$Page$TTT$Board$boardCell, 2, board)
 						])),
 					$author$project$Page$TTT$Board$vLine(theme),
 					A2(
@@ -20178,11 +20343,11 @@ var $author$project$Page$TTT$Board$view = F2(
 						]),
 					_List_fromArray(
 						[
-							A3($author$project$Page$TTT$Board$boardCell, theme, 3, board),
+							A2($author$project$Page$TTT$Board$boardCell, 3, board),
 							$author$project$Page$TTT$Board$hLine(theme),
-							A3($author$project$Page$TTT$Board$boardCell, theme, 4, board),
+							A2($author$project$Page$TTT$Board$boardCell, 4, board),
 							$author$project$Page$TTT$Board$hLine(theme),
-							A3($author$project$Page$TTT$Board$boardCell, theme, 5, board)
+							A2($author$project$Page$TTT$Board$boardCell, 5, board)
 						])),
 					$author$project$Page$TTT$Board$vLine(theme),
 					A2(
@@ -20194,11 +20359,11 @@ var $author$project$Page$TTT$Board$view = F2(
 						]),
 					_List_fromArray(
 						[
-							A3($author$project$Page$TTT$Board$boardCell, theme, 6, board),
+							A2($author$project$Page$TTT$Board$boardCell, 6, board),
 							$author$project$Page$TTT$Board$hLine(theme),
-							A3($author$project$Page$TTT$Board$boardCell, theme, 7, board),
+							A2($author$project$Page$TTT$Board$boardCell, 7, board),
 							$author$project$Page$TTT$Board$hLine(theme),
-							A3($author$project$Page$TTT$Board$boardCell, theme, 8, board)
+							A2($author$project$Page$TTT$Board$boardCell, 8, board)
 						]))
 				]));
 	});
@@ -20231,40 +20396,291 @@ var $author$project$Page$TTT$MiseryInGame$view = function (model) {
 						$author$project$Page$TTT$Board$view,
 						theme,
 						{
-							cells: A2(
-								$elm$core$Array$map,
-								function (symbol) {
-									if (symbol.$ === 'X') {
-										return $author$project$Page$TTT$Board$X;
-									} else {
-										return $author$project$Page$TTT$Board$Empty;
-									}
-								},
-								game.board),
-							line: function () {
-								var _v1 = game.status;
-								switch (_v1.$) {
-									case 'OnGoing':
-										return $elm$core$Maybe$Nothing;
-									case 'Draw':
-										return $elm$core$Maybe$Nothing;
-									default:
-										var f1 = _v1.b;
-										var f2 = _v1.c;
-										var f3 = _v1.d;
-										return $elm$core$Maybe$Just(
-											_Utils_Tuple3(f1, f2, f3));
-								}
-							}(),
+							cells: game.board,
+							line: $author$project$Page$TTT$Board$lineFormGameStatus(game.status),
 							onClick: $author$project$Page$TTT$MiseryInGame$CellClicked,
-							symbolColor: $author$project$Page$TTT$Board$defaultSymbolColor
+							symbolView: function (maybeSymbol) {
+								if ((maybeSymbol.$ === 'Just') && (maybeSymbol.a.$ === 'X')) {
+									var _v1 = maybeSymbol.a;
+									return $author$project$Page$TTT$SvgSymbol$circle(
+										$author$project$Page$TTT$Board$toCssString(
+											A2(
+												$author$project$MaterialUI$Theme$getColor,
+												$author$project$MaterialUI$Theme$Alternative($author$project$Session$Player1Color),
+												theme)));
+								} else {
+									return $author$project$Page$TTT$SvgSymbol$empty;
+								}
+							}
 						})
 					]))),
 		title: 'TTTGame'
 	};
 };
+var $author$project$Page$TTT$StoplightInGame$CellClicked = function (a) {
+	return {$: 'CellClicked', a: a};
+};
+var $author$project$Page$TTT$StoplightInGame$Left = {$: 'Left'};
+var $author$project$Page$TTT$StoplightInGame$Right = {$: 'Right'};
+var $author$project$Page$TTT$StoplightInGame$Leave = {$: 'Leave'};
+var $author$project$Page$TTT$StoplightInGame$Rematch = {$: 'Rematch'};
+var $author$project$Page$TTT$StoplightInGame$headerButtonColumn = function (theme) {
+	return A2(
+		$mdgriffith$elm_ui$Element$column,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$width(
+				$mdgriffith$elm_ui$Element$fillPortion(1)),
+				$mdgriffith$elm_ui$Element$spacing(8)
+			]),
+		_List_fromArray(
+			[
+				A3(
+				$author$project$MaterialUI$Button$outlined,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+					]),
+				{
+					color: $author$project$MaterialUI$Theme$Primary,
+					disabled: false,
+					icon: $elm$core$Maybe$Nothing,
+					onPress: $elm$core$Maybe$Just($author$project$Page$TTT$StoplightInGame$Rematch),
+					text: 'Rematch'
+				},
+				theme),
+				A3(
+				$author$project$MaterialUI$Button$outlined,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+					]),
+				{
+					color: $author$project$MaterialUI$Theme$Primary,
+					disabled: false,
+					icon: $elm$core$Maybe$Nothing,
+					onPress: $elm$core$Maybe$Just($author$project$Page$TTT$StoplightInGame$Leave),
+					text: 'Leave'
+				},
+				theme)
+			]));
+};
+var $author$project$Page$TTT$StoplightInGame$playerHeader = F4(
+	function (theme, player, highlight, alignment) {
+		var playerColor = $author$project$MaterialUI$Theme$Alternative(
+			function () {
+				var _v2 = player.playerRef;
+				if (_v2.$ === 'P1') {
+					return $author$project$Session$Player1Color;
+				} else {
+					return $author$project$Session$Player2Color;
+				}
+			}());
+		var borderColor = highlight ? A2(
+			$author$project$MaterialUI$Theme$setAlpha,
+			0.6,
+			A2($author$project$MaterialUI$Theme$getColor, playerColor, theme)) : A2($author$project$MaterialUI$Theme$setAlpha, 0.3, theme.color.onBackground);
+		var _v0 = function () {
+			if (alignment.$ === 'Left') {
+				return _Utils_Tuple2($mdgriffith$elm_ui$Element$Font$alignLeft, $mdgriffith$elm_ui$Element$alignLeft);
+			} else {
+				return _Utils_Tuple2($mdgriffith$elm_ui$Element$Font$alignRight, $mdgriffith$elm_ui$Element$alignRight);
+			}
+		}();
+		var fontAlign = _v0.a;
+		var align = _v0.b;
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+					$mdgriffith$elm_ui$Element$Border$color(
+					A2($author$project$MaterialUI$Theme$setAlpha, 0.3, borderColor)),
+					$mdgriffith$elm_ui$Element$Border$width(2),
+					$mdgriffith$elm_ui$Element$Border$rounded(6),
+					$mdgriffith$elm_ui$Element$padding(8)
+				]),
+			A4(
+				$author$project$UIHelper$materialText,
+				_List_fromArray(
+					[
+						fontAlign,
+						$mdgriffith$elm_ui$Element$Font$color(theme.color.onBackground),
+						align
+					]),
+				player.name,
+				$author$project$MaterialUI$Theme$Body1,
+				theme));
+	});
+var $author$project$Page$TTT$StoplightInGame$header = function (model) {
+	var theme = $author$project$Session$theme(
+		$author$project$Page$TTT$StoplightInGame$toSession(model));
+	var game = model.game;
+	var _v0 = game.status;
+	switch (_v0.$) {
+		case 'OnGoing':
+			return A2(
+				$mdgriffith$elm_ui$Element$row,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$spaceEvenly,
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+					]),
+				_List_fromArray(
+					[
+						A4($author$project$Page$TTT$StoplightInGame$playerHeader, theme, game.playerMe, game.meTurn, $author$project$Page$TTT$StoplightInGame$Left),
+						A4($author$project$Page$TTT$StoplightInGame$playerHeader, theme, game.opponent, !game.meTurn, $author$project$Page$TTT$StoplightInGame$Right)
+					]));
+		case 'Draw':
+			return A2(
+				$mdgriffith$elm_ui$Element$row,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$spacing(8)
+					]),
+				_List_fromArray(
+					[
+						A4(
+						$author$project$UIHelper$materialText,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$Font$alignLeft,
+								$mdgriffith$elm_ui$Element$width(
+								$mdgriffith$elm_ui$Element$fillPortion(2))
+							]),
+						'Draw',
+						$author$project$MaterialUI$Theme$H3,
+						theme),
+						$author$project$Page$TTT$StoplightInGame$headerButtonColumn(theme)
+					]));
+		default:
+			var winner = _v0.a;
+			return A2(
+				$mdgriffith$elm_ui$Element$row,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$spacing(8)
+					]),
+				_List_fromArray(
+					[
+						A4(
+						$author$project$UIHelper$materialText,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$Font$alignLeft,
+								$mdgriffith$elm_ui$Element$width(
+								$mdgriffith$elm_ui$Element$fillPortion(2))
+							]),
+						_Utils_eq(game.playerMe.playerRef, winner) ? 'Victory' : 'Defeat',
+						$author$project$MaterialUI$Theme$H3,
+						theme),
+						$author$project$Page$TTT$StoplightInGame$headerButtonColumn(theme)
+					]));
+	}
+};
+var $author$project$Page$TTT$StoplightInGame$view = function (model) {
+	var theme = $author$project$Session$theme(
+		$author$project$Page$TTT$StoplightInGame$toSession(model));
+	var getCssColor = function (color) {
+		return $author$project$Page$TTT$Board$toCssString(
+			A2($author$project$MaterialUI$Theme$getColor, color, theme));
+	};
+	var game = model.game;
+	return {
+		body: A2(
+			$mdgriffith$elm_ui$Element$layout,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$Background$color(theme.color.background),
+					$mdgriffith$elm_ui$Element$Font$color(theme.color.onBackground)
+				]),
+			A2(
+				$mdgriffith$elm_ui$Element$column,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$centerX,
+						$mdgriffith$elm_ui$Element$width(
+						A2($mdgriffith$elm_ui$Element$maximum, 900, $mdgriffith$elm_ui$Element$fill)),
+						$mdgriffith$elm_ui$Element$padding(16),
+						$mdgriffith$elm_ui$Element$spacing(16)
+					]),
+				_List_fromArray(
+					[
+						$author$project$Page$TTT$StoplightInGame$header(model),
+						A2(
+						$author$project$Page$TTT$Board$view,
+						theme,
+						{
+							cells: game.board,
+							line: $author$project$Page$TTT$Board$lineFormGameStatus(game.status),
+							onClick: $author$project$Page$TTT$StoplightInGame$CellClicked,
+							symbolView: function (maybeSymbol) {
+								_v0$3:
+								while (true) {
+									if (maybeSymbol.$ === 'Just') {
+										switch (maybeSymbol.a.$) {
+											case 'Green':
+												var _v1 = maybeSymbol.a;
+												return $author$project$Page$TTT$SvgSymbol$circle(
+													getCssColor(
+														$author$project$MaterialUI$Theme$Alternative($author$project$Session$GreenColor)));
+											case 'Yellow':
+												var _v2 = maybeSymbol.a;
+												return $author$project$Page$TTT$SvgSymbol$circle(
+													getCssColor(
+														$author$project$MaterialUI$Theme$Alternative($author$project$Session$YellowColor)));
+											case 'Red':
+												var _v3 = maybeSymbol.a;
+												return $author$project$Page$TTT$SvgSymbol$circle(
+													getCssColor(
+														$author$project$MaterialUI$Theme$Alternative($author$project$Session$RedColor)));
+											default:
+												break _v0$3;
+										}
+									} else {
+										break _v0$3;
+									}
+								}
+								return $author$project$Page$TTT$SvgSymbol$empty;
+							}
+						})
+					]))),
+		title: 'Stoplights'
+	};
+};
 var $author$project$Page$TTT$TTTInGame$CellClicked = function (a) {
 	return {$: 'CellClicked', a: a};
+};
+var $author$project$Page$TTT$SvgSymbol$cross = function (color) {
+	return _List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$stroke(color),
+					$elm$svg$Svg$Attributes$strokeWidth('2'),
+					$elm$svg$Svg$Attributes$x1('10'),
+					$elm$svg$Svg$Attributes$y1('10'),
+					$elm$svg$Svg$Attributes$x2('110'),
+					$elm$svg$Svg$Attributes$y2('110')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$stroke(color),
+					$elm$svg$Svg$Attributes$strokeWidth('2'),
+					$elm$svg$Svg$Attributes$x1('110'),
+					$elm$svg$Svg$Attributes$y1('10'),
+					$elm$svg$Svg$Attributes$x2('10'),
+					$elm$svg$Svg$Attributes$y2('110')
+				]),
+			_List_Nil)
+		]);
 };
 var $author$project$Page$TTT$TTTInGame$Left = {$: 'Left'};
 var $author$project$Page$TTT$TTTInGame$Right = {$: 'Right'};
@@ -20495,36 +20911,39 @@ var $author$project$Page$TTT$TTTInGame$view = function (model) {
 						$author$project$Page$TTT$Board$view,
 						theme,
 						{
-							cells: A2(
-								$elm$core$Array$map,
-								function (symbol) {
-									switch (symbol.$) {
-										case 'X':
-											return $author$project$Page$TTT$Board$X;
-										case 'O':
-											return $author$project$Page$TTT$Board$O;
-										default:
-											return $author$project$Page$TTT$Board$Empty;
-									}
-								},
-								game.board),
-							line: function () {
-								var _v1 = game.status;
-								switch (_v1.$) {
-									case 'OnGoing':
-										return $elm$core$Maybe$Nothing;
-									case 'Draw':
-										return $elm$core$Maybe$Nothing;
-									default:
-										var f1 = _v1.b;
-										var f2 = _v1.c;
-										var f3 = _v1.d;
-										return $elm$core$Maybe$Just(
-											_Utils_Tuple3(f1, f2, f3));
-								}
-							}(),
+							cells: game.board,
+							line: $author$project$Page$TTT$Board$lineFormGameStatus(game.status),
 							onClick: $author$project$Page$TTT$TTTInGame$CellClicked,
-							symbolColor: $author$project$Page$TTT$Board$defaultSymbolColor
+							symbolView: function (maybeSymbol) {
+								_v0$2:
+								while (true) {
+									if (maybeSymbol.$ === 'Just') {
+										switch (maybeSymbol.a.$) {
+											case 'X':
+												var _v1 = maybeSymbol.a;
+												return $author$project$Page$TTT$SvgSymbol$cross(
+													$author$project$Page$TTT$Board$toCssString(
+														A2(
+															$author$project$MaterialUI$Theme$getColor,
+															$author$project$MaterialUI$Theme$Alternative($author$project$Session$Player1Color),
+															theme)));
+											case 'O':
+												var _v2 = maybeSymbol.a;
+												return $author$project$Page$TTT$SvgSymbol$circle(
+													$author$project$Page$TTT$Board$toCssString(
+														A2(
+															$author$project$MaterialUI$Theme$getColor,
+															$author$project$MaterialUI$Theme$Alternative($author$project$Session$Player2Color),
+															theme)));
+											default:
+												break _v0$2;
+										}
+									} else {
+										break _v0$2;
+									}
+								}
+								return $author$project$Page$TTT$SvgSymbol$empty;
+							}
 						})
 					]))),
 		title: 'TTTGame'
@@ -20549,18 +20968,25 @@ var $author$project$Page$TTT$Game$view = function (model) {
 				$author$project$Page$TTT$Game$GotLobbyMsg,
 				$author$project$Page$TTT$Lobby$view(lobby));
 		case 'InGame':
-			if (model.a.$ === 'TTTGame') {
-				var inGame = model.a.a;
-				return A2(
-					$author$project$Page$TTT$Game$viewFragment,
-					A2($elm$core$Basics$composeL, $author$project$Page$TTT$Game$GotInGameMsg, $author$project$Page$TTT$Game$TTTMsg),
-					$author$project$Page$TTT$TTTInGame$view(inGame));
-			} else {
-				var inGame = model.a.a;
-				return A2(
-					$author$project$Page$TTT$Game$viewFragment,
-					A2($elm$core$Basics$composeL, $author$project$Page$TTT$Game$GotInGameMsg, $author$project$Page$TTT$Game$MiseryMsg),
-					$author$project$Page$TTT$MiseryInGame$view(inGame));
+			switch (model.a.$) {
+				case 'TTTGame':
+					var inGame = model.a.a;
+					return A2(
+						$author$project$Page$TTT$Game$viewFragment,
+						A2($elm$core$Basics$composeL, $author$project$Page$TTT$Game$GotInGameMsg, $author$project$Page$TTT$Game$TTTMsg),
+						$author$project$Page$TTT$TTTInGame$view(inGame));
+				case 'MiseryGame':
+					var inGame = model.a.a;
+					return A2(
+						$author$project$Page$TTT$Game$viewFragment,
+						A2($elm$core$Basics$composeL, $author$project$Page$TTT$Game$GotInGameMsg, $author$project$Page$TTT$Game$MiseryMsg),
+						$author$project$Page$TTT$MiseryInGame$view(inGame));
+				default:
+					var inGame = model.a.a;
+					return A2(
+						$author$project$Page$TTT$Game$viewFragment,
+						A2($elm$core$Basics$composeL, $author$project$Page$TTT$Game$GotInGameMsg, $author$project$Page$TTT$Game$StoplightMsg),
+						$author$project$Page$TTT$StoplightInGame$view(inGame));
 			}
 		default:
 			var session = model.a;

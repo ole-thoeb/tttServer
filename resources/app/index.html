@@ -74,11 +74,15 @@
 
     app.ports.send.subscribe(function (msg) {
         if (socket) {
+            let str = JSON.stringify(msg)
             try {
-                socket.send(JSON.stringify(msg));
+                console.info("sending: " + str)
+                socket.send(str);
             } catch (error) {
-                console.error("Failed to send " + msg + "with error " + error)
+                console.error("Failed to send " + str + "with error " + error)
             }
+        } else {
+            console.warn("no socket is present -> send nothing")
         }
     });
 

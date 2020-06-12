@@ -46,6 +46,38 @@ private fun <S, M> MinMaxStrategy<S, M>.minMaxEval(state : S, player: MinMaxPlay
     }
 }
 
+fun <M, S> MinMaxStrategy<S, M>.alphaBeta(state : S, maxLevel: Int): ScoredMove<M> {
+    val weightedMoves = state.possibleMoves().map { move ->
+        val newState = state.doMove(move, MinMaxPlayer.MAX)
+        ScoredMove(-alphaBetaEval(newState, MinMaxPlayer.MIN, maxLevel - 1, -Int.MAX_VALUE, Int.MAX_VALUE), move)
+    }
+//    val weightList = MutableList(9) { 55 }
+//    weightedMoves.forEach { weightList[it.move as Int] = it.score }
+//    println()
+//    println("%02d %02d %02d\n%02d %02d %02d\n%02d %02d %02d".format(*weightList.toTypedArray()))
+    return weightedMoves.allMaxsBy { it.score }.random()
+}
+
+private fun <S, M> MinMaxStrategy<S, M>.alphaBetaEval(state : S, player: MinMaxPlayer, level: Int, alpha: Int, beta: Int): Int {
+    return if (state.isTerminal || level == 0) {
+        state.score(player)
+    } else {
+        var maxValue = alpha
+        val scores = state.possibleMoves().map { move ->
+            if (maxValue >= beta)
+                Int.MAX_VALUE
+            else {
+                val newState = state.doMove(move, player)
+                val score = -alphaBetaEval(newState, !player, level - 1, -beta, -maxValue)
+                if (score > maxValue)
+                    maxValue = score
+                score
+            }
+        }
+        scores.max()!!
+    }
+}
+
 fun <M, S> MinMaxStrategy<S, M>.randomMove(state : S): M {
     return state.possibleMoves().toList().random()
 }

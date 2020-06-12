@@ -31,3 +31,4 @@ encodeId id =
 type Mode
     = TicTacToe
     | Misery
+    | Stoplight

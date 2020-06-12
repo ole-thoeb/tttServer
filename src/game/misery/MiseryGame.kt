@@ -33,7 +33,7 @@ data class MiseryInGame(
     enum class CellState { X, EMPTY }
 
     fun setPiece(index: Int, playerId: PlayerId): Either<TwoPlayerGameError, MiseryInGame> {
-        return twoPlayerGame.getPlayerForPiece(board, CellState.EMPTY, twoPlayerGame.status, index, playerId).map {
+        return twoPlayerGame.getPlayerForPiece(board, CellState.EMPTY, index, playerId).map {
             val updatedBoard = board.update(index, CellState.X).k()
             val updatedTwoGame = twoPlayerGame.nextTurn().copy(status = checkStatus(updatedBoard, !twoPlayerGame.turn))
             copy(
