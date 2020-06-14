@@ -55,9 +55,9 @@ fun main() {
 //    )
 //    println(TTTStrategy.withDifficulty(DefaultLobby.Difficulty.CHALLENGE)(TTTBoard(b)))
     val b = listOf(
-            StoplightBoard.CellState.EMPTY, StoplightBoard.CellState.EMPTY, StoplightBoard.CellState.EMPTY,
-            StoplightBoard.CellState.GREEN, StoplightBoard.CellState.YELLOW, StoplightBoard.CellState.EMPTY,
-            StoplightBoard.CellState.EMPTY, StoplightBoard.CellState.GREEN, StoplightBoard.CellState.EMPTY
+            StoplightBoard.CellState.EMPTY, StoplightBoard.CellState.RED, StoplightBoard.CellState.EMPTY,
+            StoplightBoard.CellState.EMPTY, StoplightBoard.CellState.EMPTY, StoplightBoard.CellState.YELLOW,
+            StoplightBoard.CellState.YELLOW, StoplightBoard.CellState.EMPTY, StoplightBoard.CellState.YELLOW
     )
     println(StoplightStrategy.withDifficulty(DefaultLobby.Difficulty.NIGHTMARE)(StoplightBoard(b, lastPlayer = MinMaxPlayer.MIN)))
 }

@@ -49,4 +49,21 @@ fun <T> Iterable<T>.allEqual(): Boolean {
     return true
 }
 
+fun <T> List<T>.allEqual(indices: Iterable<Int>): Boolean {
+    val iter = indices.iterator()
+    if (!iter.hasNext()) return true
+    val element = this[iter.next()]
+    while (iter.hasNext()) {
+        if (element != this[iter.next()]) return false
+    }
+    return true
+}
+
+
+inline fun <T, E> Collection<T>.mapToSet(transform: (T) -> E): Set<E> = mapTo(HashSet(size, 1f), transform)
+
+fun <T> List<T>.slice(indices: Pair<Int, Int>): List<T> = listOf(this[indices.first], this[indices.second])
+
+operator fun <T> Pair<T, T>.contains(t: T) = first == t || second == t
+
 fun String.limit(n: Int) = if (length > n) slice(0 until n) else this

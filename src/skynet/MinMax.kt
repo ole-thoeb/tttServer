@@ -60,7 +60,7 @@ fun <M, S> MinMaxStrategy<S, M>.alphaBeta(state : S, maxLevel: Int): ScoredMove<
 
 private fun <S, M> MinMaxStrategy<S, M>.alphaBetaEval(state : S, player: MinMaxPlayer, level: Int, alpha: Int, beta: Int): Int {
     return if (state.isTerminal || level == 0) {
-        state.score(player)
+        state.score(player) * (level + 1)
     } else {
         var maxValue = alpha
         val scores = state.possibleMoves().map { move ->

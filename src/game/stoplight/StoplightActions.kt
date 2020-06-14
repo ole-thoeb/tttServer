@@ -59,7 +59,7 @@ fun GameServer<*, *>.playBotTurn(game: Game.InGame<StoplightInGame>): Game.InGam
         log.warn("[PlayBotTurn] but current player is not a bot")
         return game
     } else {
-        val index = StoplightStrategy.withDifficulty(turnPlayer.impl.difficulty)(StoplightBoard(board.map { state ->
+        val move = StoplightStrategy.withDifficulty(turnPlayer.impl.difficulty)(StoplightBoard(board.map { state ->
             when (state) {
                 StoplightInGame.CellState.EMPTY -> StoplightBoard.CellState.EMPTY
                 StoplightInGame.CellState.GREEN -> StoplightBoard.CellState.GREEN
@@ -67,7 +67,7 @@ fun GameServer<*, *>.playBotTurn(game: Game.InGame<StoplightInGame>): Game.InGam
                 StoplightInGame.CellState.RED -> StoplightBoard.CellState.RED
             }
         }, lastPlayer = MinMaxPlayer.MIN))
-        setPiece(index, turnPlayer.playerId).fold(
+        setPiece(move.expandIndex().random(), turnPlayer.playerId).fold(
                 { e ->
                     log.error("[PlayBotTurn] failed to set piece with error $e")
                     this
