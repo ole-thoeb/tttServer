@@ -54,7 +54,7 @@ defaultDarkTheme =
             [ ( Player1Color, Element.rgb255 236 64 122 )
             , ( Player2Color, Element.rgb255 92 107 192 )
             , ( GreenColor, Element.rgb255 102 187 106 )
-            , ( YellowColor, Element.rgb255 220 210 111 )
+            , ( YellowColor, Element.rgb255 206 193 58 )
             , ( RedColor, Element.rgb255 236 64 122 )
             ]
         }
