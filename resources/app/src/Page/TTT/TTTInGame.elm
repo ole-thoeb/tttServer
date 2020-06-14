@@ -230,7 +230,7 @@ playerHeader theme player highlight alignment =
 
         borderColor =
             if highlight then
-                Theme.setAlpha 0.8 (Theme.getColor playerColor theme)
+                Theme.setAlpha 0.6 (Theme.getColor playerColor theme)
 
             else
                 Theme.setAlpha 0.3 (theme.color.onBackground)

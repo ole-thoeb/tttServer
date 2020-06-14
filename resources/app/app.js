@@ -7286,7 +7286,7 @@ var $author$project$Session$defaultDarkTheme = function () {
 							A3($mdgriffith$elm_ui$Element$rgb255, 102, 187, 106)),
 							_Utils_Tuple2(
 							$author$project$Session$YellowColor,
-							A3($mdgriffith$elm_ui$Element$rgb255, 220, 210, 111)),
+							A3($mdgriffith$elm_ui$Element$rgb255, 206, 193, 58)),
 							_Utils_Tuple2(
 							$author$project$Session$RedColor,
 							A3($mdgriffith$elm_ui$Element$rgb255, 236, 64, 122))
@@ -19897,6 +19897,8 @@ var $author$project$Page$TTT$Lobby$view = function (model) {
 var $author$project$Page$TTT$MiseryInGame$CellClicked = function (a) {
 	return {$: 'CellClicked', a: a};
 };
+var $author$project$Page$TTT$MiseryInGame$Leave = {$: 'Leave'};
+var $author$project$Page$TTT$MiseryInGame$Rematch = {$: 'Rematch'};
 var $elm$svg$Svg$circle = $elm$svg$Svg$trustedNode('circle');
 var $elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
 var $elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
@@ -19921,166 +19923,6 @@ var $author$project$Page$TTT$SvgSymbol$circle = function (color) {
 		]);
 };
 var $author$project$Page$TTT$SvgSymbol$empty = _List_Nil;
-var $author$project$Page$TTT$MiseryInGame$Left = {$: 'Left'};
-var $author$project$Page$TTT$MiseryInGame$Right = {$: 'Right'};
-var $author$project$Page$TTT$MiseryInGame$Leave = {$: 'Leave'};
-var $author$project$Page$TTT$MiseryInGame$Rematch = {$: 'Rematch'};
-var $author$project$Page$TTT$MiseryInGame$headerButtonColumn = function (theme) {
-	return A2(
-		$mdgriffith$elm_ui$Element$column,
-		_List_fromArray(
-			[
-				$mdgriffith$elm_ui$Element$width(
-				$mdgriffith$elm_ui$Element$fillPortion(1)),
-				$mdgriffith$elm_ui$Element$spacing(8)
-			]),
-		_List_fromArray(
-			[
-				A3(
-				$author$project$MaterialUI$Button$outlined,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-					]),
-				{
-					color: $author$project$MaterialUI$Theme$Primary,
-					disabled: false,
-					icon: $elm$core$Maybe$Nothing,
-					onPress: $elm$core$Maybe$Just($author$project$Page$TTT$MiseryInGame$Rematch),
-					text: 'Rematch'
-				},
-				theme),
-				A3(
-				$author$project$MaterialUI$Button$outlined,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-					]),
-				{
-					color: $author$project$MaterialUI$Theme$Primary,
-					disabled: false,
-					icon: $elm$core$Maybe$Nothing,
-					onPress: $elm$core$Maybe$Just($author$project$Page$TTT$MiseryInGame$Leave),
-					text: 'Leave'
-				},
-				theme)
-			]));
-};
-var $author$project$Page$TTT$MiseryInGame$playerHeader = F4(
-	function (theme, player, highlight, alignment) {
-		var playerColor = $author$project$MaterialUI$Theme$Alternative(
-			function () {
-				var _v2 = player.playerRef;
-				if (_v2.$ === 'P1') {
-					return $author$project$Session$Player1Color;
-				} else {
-					return $author$project$Session$Player2Color;
-				}
-			}());
-		var borderColor = highlight ? A2(
-			$author$project$MaterialUI$Theme$setAlpha,
-			0.6,
-			A2($author$project$MaterialUI$Theme$getColor, playerColor, theme)) : A2($author$project$MaterialUI$Theme$setAlpha, 0.3, theme.color.onBackground);
-		var _v0 = function () {
-			if (alignment.$ === 'Left') {
-				return _Utils_Tuple2($mdgriffith$elm_ui$Element$Font$alignLeft, $mdgriffith$elm_ui$Element$alignLeft);
-			} else {
-				return _Utils_Tuple2($mdgriffith$elm_ui$Element$Font$alignRight, $mdgriffith$elm_ui$Element$alignRight);
-			}
-		}();
-		var fontAlign = _v0.a;
-		var align = _v0.b;
-		return A2(
-			$mdgriffith$elm_ui$Element$el,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-					$mdgriffith$elm_ui$Element$Border$color(
-					A2($author$project$MaterialUI$Theme$setAlpha, 0.3, borderColor)),
-					$mdgriffith$elm_ui$Element$Border$width(2),
-					$mdgriffith$elm_ui$Element$Border$rounded(6),
-					$mdgriffith$elm_ui$Element$padding(8)
-				]),
-			A4(
-				$author$project$UIHelper$materialText,
-				_List_fromArray(
-					[
-						fontAlign,
-						$mdgriffith$elm_ui$Element$Font$color(theme.color.onBackground),
-						align
-					]),
-				player.name,
-				$author$project$MaterialUI$Theme$Body1,
-				theme));
-	});
-var $author$project$Page$TTT$MiseryInGame$header = function (model) {
-	var theme = $author$project$Session$theme(
-		$author$project$Page$TTT$MiseryInGame$toSession(model));
-	var game = model.game;
-	var _v0 = game.status;
-	switch (_v0.$) {
-		case 'OnGoing':
-			return A2(
-				$mdgriffith$elm_ui$Element$row,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$spaceEvenly,
-						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-					]),
-				_List_fromArray(
-					[
-						A4($author$project$Page$TTT$MiseryInGame$playerHeader, theme, game.playerMe, game.meTurn, $author$project$Page$TTT$MiseryInGame$Left),
-						A4($author$project$Page$TTT$MiseryInGame$playerHeader, theme, game.opponent, !game.meTurn, $author$project$Page$TTT$MiseryInGame$Right)
-					]));
-		case 'Draw':
-			return A2(
-				$mdgriffith$elm_ui$Element$row,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-						$mdgriffith$elm_ui$Element$spacing(8)
-					]),
-				_List_fromArray(
-					[
-						A4(
-						$author$project$UIHelper$materialText,
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$Font$alignLeft,
-								$mdgriffith$elm_ui$Element$width(
-								$mdgriffith$elm_ui$Element$fillPortion(2))
-							]),
-						'Draw',
-						$author$project$MaterialUI$Theme$H3,
-						theme),
-						$author$project$Page$TTT$MiseryInGame$headerButtonColumn(theme)
-					]));
-		default:
-			var winner = _v0.a;
-			return A2(
-				$mdgriffith$elm_ui$Element$row,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-						$mdgriffith$elm_ui$Element$spacing(8)
-					]),
-				_List_fromArray(
-					[
-						A4(
-						$author$project$UIHelper$materialText,
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$Font$alignLeft,
-								$mdgriffith$elm_ui$Element$width(
-								$mdgriffith$elm_ui$Element$fillPortion(2))
-							]),
-						_Utils_eq(game.playerMe.playerRef, winner) ? 'Victory' : 'Defeat',
-						$author$project$MaterialUI$Theme$H3,
-						theme),
-						$author$project$Page$TTT$MiseryInGame$headerButtonColumn(theme)
-					]));
-	}
-};
 var $author$project$Page$TTT$Board$lineFormGameStatus = function (status) {
 	switch (status.$) {
 		case 'OnGoing':
@@ -20129,6 +19971,162 @@ var $author$project$Page$TTT$Board$toCssString = function (color) {
 		$avh4$elm_color$Color$fromRgba(
 			$mdgriffith$elm_ui$Element$toRgb(color)));
 };
+var $author$project$Page$TTT$GameUI$Left = {$: 'Left'};
+var $author$project$Page$TTT$GameUI$Right = {$: 'Right'};
+var $author$project$Page$TTT$GameUI$headerButtonColumn = F2(
+	function (header, theme) {
+		return A2(
+			$mdgriffith$elm_ui$Element$column,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width(
+					$mdgriffith$elm_ui$Element$fillPortion(1)),
+					$mdgriffith$elm_ui$Element$spacing(8)
+				]),
+			_List_fromArray(
+				[
+					A3(
+					$author$project$MaterialUI$Button$outlined,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+						]),
+					{
+						color: $author$project$MaterialUI$Theme$Primary,
+						disabled: false,
+						icon: $elm$core$Maybe$Nothing,
+						onPress: $elm$core$Maybe$Just(header.rematch),
+						text: 'Rematch'
+					},
+					theme),
+					A3(
+					$author$project$MaterialUI$Button$outlined,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+						]),
+					{
+						color: $author$project$MaterialUI$Theme$Primary,
+						disabled: false,
+						icon: $elm$core$Maybe$Nothing,
+						onPress: $elm$core$Maybe$Just(header.leave),
+						text: 'Leave'
+					},
+					theme)
+				]));
+	});
+var $author$project$Page$TTT$GameUI$playerHeader = F4(
+	function (theme, player, highlight, alignment) {
+		var playerColor = $author$project$MaterialUI$Theme$Alternative(
+			function () {
+				var _v2 = player.playerRef;
+				if (_v2.$ === 'P1') {
+					return $author$project$Session$Player1Color;
+				} else {
+					return $author$project$Session$Player2Color;
+				}
+			}());
+		var borderColor = highlight ? A2(
+			$author$project$MaterialUI$Theme$setAlpha,
+			0.6,
+			A2($author$project$MaterialUI$Theme$getColor, playerColor, theme)) : A2($author$project$MaterialUI$Theme$setAlpha, 0.3, theme.color.onBackground);
+		var _v0 = function () {
+			if (alignment.$ === 'Left') {
+				return _Utils_Tuple2($mdgriffith$elm_ui$Element$Font$alignLeft, $mdgriffith$elm_ui$Element$alignLeft);
+			} else {
+				return _Utils_Tuple2($mdgriffith$elm_ui$Element$Font$alignRight, $mdgriffith$elm_ui$Element$alignRight);
+			}
+		}();
+		var fontAlign = _v0.a;
+		var align = _v0.b;
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+					$mdgriffith$elm_ui$Element$Border$color(borderColor),
+					$mdgriffith$elm_ui$Element$Border$width(2),
+					$mdgriffith$elm_ui$Element$Border$rounded(6),
+					$mdgriffith$elm_ui$Element$padding(8)
+				]),
+			A4(
+				$author$project$UIHelper$materialText,
+				_List_fromArray(
+					[
+						fontAlign,
+						$mdgriffith$elm_ui$Element$Font$color(theme.color.onBackground),
+						align
+					]),
+				player.name,
+				$author$project$MaterialUI$Theme$Body1,
+				theme));
+	});
+var $author$project$Page$TTT$GameUI$twoPlayerHeader = F2(
+	function (header, theme) {
+		var _v0 = header.game.status;
+		switch (_v0.$) {
+			case 'OnGoing':
+				return A2(
+					$mdgriffith$elm_ui$Element$row,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$spaceEvenly,
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+						]),
+					_List_fromArray(
+						[
+							A4($author$project$Page$TTT$GameUI$playerHeader, theme, header.playerMe, header.game.meTurn, $author$project$Page$TTT$GameUI$Left),
+							A4($author$project$Page$TTT$GameUI$playerHeader, theme, header.opponent, !header.game.meTurn, $author$project$Page$TTT$GameUI$Right)
+						]));
+			case 'Draw':
+				return A2(
+					$mdgriffith$elm_ui$Element$row,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$spacing(8)
+						]),
+					_List_fromArray(
+						[
+							A4(
+							$author$project$UIHelper$materialText,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$Font$alignLeft,
+									$mdgriffith$elm_ui$Element$width(
+									$mdgriffith$elm_ui$Element$fillPortion(2))
+								]),
+							'Draw',
+							$author$project$MaterialUI$Theme$H3,
+							theme),
+							A2($author$project$Page$TTT$GameUI$headerButtonColumn, header, theme)
+						]));
+			default:
+				var winner = _v0.a;
+				return A2(
+					$mdgriffith$elm_ui$Element$row,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$spacing(8)
+						]),
+					_List_fromArray(
+						[
+							A4(
+							$author$project$UIHelper$materialText,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$Font$alignLeft,
+									$mdgriffith$elm_ui$Element$width(
+									$mdgriffith$elm_ui$Element$fillPortion(2))
+								]),
+							_Utils_eq(header.playerMe.playerRef, winner) ? 'Victory' : 'Defeat',
+							$author$project$MaterialUI$Theme$H3,
+							theme),
+							A2($author$project$Page$TTT$GameUI$headerButtonColumn, header, theme)
+						]));
+		}
+	});
 var $elm$svg$Svg$line = $elm$svg$Svg$trustedNode('line');
 var $elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
 var $elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
@@ -20391,7 +20389,10 @@ var $author$project$Page$TTT$MiseryInGame$view = function (model) {
 					]),
 				_List_fromArray(
 					[
-						$author$project$Page$TTT$MiseryInGame$header(model),
+						A2(
+						$author$project$Page$TTT$GameUI$twoPlayerHeader,
+						{game: game, leave: $author$project$Page$TTT$MiseryInGame$Leave, opponent: game.opponent, playerMe: game.playerMe, rematch: $author$project$Page$TTT$MiseryInGame$Rematch},
+						theme),
 						A2(
 						$author$project$Page$TTT$Board$view,
 						theme,
@@ -20420,166 +20421,8 @@ var $author$project$Page$TTT$MiseryInGame$view = function (model) {
 var $author$project$Page$TTT$StoplightInGame$CellClicked = function (a) {
 	return {$: 'CellClicked', a: a};
 };
-var $author$project$Page$TTT$StoplightInGame$Left = {$: 'Left'};
-var $author$project$Page$TTT$StoplightInGame$Right = {$: 'Right'};
 var $author$project$Page$TTT$StoplightInGame$Leave = {$: 'Leave'};
 var $author$project$Page$TTT$StoplightInGame$Rematch = {$: 'Rematch'};
-var $author$project$Page$TTT$StoplightInGame$headerButtonColumn = function (theme) {
-	return A2(
-		$mdgriffith$elm_ui$Element$column,
-		_List_fromArray(
-			[
-				$mdgriffith$elm_ui$Element$width(
-				$mdgriffith$elm_ui$Element$fillPortion(1)),
-				$mdgriffith$elm_ui$Element$spacing(8)
-			]),
-		_List_fromArray(
-			[
-				A3(
-				$author$project$MaterialUI$Button$outlined,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-					]),
-				{
-					color: $author$project$MaterialUI$Theme$Primary,
-					disabled: false,
-					icon: $elm$core$Maybe$Nothing,
-					onPress: $elm$core$Maybe$Just($author$project$Page$TTT$StoplightInGame$Rematch),
-					text: 'Rematch'
-				},
-				theme),
-				A3(
-				$author$project$MaterialUI$Button$outlined,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-					]),
-				{
-					color: $author$project$MaterialUI$Theme$Primary,
-					disabled: false,
-					icon: $elm$core$Maybe$Nothing,
-					onPress: $elm$core$Maybe$Just($author$project$Page$TTT$StoplightInGame$Leave),
-					text: 'Leave'
-				},
-				theme)
-			]));
-};
-var $author$project$Page$TTT$StoplightInGame$playerHeader = F4(
-	function (theme, player, highlight, alignment) {
-		var playerColor = $author$project$MaterialUI$Theme$Alternative(
-			function () {
-				var _v2 = player.playerRef;
-				if (_v2.$ === 'P1') {
-					return $author$project$Session$Player1Color;
-				} else {
-					return $author$project$Session$Player2Color;
-				}
-			}());
-		var borderColor = highlight ? A2(
-			$author$project$MaterialUI$Theme$setAlpha,
-			0.6,
-			A2($author$project$MaterialUI$Theme$getColor, playerColor, theme)) : A2($author$project$MaterialUI$Theme$setAlpha, 0.3, theme.color.onBackground);
-		var _v0 = function () {
-			if (alignment.$ === 'Left') {
-				return _Utils_Tuple2($mdgriffith$elm_ui$Element$Font$alignLeft, $mdgriffith$elm_ui$Element$alignLeft);
-			} else {
-				return _Utils_Tuple2($mdgriffith$elm_ui$Element$Font$alignRight, $mdgriffith$elm_ui$Element$alignRight);
-			}
-		}();
-		var fontAlign = _v0.a;
-		var align = _v0.b;
-		return A2(
-			$mdgriffith$elm_ui$Element$el,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-					$mdgriffith$elm_ui$Element$Border$color(
-					A2($author$project$MaterialUI$Theme$setAlpha, 0.3, borderColor)),
-					$mdgriffith$elm_ui$Element$Border$width(2),
-					$mdgriffith$elm_ui$Element$Border$rounded(6),
-					$mdgriffith$elm_ui$Element$padding(8)
-				]),
-			A4(
-				$author$project$UIHelper$materialText,
-				_List_fromArray(
-					[
-						fontAlign,
-						$mdgriffith$elm_ui$Element$Font$color(theme.color.onBackground),
-						align
-					]),
-				player.name,
-				$author$project$MaterialUI$Theme$Body1,
-				theme));
-	});
-var $author$project$Page$TTT$StoplightInGame$header = function (model) {
-	var theme = $author$project$Session$theme(
-		$author$project$Page$TTT$StoplightInGame$toSession(model));
-	var game = model.game;
-	var _v0 = game.status;
-	switch (_v0.$) {
-		case 'OnGoing':
-			return A2(
-				$mdgriffith$elm_ui$Element$row,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$spaceEvenly,
-						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-					]),
-				_List_fromArray(
-					[
-						A4($author$project$Page$TTT$StoplightInGame$playerHeader, theme, game.playerMe, game.meTurn, $author$project$Page$TTT$StoplightInGame$Left),
-						A4($author$project$Page$TTT$StoplightInGame$playerHeader, theme, game.opponent, !game.meTurn, $author$project$Page$TTT$StoplightInGame$Right)
-					]));
-		case 'Draw':
-			return A2(
-				$mdgriffith$elm_ui$Element$row,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-						$mdgriffith$elm_ui$Element$spacing(8)
-					]),
-				_List_fromArray(
-					[
-						A4(
-						$author$project$UIHelper$materialText,
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$Font$alignLeft,
-								$mdgriffith$elm_ui$Element$width(
-								$mdgriffith$elm_ui$Element$fillPortion(2))
-							]),
-						'Draw',
-						$author$project$MaterialUI$Theme$H3,
-						theme),
-						$author$project$Page$TTT$StoplightInGame$headerButtonColumn(theme)
-					]));
-		default:
-			var winner = _v0.a;
-			return A2(
-				$mdgriffith$elm_ui$Element$row,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-						$mdgriffith$elm_ui$Element$spacing(8)
-					]),
-				_List_fromArray(
-					[
-						A4(
-						$author$project$UIHelper$materialText,
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$Font$alignLeft,
-								$mdgriffith$elm_ui$Element$width(
-								$mdgriffith$elm_ui$Element$fillPortion(2))
-							]),
-						_Utils_eq(game.playerMe.playerRef, winner) ? 'Victory' : 'Defeat',
-						$author$project$MaterialUI$Theme$H3,
-						theme),
-						$author$project$Page$TTT$StoplightInGame$headerButtonColumn(theme)
-					]));
-	}
-};
 var $author$project$Page$TTT$StoplightInGame$view = function (model) {
 	var theme = $author$project$Session$theme(
 		$author$project$Page$TTT$StoplightInGame$toSession(model));
@@ -20608,7 +20451,10 @@ var $author$project$Page$TTT$StoplightInGame$view = function (model) {
 					]),
 				_List_fromArray(
 					[
-						$author$project$Page$TTT$StoplightInGame$header(model),
+						A2(
+						$author$project$Page$TTT$GameUI$twoPlayerHeader,
+						{game: game, leave: $author$project$Page$TTT$StoplightInGame$Leave, opponent: game.opponent, playerMe: game.playerMe, rematch: $author$project$Page$TTT$StoplightInGame$Rematch},
+						theme),
 						A2(
 						$author$project$Page$TTT$Board$view,
 						theme,
@@ -20776,7 +20622,7 @@ var $author$project$Page$TTT$TTTInGame$playerHeader = F4(
 			}());
 		var borderColor = highlight ? A2(
 			$author$project$MaterialUI$Theme$setAlpha,
-			0.8,
+			0.6,
 			A2($author$project$MaterialUI$Theme$getColor, playerColor, theme)) : A2($author$project$MaterialUI$Theme$setAlpha, 0.3, theme.color.onBackground);
 		var _v0 = function () {
 			if (alignment.$ === 'Left') {
