@@ -1,9 +1,7 @@
 version: '2'
 services:
   tttserver:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ttt_server
     restart: always
     networks:
       - frontproxy_default
