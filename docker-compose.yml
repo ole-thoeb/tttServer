@@ -1,7 +1,7 @@
 version: '2'
 services:
   tttserver:
-    image: ttt_server
+    image: olethoeb/ttt_server
     restart: always
     networks:
       - frontproxy_default
