@@ -2,12 +2,15 @@ version: '3'
 services:
   tttserver:
     image: olethoeb/ttt_server
+    container_name: ttt_server
     restart: always
     networks:
       - frontproxy_default
       - default
     environment:
       - VIRTUAL_HOST=ttt.olethoeb.me
+    expose:
+      - "80"
 networks:
   frontproxy_default:
     external: true
