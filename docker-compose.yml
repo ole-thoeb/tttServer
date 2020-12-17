@@ -1,0 +1,15 @@
+version: '2'
+services:
+  tttserver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    networks:
+      - frontproxy_default
+      - default
+    environment:
+      - VIRTUAL_HOST=ttt.olethoeb.me
+networks:
+  frontproxy_default:
+    external: true
