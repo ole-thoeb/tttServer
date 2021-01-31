@@ -3,6 +3,7 @@ package json
 import arrow.Kind
 import arrow.core.Option
 import arrow.typeclasses.MonadError
+import kotlinx.serialization.decodeFromString
 import tryCatch
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -15,7 +16,7 @@ class JsonParser<F>(private val ME: MonadError<F, JsonError>) : MonadError<F, Js
     }
     
     fun parsJson(json: JsonString): Kind<F, JsonElement> =
-            tryCatch(JsonError.Companion::fromThrowable) { packageJson.parseJson(json) }
+            tryCatch(JsonError.Companion::fromThrowable) { packageJson.decodeFromString(json) }
     
     fun JsonObject.getStringK(key: String): Kind<F, String> = getString(key, this@JsonParser)
     fun JsonObject.getObjectK(key: String): Kind<F, JsonObject> = getObject(key, this@JsonParser)

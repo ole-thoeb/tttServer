@@ -15,7 +15,7 @@ sealed class DefaultLobbyResponse : JsonSerializable {
         val type = TYPE
 
         override fun toJson(): JsonElement {
-            return packageJson.toJson(serializer(), this)
+            return packageJson.encodeToJsonElement(serializer(), this)
         }
 
         @Serializable
@@ -43,7 +43,7 @@ sealed class DefaultLobbyResponse : JsonSerializable {
         val type = TYPE
 
         override fun toJson(): JsonElement {
-            return packageJson.toJson(serializer(), this)
+            return packageJson.encodeToJsonElement(serializer(), this)
         }
 
         @Serializable
@@ -67,7 +67,7 @@ sealed class DefaultLobbyResponse : JsonSerializable {
         constructor(gameId: String) : this(Content(gameId))
 
         override fun toJson(): JsonElement {
-            return packageJson.toJson(serializer(), this)
+            return packageJson.encodeToJsonElement(serializer(), this)
         }
 
         @Serializable

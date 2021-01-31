@@ -18,6 +18,6 @@ interface JsonTypeDeserializer<T, C> {
     
     fun <F> fromContentJson(content: JsonObject, ME: MonadError<F, JsonError>): Kind<F, T> =
             ME.tryCatch(JsonError.Companion::fromThrowable) {
-                typeConstructor(deserializeJson.fromJson(contentDeserializer, content))
+                typeConstructor(deserializeJson.decodeFromJsonElement(contentDeserializer, content))
             }
 }

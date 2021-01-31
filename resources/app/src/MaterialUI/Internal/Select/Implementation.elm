@@ -7,6 +7,7 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Events as Events
 import Element.Font as Font
+import Element.Input as Input
 import Json.Decode as Decode
 import MaterialUI.ColorStateList as ColorStateList exposing (ColorStateList)
 import MaterialUI.Icon as Icon
@@ -235,19 +236,29 @@ menuItemView mui menu store pos menuItem =
                 menuModel =
                     Dict.get index store.menuItems
                         |> Maybe.withDefault Select.defaultMenuItemModel
+
+                label =
+                    Text.view [] text Theme.Body1 mui.theme
+
+                transparent =
+                    Element.rgba255 0 0 0 0
             in
-            Text.view
+            Input.button
                 (State.install (mui.lift << Message.SelectMsg menu.index << Select.ItemState index)
                     ++ [ Element.width Element.fill
                        , Element.paddingXY 12 8
                        , Background.color <| State.getColor menuModel menuItemBackgroundCST mui.theme
-                       , Events.onClick <| menu.onClick item
-                       , Element.pointer
+                       , Element.mouseDown
+                           []
+                       , Element.focused
+                           []
+                       , Element.mouseOver
+                           []
                        ]
                 )
-                text
-                Theme.Body1
-                mui.theme
+                { label = label
+                , onPress = Just <| menu.onClick item
+                }
 
 
 type alias Store s msg =

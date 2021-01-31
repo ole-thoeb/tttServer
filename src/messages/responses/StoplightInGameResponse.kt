@@ -17,7 +17,7 @@ sealed class StoplightInGameResponse : JsonSerializable {
         val type = TYPE
 
         override fun toJson(): JsonElement {
-            return packageJson.toJson(serializer(), this)
+            return packageJson.encodeToJsonElement(serializer(), this)
         }
 
         @Serializable

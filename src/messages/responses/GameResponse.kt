@@ -15,7 +15,7 @@ sealed class GameResponse : JsonSerializable {
         constructor(gameId: String) : this(Content(gameId))
 
         override fun toJson(): JsonElement {
-            return packageJson.toJson(serializer(), this)
+            return packageJson.encodeToJsonElement(serializer(), this)
         }
 
         @Serializable
@@ -35,7 +35,7 @@ sealed class GameResponse : JsonSerializable {
         constructor() : this(Content)
 
         override fun toJson(): JsonElement {
-            return packageJson.toJson(serializer(), this)
+            return packageJson.encodeToJsonElement(serializer(), this)
         }
 
         @Serializable
@@ -55,7 +55,7 @@ sealed class GameResponse : JsonSerializable {
         constructor(discPlayerName: String) : this(Content(discPlayerName))
 
         override fun toJson(): JsonElement {
-            return packageJson.toJson(serializer(), this)
+            return packageJson.encodeToJsonElement(serializer(), this)
         }
 
         @Serializable
@@ -75,7 +75,7 @@ sealed class GameResponse : JsonSerializable {
         constructor(conPlayerName: String) : this(Content(conPlayerName))
 
         override fun toJson(): JsonElement {
-            return packageJson.toJson(serializer(), this)
+            return packageJson.encodeToJsonElement(serializer(), this)
         }
 
         @Serializable

@@ -18541,6 +18541,10 @@ var $author$project$MaterialUI$Internal$Select$Implementation$menuItemBackground
 	idle: $author$project$MaterialUI$ColorStateList$transparent,
 	mouseDown: A2($author$project$MaterialUI$ColorStateList$Color, 0.3, $author$project$MaterialUI$Theme$OnSurface)
 };
+var $mdgriffith$elm_ui$Element$rgba255 = F4(
+	function (red, green, blue, a) {
+		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, red / 255, green / 255, blue / 255, a);
+	});
 var $author$project$MaterialUI$Text$view = F4(
 	function (attr, displayStr, fontscale, theme) {
 		var font = A2($author$project$MaterialUI$Theme$getFont, fontscale, theme);
@@ -18555,6 +18559,7 @@ var $author$project$MaterialUI$Text$view = F4(
 var $author$project$MaterialUI$Internal$Select$Implementation$menuItemView = F5(
 	function (mui, menu, store, pos, menuItem) {
 		var item = menuItem.a;
+		var transparent = A4($mdgriffith$elm_ui$Element$rgba255, 0, 0, 0, 0);
 		var index = $elm$core$String$fromInt(pos);
 		var menuModel = A2(
 			$elm$core$Maybe$withDefault,
@@ -18562,8 +18567,9 @@ var $author$project$MaterialUI$Internal$Select$Implementation$menuItemView = F5(
 			A2($elm$core$Dict$get, index, store.menuItems));
 		var _v1 = menu.toItem(item);
 		var text = _v1.text;
-		return A4(
-			$author$project$MaterialUI$Text$view,
+		var label = A4($author$project$MaterialUI$Text$view, _List_Nil, text, $author$project$MaterialUI$Theme$Body1, mui.theme);
+		return A2(
+			$mdgriffith$elm_ui$Element$Input$button,
 			_Utils_ap(
 				$author$project$MaterialUI$Internal$State$install(
 					A2(
@@ -18579,13 +18585,15 @@ var $author$project$MaterialUI$Internal$Select$Implementation$menuItemView = F5(
 						A2($mdgriffith$elm_ui$Element$paddingXY, 12, 8),
 						$mdgriffith$elm_ui$Element$Background$color(
 						A3($author$project$MaterialUI$Internal$State$getColor, menuModel, $author$project$MaterialUI$Internal$Select$Implementation$menuItemBackgroundCST, mui.theme)),
-						$mdgriffith$elm_ui$Element$Events$onClick(
-						menu.onClick(item)),
-						$mdgriffith$elm_ui$Element$pointer
+						$mdgriffith$elm_ui$Element$mouseDown(_List_Nil),
+						$mdgriffith$elm_ui$Element$focused(_List_Nil),
+						$mdgriffith$elm_ui$Element$mouseOver(_List_Nil)
 					])),
-			text,
-			$author$project$MaterialUI$Theme$Body1,
-			mui.theme);
+			{
+				label: label,
+				onPress: $elm$core$Maybe$Just(
+					menu.onClick(item))
+			});
 	});
 var $author$project$MaterialUI$Icon$view = $author$project$MaterialUI$Internal$Icon$Implementation$view;
 var $author$project$MaterialUI$Internal$Select$Implementation$outlined = F3(
