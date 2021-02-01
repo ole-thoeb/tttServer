@@ -2,11 +2,23 @@ package skynet
 
 
 
+interface Copyable<out C> {
+    fun copy(): C
+}
+
 interface MinMaxStrategy<S, M> {
     fun S.possibleMoves(): Iterable<M>
     fun S.doMove(move: M, player: MinMaxPlayer): S
     val S.isTerminal: Boolean
     fun S.score(player: MinMaxPlayer): Int
+}
+
+interface RevertibleMinMaxStrategie<S : Copyable<S>, M> {
+    fun S.possibleMoves(): List<M>
+    fun S.doMove(move: M, player: MinMaxPlayer)
+    val S.isTerminal: Boolean
+    fun S.score(player: MinMaxPlayer): Int
+    fun S.undoMove(move: M, player: MinMaxPlayer)
 }
 
 
@@ -77,6 +89,39 @@ private fun <S, M> MinMaxStrategy<S, M>.alphaBetaEval(state : S, player: MinMaxP
         scores.max()!!
     }
 }
+
+fun <S : Copyable<S>, M> RevertibleMinMaxStrategie<S, M>.alphaBeta(state: S, maxLevel: Int): ScoredMove<M> {
+    val weightedMoves = state.possibleMoves().map { move ->
+        state.doMove(move, MinMaxPlayer.MAX)
+        ScoredMove(-alphaBetaEval(state, MinMaxPlayer.MIN, maxLevel - 1, -Int.MAX_VALUE, Int.MAX_VALUE), move).also {
+            state.undoMove(move, MinMaxPlayer.MAX)
+        }
+    }
+    return weightedMoves.allMaxsBy { it.score }.random()
+}
+
+private fun <S : Copyable<S>, M> RevertibleMinMaxStrategie<S, M>.alphaBetaEval(state: S, player: MinMaxPlayer, level: Int, alpha: Int, beta: Int): Int {
+    return if (state.isTerminal || level == 0) {
+        state.score(player) * (level + 1)
+    } else {
+        var maxScore = alpha
+        val possibleMoves = state.possibleMoves()
+        for (i in possibleMoves.indices) {
+            val move = possibleMoves[i]
+            state.doMove(move, player)
+            val score = -alphaBetaEval(state, !player, level - 1, -beta, -maxScore)
+            state.undoMove(move, player)
+            if (score > maxScore) {
+                maxScore = score
+                if (maxScore >= beta)
+                    break
+            }
+        }
+        maxScore
+    }
+}
+
+
 
 fun <M, S> MinMaxStrategy<S, M>.randomMove(state : S): M {
     return state.possibleMoves().toList().random()

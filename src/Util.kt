@@ -59,8 +59,24 @@ fun <T> List<T>.allEqual(indices: Iterable<Int>): Boolean {
     return true
 }
 
+fun <T> List<T>.allEqual(indices: IntArray): Boolean {
+    if (indices.isEmpty())
+        return true
+    val element = this[indices[0]]
+    for (i in 1..indices.lastIndex) {
+        if (element != this[indices[i]]) return false
+    }
+    return true
+}
 
-inline fun <T, E> Collection<T>.mapToSet(transform: (T) -> E): Set<E> = mapTo(HashSet(size, 1f), transform)
+inline fun <T> List<T>.forEachFast(action: (T) -> Unit) {
+    for (i in 0 until size) {
+        action(this[i])
+    }
+}
+
+
+inline fun <T, E> Collection<T>.mapToSet(transform: (T) -> E): Set<E> = mapTo(HashSet(size + size / 2, 0.8f), transform)
 
 fun <T> List<T>.slice(indices: Pair<Int, Int>): List<T> = listOf(this[indices.first], this[indices.second])
 

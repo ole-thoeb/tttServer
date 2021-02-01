@@ -5,6 +5,8 @@ import game.withDifficulty
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
 
 
 val analyseTTT = { board: TTTBoard ->
@@ -30,6 +32,7 @@ val analyseMisery = { board: MiseryBoard ->
     }
 }
 
+@ExperimentalTime
 fun main() {
 //    println("Going first")
 //    fuzz(TTTStrategy, MinMaxPlayer.MAX, TTTBoard.empty(), 500, analyseTTT)
@@ -55,11 +58,14 @@ fun main() {
 //    )
 //    println(TTTStrategy.withDifficulty(DefaultLobby.Difficulty.CHALLENGE)(TTTBoard(b)))
     val b = listOf(
-            StoplightBoard.CellState.EMPTY, StoplightBoard.CellState.RED, StoplightBoard.CellState.EMPTY,
-            StoplightBoard.CellState.EMPTY, StoplightBoard.CellState.EMPTY, StoplightBoard.CellState.YELLOW,
-            StoplightBoard.CellState.YELLOW, StoplightBoard.CellState.EMPTY, StoplightBoard.CellState.YELLOW
+            StoplightBoard.CellState.EMPTY, StoplightBoard.CellState.RED, StoplightBoard.CellState.RED,
+            StoplightBoard.CellState.RED, StoplightBoard.CellState.GREEN, StoplightBoard.CellState.RED,
+            StoplightBoard.CellState.RED, StoplightBoard.CellState.RED, StoplightBoard.CellState.EMPTY
     )
-    println(StoplightStrategy.withDifficulty(DefaultLobby.Difficulty.NIGHTMARE)(StoplightBoard(b, lastPlayer = MinMaxPlayer.MIN)))
+    val timeTaken = measureTime {
+        println(StoplightStrategy.alphaBeta(StoplightBoard.empty(), 18))
+    }
+    println("time taken: $timeTaken")
 }
 
 data class Analyse(val wins: Int = 0, val draws: Int = 0, val losses: Int = 0)
