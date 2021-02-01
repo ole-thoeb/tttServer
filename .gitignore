@@ -2,3 +2,4 @@
 /.gradle
 /build
 /resources/app/elm-stuff
+/rust_ki/target
