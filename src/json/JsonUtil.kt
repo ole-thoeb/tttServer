@@ -10,6 +10,7 @@ typealias JsonString = String
 
 internal val packageJson get() = Json {
     prettyPrint = true
+    encodeDefaults = true
 }
 
 

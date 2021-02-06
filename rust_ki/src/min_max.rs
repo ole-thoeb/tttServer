@@ -1,6 +1,7 @@
 use std::ops::Not;
 
 use strum_macros::EnumIter;
+use std::collections::HashSet;
 
 #[derive(Debug)]
 #[derive(Eq, PartialEq)]
@@ -17,8 +18,14 @@ pub struct ScoredMove<M> {
 }
 
 impl<M> ScoredMove<M> {
-    fn new(score: i32, min_max_move: M) -> ScoredMove<M> {
+    pub fn new(score: i32, min_max_move: M) -> ScoredMove<M> {
         ScoredMove { score, min_max_move }
+    }
+}
+
+impl<M : Clone> Clone for ScoredMove<M> {
+    fn clone(&self) -> Self {
+        ScoredMove::new(self.score, self.min_max_move.clone())
     }
 }
 
@@ -42,7 +49,7 @@ pub trait MinMaxStrategie<S, M> {
 }
 
 impl<S, M> dyn MinMaxStrategie<S, M> {
-    pub fn alpha_beta(&self, state: &mut S, max_level: u32) -> ScoredMove<M> {
+    pub fn alpha_beta(&self, state: &mut S, max_level: u8) -> ScoredMove<M> {
         let weighted_moves = self.possible_moves(&state).into_iter().map(|m| {
             self.do_move(state, &m, Player::Max);
             let score = -self.alpha_beta_eval(state, Player::Min, max_level - 1, -i32::MAX, i32::MAX);
@@ -52,7 +59,7 @@ impl<S, M> dyn MinMaxStrategie<S, M> {
         weighted_moves.max_by(|a, b| a.score.cmp(&b.score)).unwrap()
     }
 
-    fn alpha_beta_eval(&self, state: &mut S, player: Player, level: u32, alpha: i32, beta: i32) -> i32 {
+    fn alpha_beta_eval(&self, state: &mut S, player: Player, level: u8, alpha: i32, beta: i32) -> i32 {
         if self.is_terminal(state) || level == 0 {
             self.score(state, player) * (level as i32 + 1)
         } else {
@@ -78,6 +85,31 @@ impl<S, M> dyn MinMaxStrategie<S, M> {
 #[derive(Debug)]
 pub struct SymmetricMove(pub usize, pub Vec<Symmetrie>);
 
+impl SymmetricMove {
+    pub fn index(&self) -> usize {
+        self.0
+    }
+
+    pub fn expanded_index(&self) -> Vec<usize> {
+        let SymmetricMove(index, symmetries) = self;
+        if symmetries.is_empty() {
+            vec![*index]
+        } else {
+            symmetries.iter()
+                .flat_map(|symmetry| symmetry.mirror(*index))
+                .collect::<HashSet<usize>>()
+                .into_iter()
+                .collect()
+        }
+    }
+}
+
+impl Clone for SymmetricMove {
+    fn clone(&self) -> Self {
+        SymmetricMove(self.index(), self.1.clone())
+    }
+}
+
 #[derive(EnumIter, Eq, PartialEq, Debug, Clone)]
 pub enum Symmetrie {
     YAxes,
@@ -94,6 +126,13 @@ impl Symmetrie {
             Symmetrie::TopBottom => [(1, 3), (2, 6), (5, 7)],
             Symmetrie::BottomTop => [(0, 8), (1, 5), (3, 7)],
         }
+    }
+
+    pub fn mirror(&self, index: usize) -> Vec<usize> {
+        self.symmetric_pairs().iter()
+            .find(|(f, s)| *f as usize == index || *s as usize == index)
+            .map(|(f, s)| vec![*f as usize, *s as usize])
+            .unwrap_or_else(|| vec![index])
     }
 }
 

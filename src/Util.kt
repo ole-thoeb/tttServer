@@ -6,8 +6,12 @@ import arrow.core.identity
 import arrow.typeclasses.ApplicativeError
 import arrow.typeclasses.MonadError
 import game.TechnicalPlayer
+import io.ktor.utils.io.errors.*
 import json.JsonSerializable
+import kotlinx.serialization.Serializable
 import messages.responses.GameResponse
+import java.io.File
+import java.util.concurrent.TimeUnit
 import kotlin.reflect.KClass
 
 inline fun <F, A, E> MonadError<F, E>.tryCatch(fe: (Throwable) -> E, f: () -> A): Kind<F, A> = try {
@@ -83,3 +87,18 @@ fun <T> List<T>.slice(indices: Pair<Int, Int>): List<T> = listOf(this[indices.fi
 operator fun <T> Pair<T, T>.contains(t: T) = first == t || second == t
 
 fun String.limit(n: Int) = if (length > n) slice(0 until n) else this
+
+fun String.runCommand(workingDir: File): String? = try {
+    val parts = this.split("\\s".toRegex())
+    val proc = ProcessBuilder(*parts.toTypedArray())
+        .directory(workingDir)
+        .redirectOutput(ProcessBuilder.Redirect.PIPE)
+        .redirectError(ProcessBuilder.Redirect.PIPE)
+        .start()
+
+    proc.waitFor(60, TimeUnit.SECONDS)
+    proc.inputStream.bufferedReader().readText()
+} catch(e: IOException) {
+    e.printStackTrace()
+    null
+}
