@@ -25,7 +25,7 @@ impl Hash for CellState {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct Board {
     pub cells: Cells,
     last_player: Player,
@@ -94,7 +94,7 @@ impl Board {
 
 
 pub struct Strategie {
-    cache: HashMap<Cells, CacheEntry>
+    cache: HashMap<Board, CacheEntry>
 }
 
 impl Strategie {
@@ -170,11 +170,11 @@ impl MinMaxStrategie<Board, SymmetricMove> for Strategie {
     }
 
     fn cache(&mut self, state: &Board, entry: CacheEntry) {
-        debug_assert_eq!(None, self.cache.insert(state.cells, entry))
+        self.cache.insert(state.clone(), entry);
     }
 
     fn lookup(&mut self, state: &Board) -> Option<CacheEntry> {
-        self.cache.get(&state.cells).cloned()
+        self.cache.get(&state).cloned()
     }
 }
 
