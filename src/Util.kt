@@ -88,7 +88,7 @@ operator fun <T> Pair<T, T>.contains(t: T) = first == t || second == t
 
 fun String.limit(n: Int) = if (length > n) slice(0 until n) else this
 
-fun String.runCommand(workingDir: File): String? = try {
+fun String.runCommand(workingDir: File): Pair<String, String>? = try {
     val parts = this.split("\\s".toRegex())
     val proc = ProcessBuilder(*parts.toTypedArray())
         .directory(workingDir)
@@ -97,7 +97,7 @@ fun String.runCommand(workingDir: File): String? = try {
         .start()
 
     proc.waitFor(60, TimeUnit.SECONDS)
-    proc.inputStream.bufferedReader().readText()
+    proc.inputStream.bufferedReader().readText() to proc.errorStream.bufferedReader().readText()
 } catch(e: IOException) {
     e.printStackTrace()
     null

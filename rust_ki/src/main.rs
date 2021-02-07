@@ -1,7 +1,8 @@
 mod min_max;
 mod stoplight;
+mod misery;
+
 use std::env;
-use rand::seq::SliceRandom;
 
 use std::time::{Instant};
 use crate::stoplight::{Board, choose_random_move};
@@ -17,8 +18,10 @@ fn main() {
     let board_str = &args[1];
     match Board::from_string(board_str) {
         Some(mut board) => {
-            let (res, _cache) = stoplight::compute_all_best_moves(&mut board);
-            println!("{}", choose_random_move(res))
+            let moves = stoplight::Strategie::new().as_strategie().alpha_beta(&mut board, 30);
+            let m = choose_random_move(moves);
+            println!("{}", m.min_max_move);
+            eprintln!("score for current move is {}", m.score);
         },
         None => {
             eprintln!("invalid board '{}'", board_str);
