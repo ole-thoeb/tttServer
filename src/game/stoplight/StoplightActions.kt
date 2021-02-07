@@ -76,7 +76,7 @@ fun GameServer<*, *>.playBotTurn(game: Game.InGame<StoplightInGame>): Game.InGam
                 StoplightInGame.CellState.RED -> "r"
             }
         }.joinToString(",")
-        val cmd = if (System.getProperty("os.name").contains("Windows")) "resources\\rust_ki.exe" else "./resources/rust_ki.exe"
+        val cmd = if (System.getProperty("os.name").contains("Windows")) "resources\\rust_ki.exe" else "./resources/rust_ki"
         val (out, err) = "$cmd $boardString".runCommand(File("./resources")) ?: TODO()
         log.debug(err)
         val res =  out.trim().toIntOrNull()

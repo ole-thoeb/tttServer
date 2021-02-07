@@ -22,7 +22,7 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @KtorExperimentalLocationsAPI
 @Suppress("unused") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
-fun Application.module(testing: Boolean = true) {
+fun Application.module(testing: Boolean = false) {
     val tttGameServer = TTTGameServer(this, testing)
     val miseryGameServer = MiseryGameServer(this, testing)
     val stoplightGameServer = StoplightGameServer(this, testing)

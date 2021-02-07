@@ -8,6 +8,9 @@ RUN chown -R $APPLICATION_USER /app
 
 USER $APPLICATION_USER
 
+RUN mkdir /app/resources
+COPY ./resources/rust_ki /app/resources/rust_ki
+
 COPY ./build/libs/my-application.jar /app/my-application.jar
 WORKDIR /app
 
