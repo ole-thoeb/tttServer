@@ -51,25 +51,25 @@ internal class MinMaxTest {
 //            )
 //        }
 
-        run {
-            val analyse = { board: MutableBitStoplightBoard ->
-                when (board.status) {
-                    StoplightBoard.Status.MAX_WON -> Analyse(wins = 1)
-                    StoplightBoard.Status.MIN_WON -> Analyse(losses = 1)
-                    StoplightBoard.Status.ONGOING -> throw IllegalStateException("welp")
-                }
-            }
-            println(
-                fuzz(
-                    RevertibleBitStoplightStrategy,
-                    MinMaxPlayer.MAX,
-                    MutableBitStoplightBoard.empty(),
-                    100,
-                    13,
-                    analyse
-                )
-            )
-        }
+//        run {
+//            val analyse = { board: MutableBitStoplightBoard ->
+//                when (board.status) {
+//                    StoplightBoard.Status.MAX_WON -> Analyse(wins = 1)
+//                    StoplightBoard.Status.MIN_WON -> Analyse(losses = 1)
+//                    StoplightBoard.Status.ONGOING -> throw IllegalStateException("welp")
+//                }
+//            }
+//            println(
+//                fuzz(
+//                    RevertibleBitStoplightStrategy,
+//                    MinMaxPlayer.MAX,
+//                    MutableBitStoplightBoard.empty(),
+//                    100,
+//                    13,
+//                    analyse
+//                )
+//            )
+//        }
     }
 
     private data class Analyse(val wins: Int = 0, val draws: Int = 0, val losses: Int = 0)
