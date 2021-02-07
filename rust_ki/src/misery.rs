@@ -5,7 +5,7 @@ use strum::IntoEnumIterator;
 
 use crate::min_max::*;
 
-#[derive(Eq, PartialEq)]
+#[derive(Eq, PartialEq, Hash)]
 #[derive(Debug, Copy, Clone)]
 #[repr(u8)]
 pub enum CellState {
@@ -15,13 +15,7 @@ pub enum CellState {
 
 type Cells = [CellState; 9];
 
-impl Hash for CellState {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        state.write_u8(*self as u8)
-    }
-}
-
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq, Hash, Clone)]
 pub struct Board {
     pub cells: Cells,
     last_player: Player,
@@ -76,7 +70,7 @@ impl Board {
 }
 
 pub struct Strategie {
-    cache: HashMap<Cells, i32>
+    cache: HashMap<Board, CacheEntry>
 }
 
 impl Strategie {
@@ -138,13 +132,12 @@ impl MinMaxStrategie<Board, SymmetricMove> for Strategie {
         state.last_player = !player;
     }
 
-
-    fn cache(&mut self, state: &Board, score: i32) {
-        debug_assert_eq!(None, self.cache.insert(state.cells, score))
+    fn cache(&mut self, state: &Board, entry: CacheEntry) {
+        self.cache.insert(state.clone(), entry);
     }
 
-    fn lookup(&mut self, state: &Board) -> Option<i32> {
-        self.cache.get(&state.cells).cloned()
+    fn lookup(&mut self, state: &Board) -> Option<CacheEntry> {
+        self.cache.get(&state).cloned()
     }
 }
 
@@ -162,7 +155,12 @@ mod test {
     #[test]
     fn empty() {
         let scores = cells_to_score_board([CellState::EMPTY; 9]);
-        print_3_by_3(&scores)
+        let sines = [
+            -1, -1, -1,
+            -1, 1, -1,
+            -1, -1, -1,
+        ];
+        expect_sines(scores, sines);
     }
 
     #[test]
@@ -194,38 +192,66 @@ mod test {
     }
 
     #[test]
-    fn half_way__won() {
-        // {
-        //     let cells = [
-        //         CellState::EMPTY, CellState::EMPTY, CellState::EMPTY,
-        //         CellState::EMPTY, CellState::X, CellState::EMPTY,
-        //         CellState::EMPTY, CellState::EMPTY, CellState::X,
-        //     ];
-        //     let scores = cells_to_score_board(cells);
-        //     print_scores(&scores);
-        //     assert!(scores[0] < 0);
-        //     assert!(scores[1] > 0);
-        //     assert!(scores[2] < 0);
-        //     assert!(scores[3] > 0);
-        //     assert!(scores[5] < 0);
-        //     assert!(scores[6] < 0);
-        //     assert!(scores[7] < 0);
-        // }
+    fn half_way_won() {
         {
             let cells = [
                 CellState::X, CellState::EMPTY, CellState::EMPTY,
                 CellState::EMPTY, CellState::X, CellState::EMPTY,
                 CellState::EMPTY, CellState::EMPTY, CellState::EMPTY,
             ];
+            let sines = [
+                0, -1, 1,
+                -1, 0, 1,
+                1, 1, -1,
+            ];
             let scores = cells_to_score_board(cells);
-            print_3_by_3(&scores);
-            assert!(scores[1] < 0);
-            assert!(scores[2] > 0);
-            assert!(scores[3] < 0);
-            assert!(scores[5] < 0);
-            assert!(scores[6] > 0);
-            assert!(scores[7] < 0);
-            assert!(scores[8] < 0);
+            expect_sines(scores, sines);
+        }
+        {
+            let cells = [
+                CellState::EMPTY, CellState::EMPTY, CellState::X,
+                CellState::EMPTY, CellState::X, CellState::EMPTY,
+                CellState::EMPTY, CellState::EMPTY, CellState::EMPTY,
+            ];
+            let sines = [
+                1, -1, 0,
+                1, 0, -1,
+                -1, 1, 1,
+            ];
+            let scores = cells_to_score_board(cells);
+            expect_sines(scores, sines);
+        }
+    }
+
+    #[test]
+    fn win_is_imminent_question_mark() {
+        {
+            let cells = [
+                CellState::X, CellState::EMPTY, CellState::EMPTY,
+                CellState::EMPTY, CellState::X, CellState::EMPTY,
+                CellState::EMPTY, CellState::X, CellState::EMPTY,
+            ];
+            let sines = [
+                0, -1, -1,
+                -1, 0, -1,
+                -1, 0, -1,
+            ];
+            let scores = cells_to_score_board(cells);
+            expect_sines(scores, sines);
+        }
+        {
+            let cells = [
+                CellState::X, CellState::EMPTY, CellState::EMPTY,
+                CellState::EMPTY, CellState::X, CellState::X,
+                CellState::EMPTY, CellState::EMPTY, CellState::EMPTY,
+            ];
+            let sines = [
+                0, -1, -1,
+                -1, 0, 0,
+                -1, -1, -1,
+            ];
+            let scores = cells_to_score_board(cells);
+            expect_sines(scores, sines);
         }
     }
 
@@ -236,13 +262,13 @@ mod test {
             CellState::EMPTY, CellState::X, CellState::EMPTY,
             CellState::EMPTY, CellState::EMPTY, CellState::EMPTY,
         ];
-        let sins = [
+        let sines = [
             0, 0, -1,
             1, 0, -1,
             -1, -1, -1
         ];
         let scores = cells_to_score_board(cells);
-        expect_sines(scores, sins);
+        expect_sines(scores, sines);
     }
 
     #[test]

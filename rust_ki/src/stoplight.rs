@@ -94,7 +94,7 @@ impl Board {
 
 
 pub struct Strategie {
-    cache: HashMap<Cells, i32>
+    cache: HashMap<Cells, CacheEntry>
 }
 
 impl Strategie {
@@ -169,11 +169,11 @@ impl MinMaxStrategie<Board, SymmetricMove> for Strategie {
         state.last_player = !player;
     }
 
-    fn cache(&mut self, state: &Board, score: i32) {
-        debug_assert_eq!(None, self.cache.insert(state.cells, score))
+    fn cache(&mut self, state: &Board, entry: CacheEntry) {
+        debug_assert_eq!(None, self.cache.insert(state.cells, entry))
     }
 
-    fn lookup(&mut self, state: &Board) -> Option<i32> {
+    fn lookup(&mut self, state: &Board) -> Option<CacheEntry> {
         self.cache.get(&state.cells).cloned()
     }
 }
